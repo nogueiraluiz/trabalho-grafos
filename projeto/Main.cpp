@@ -1,21 +1,21 @@
 #include <iostream>
-// #include "headers/Aresta.hpp"
-// #include "headers/Grafo.hpp"
-// #include "headers/Aresta.hpp"
+#include <fstream>
+#include "Grafo.hpp"
 
-using namespace std;
 
 int main(int argc, char *argv[])
 {
+    if (argc < 6) {
+        return 1;
+    }
     char *arquivoInput = argv[1];
     char *arquivoOutput = argv[2];
-    char *direcionado = argv[3];
-    char *ponderadoArestas = argv[4];
-    char *ponderadoVertices = argv[5];
-    cout << arquivoInput << endl;
-    cout << arquivoOutput << endl;
-    cout << direcionado << endl;
-    cout << ponderadoArestas << endl;
-    cout << ponderadoVertices << endl;
+    int direcionado = std::stoi(argv[3]);
+    int ponderadoArestas = std::stoi(argv[4]);
+    int ponderadoVertices = std::stoi(argv[5]);
+    std::ifstream arquivo(arquivoInput);
+    Grafo *g = new Grafo(arquivo, direcionado, ponderadoVertices, ponderadoArestas);
+    g->print();
+    arquivo.close();
     return 0;
 }
