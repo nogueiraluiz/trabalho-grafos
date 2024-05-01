@@ -6,7 +6,7 @@
 int main(int argc, char *argv[])
 {
     if (argc < 6) {
-        return 1;
+        return 1; // número insuficiente de argumentos
     }
     char *arquivoInput = argv[1];
     char *arquivoOutput = argv[2];

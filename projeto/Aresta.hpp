@@ -5,10 +5,10 @@
 
 struct Aresta
 {
-    unsigned int _id;
-    int _peso;
-    Vertice *_cabeca;
-    Vertice *_cauda;
+    int id;
+    int peso;
+    int idVerticeA;
+    int idVerticeB;
 };
 
 #endif

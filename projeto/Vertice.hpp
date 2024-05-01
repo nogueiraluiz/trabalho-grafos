@@ -5,9 +5,10 @@
 
 struct Vertice
 {
-    unsigned int _id;
+    int id;
     int peso;
-    std::vector<Vertice*>* _adjacencias;
+    int numArestas;
+    std::vector<Vertice *> adjacencias;
 };
 
 #endif
