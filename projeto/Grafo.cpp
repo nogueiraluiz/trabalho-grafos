@@ -55,6 +55,40 @@ void Grafo::print()
     } 
 }
 
+void Grafo::printDirecionado(std::ofstream &output)
+{
+    output << "digraph G {\n\n";
+    for (Vertice *v : vertices)
+    {
+        for (Aresta *e : v->arestas)
+        {
+            output << '\t' << v->id << " -> " << e->destino->id;
+            if (ponderadoArestas)
+            {
+                output << " [weight=" << e->peso << "]";
+            }
+            output << '\n';
+        }
+    }
+    output << "\n}\n";
+}
+
+void Grafo::printNaoDirecionado(std::ofstream &output)
+{
+}
+
+void Grafo::print(std::ofstream &output)
+{
+    if (direcionado)
+    {
+        printDirecionado(output);
+    }
+    else
+    {
+        printNaoDirecionado(output);
+    }
+}
+
 // Verifica se um vértice já existe na lista de vértices do grafo e, caso não esteja, o adiciona
 // NOTA: funcionando para ordenados e não ordenados, vértices ponderados ou não
 void Grafo::adicionaVertice(int idVertice, int peso)
@@ -101,7 +135,7 @@ bool Grafo::saoVizinhos(int idVerticeA, int idVerticeB)
 
 void Grafo::adicionaAdjacencias(int idVerticeA, int idVerticeB, int peso)
 {
-    // TODO: Verificar 'direcionado' e, caso 'false', adicionar A às adjacências de B também
+    // TODO: Verificar se a aresta já existe
     if (saoVizinhos(idVerticeA, idVerticeB))
     {
         return;

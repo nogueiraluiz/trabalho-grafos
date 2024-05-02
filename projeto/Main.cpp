@@ -13,9 +13,13 @@ int main(int argc, char *argv[])
     int direcionado = std::stoi(argv[3]);
     int ponderadoArestas = std::stoi(argv[4]);
     int ponderadoVertices = std::stoi(argv[5]);
-    std::ifstream arquivo(arquivoInput);
-    Grafo *g = new Grafo(arquivo, direcionado, ponderadoVertices, ponderadoArestas);
+    std::ifstream input(arquivoInput);
+    std::ofstream output;
+    output.open(arquivoOutput);
+    Grafo *g = new Grafo(input, direcionado, ponderadoVertices, ponderadoArestas);
     g->print();
-    arquivo.close();
+    g->print(output);
+    input.close();
+    output.close();
     return 0;
 }

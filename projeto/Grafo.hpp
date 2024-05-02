@@ -13,6 +13,7 @@ public:
     Grafo(std::ifstream &arquivoInstancia, bool direcionado, bool ponderadoVertices, bool ponderadoArestas);
     ~Grafo();
     void print();
+    void print(std::ofstream &output);
     void adicionaAresta(int idVerticeA, int idVerticeB, int peso = 0);
     void adicionaVertice(int idVertice, int peso = 0);
     void removeAresta(int idVerticeA, int idVeritceB);
@@ -25,6 +26,8 @@ private:
     void adicionaAdjacencias(int idA, int idB, int peso = 0);
     Vertice* getVertice(int idVerticeAlvo);
     bool saoVizinhos(int idVerticeA, int idVerticeB);
+    void printDirecionado(std::ofstream &output);
+    void printNaoDirecionado(std::ofstream &output);
 };
 
 #endif
