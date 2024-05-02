@@ -1,23 +1,20 @@
 #include <iostream>
 
 #include <vector>
+#include <list>
 #include <string>
 #include <sstream>
 #include <algorithm>
 #include "Grafo.hpp"
 
-// Todas as implementações até o momento foram feitas com grafos direcionados e ponderados nas arestas em mente.
-
 Grafo::Grafo(std::ifstream &arquivoInstancia, bool direcionado, bool ponderadoVertices, bool ponderadoArestas)
 {
-    direcionado = direcionado;
-    ponderadoVertices = ponderadoVertices;
-    ponderadoArestas = ponderadoArestas;
+    this->direcionado = direcionado;
+    this->ponderadoVertices = ponderadoVertices;
+    this->ponderadoArestas = ponderadoArestas;
     std::string linha;
     getline(arquivoInstancia, linha);
     int tamanhoInicialEsperado = std::stoi(linha);
-    numArestas = 0;
-    numVertices = 0;
     while (getline(arquivoInstancia, linha)) {
         std::stringstream stream(linha);
         std::string item;
@@ -25,25 +22,26 @@ Grafo::Grafo(std::ifstream &arquivoInstancia, bool direcionado, bool ponderadoVe
         while (getline(stream, item, ' ')) {
             itens.push_back(std::stoi(item));
         }
-        std::cout << "Lendo linha: " << linha << "\n";
-        int idVerticeA = itens.at(0);
-        int idVerticeB = itens.at(1);
-        int pesoAresta = itens.at(2);
+        int idVerticeA = itens[0];
+        int idVerticeB = itens[1];
+        int pesoAresta = itens[2];
         adicionaAresta(idVerticeA, idVerticeB, pesoAresta); // para grafos direcionados e ponderados nas arestas a princípio
     }
+    this->print();
+    std::cout << this->direcionado << "\n"; 
+    removeAresta(2, 3);
+    this->print();
 }
 
 Grafo::~Grafo()
 {
-    for (int i = 0; i < numVertices; i++)
+    for (Vertice *v : vertices)
     {
-        Vertice *temp = vertices[i];
-        delete temp;
-    }
-    for (int i = 0; i < numArestas; i++)
-    {
-        Aresta *temp = arestas[i];
-        delete temp;
+        for (Aresta *e : v->arestas)
+        {
+            delete e;
+        }
+        delete v;
     }
 }
 
@@ -52,16 +50,17 @@ void Grafo::print()
     std::cout << "Número de vértices: " << vertices.size() << '\n';
     for (Vertice *vertice : vertices)
     {
-        std::cout << vertice->id << " -> ";
-        for (Vertice *vizinho : vertice->adjacencias)
+        std::cout << vertice->id << " -> { ";
+        for (Aresta *arestaIncidente : vertice->arestas)
         {
-            std::cout << vizinho->id << " ";
+            std::cout << arestaIncidente->destino->id << " ";
         }
-        std::cout << '\n';
+        std::cout << "}\n";
     } 
 }
 
 // Verifica se um vértice já existe na lista de vértices do grafo e, caso não esteja, o adiciona
+// NOTA: funcionando para ordenados e não ordenados, vértices ponderados ou não
 void Grafo::adicionaVertice(int idVertice, int peso)
 {
     for (Vertice *vertice : vertices)
@@ -73,8 +72,8 @@ void Grafo::adicionaVertice(int idVertice, int peso)
     }
     Vertice *v = new Vertice;
     v->id = idVertice;
+    v->peso = peso;
     vertices.push_back(v);
-    numVertices++;
 }
 
 Vertice* Grafo::getVertice(int idVerticeAlvo)
@@ -94,9 +93,9 @@ Vertice* Grafo::getVertice(int idVerticeAlvo)
 bool Grafo::saoVizinhos(int idVerticeA, int idVerticeB)
 {
     Vertice *a = getVertice(idVerticeA);
-    for (Vertice *vizinho : a->adjacencias)
+    for (Aresta *aresta : a->arestas)
     {
-        if (vizinho->id == idVerticeB)
+        if (aresta->destino->id == idVerticeB)
         {
             return true;
         }
@@ -104,7 +103,7 @@ bool Grafo::saoVizinhos(int idVerticeA, int idVerticeB)
     return false;
 }
 
-void Grafo::adicionaAdjacencias(int idVerticeA, int idVerticeB)
+void Grafo::adicionaAdjacencias(int idVerticeA, int idVerticeB, int peso)
 {
     // TODO: Verificar 'direcionado' e, caso 'false', adicionar A às adjacências de B também
     if (saoVizinhos(idVerticeA, idVerticeB))
@@ -112,32 +111,90 @@ void Grafo::adicionaAdjacencias(int idVerticeA, int idVerticeB)
         return;
     }
     Vertice* verticeA = getVertice(idVerticeA);
+    Aresta* aresta = new Aresta;
     Vertice* verticeB = getVertice(idVerticeB);
-    if (verticeA != nullptr  && verticeB != nullptr)
+    aresta->destino = verticeB;
+    aresta->peso = peso;
+    if (verticeA != nullptr)
     {
-        verticeA->adjacencias.push_back(verticeB);
-        verticeA->numArestas++;
+        verticeA->arestas.push_back(aresta);
     }
 }
 
+// Funcionando para direcionados ou não
 void Grafo::adicionaAresta(int idVerticeA, int idVerticeB, int peso)
 {
     adicionaVertice(idVerticeA);
     adicionaVertice(idVerticeB);
-    adicionaAdjacencias(idVerticeA, idVerticeB);;
-    Aresta *e = new Aresta;
-    e->idVerticeA = idVerticeA;
-    e->idVerticeB = idVerticeB;
-    arestas.push_back(e);
-    numArestas++;
+    if (!direcionado) {
+        adicionaAdjacencias(idVerticeB, idVerticeA, peso);
+    }
+    adicionaAdjacencias(idVerticeA, idVerticeB, peso);
 }
 
-void Grafo::removeAresta(int idVerticeA, int idVeritceB)
+// Caso exista o vértice correspondente a idVerticeA, busca em suas arestas incidentes
+// uma o conecte ao vértice correspondente a idVerticeB, a remove e libera a memória
+// alocada, caso a encontre.
+// Se o grafo em questão não for direcionado, remove a aresta criada no caminho contrário.
+void Grafo::removeAresta(int idVerticeA, int idVerticeB)
 {
-    
+    Vertice *a = getVertice(idVerticeA);
+    if (a == nullptr)
+    {
+        return; // A não existe no conjunto de vértices
+    }
+    Vertice *b = getVertice(idVerticeB);
+    if (b == nullptr)
+    {
+        return; // B não existe no conjunto de vértices
+    }
+    for (Aresta* aresta : a->arestas)
+    {
+        if (aresta->destino->id == idVerticeB)
+        {
+            a->arestas.remove(aresta);
+            delete aresta;
+            if (direcionado)
+            {
+                return;
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+    if (!direcionado)
+    {
+        for (Aresta* aresta : b->arestas)
+        {
+            if (aresta->destino->id == idVerticeA)
+            {
+                b->arestas.remove(aresta);
+                delete aresta;
+                return;
+            }
+        }
+    }
+    std::cout << "Não foi encontrada aresta definida pelos vértices " << idVerticeA 
+            << "e " << idVerticeB << '\n';
 }
 
 void Grafo::removeVertice(int idVertice)
 {
-
+    Vertice *v = getVertice(idVertice);
+    if (v == nullptr)
+    {
+        return; // v não existe
+    }
+    for (Vertice *vertice : vertices)
+    {
+        if (vertice->id != idVertice)
+        {
+            removeAresta(idVertice, vertice->id);
+            removeAresta(vertice->id, idVertice);
+        }
+    }
+    vertices.remove(v);
+    delete v;
 }

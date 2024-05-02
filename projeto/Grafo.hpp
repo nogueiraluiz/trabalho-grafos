@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <vector>
+#include <list>
 #include "Vertice.hpp"
 #include "Aresta.hpp"
 
@@ -17,14 +18,11 @@ public:
     void removeAresta(int idVerticeA, int idVeritceB);
     void removeVertice(int idVertice);
 private:
-    int numArestas;
-    int numVertices;
     bool direcionado;
     bool ponderadoVertices;
     bool ponderadoArestas;
-    std::vector<Vertice *> vertices;
-    std::vector<Aresta *> arestas;
-    void adicionaAdjacencias(int idA, int idB);
+    std::list<Vertice *> vertices;
+    void adicionaAdjacencias(int idA, int idB, int peso = 0);
     Vertice* getVertice(int idVerticeAlvo);
     bool saoVizinhos(int idVerticeA, int idVerticeB);
 };
