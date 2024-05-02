@@ -3,12 +3,13 @@
 
 #include "Vertice.hpp"
 
+struct Vertice;
+
 struct Aresta
 {
     int id;
     int peso;
-    int idVerticeA;
-    int idVerticeB;
+    Vertice *destino;
 };
 
 #endif
