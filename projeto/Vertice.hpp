@@ -1,14 +1,16 @@
 #ifndef VERTICE_HPP
 #define VERTICE_HPP
 
-#include <vector>
+#include <list>
+#include "Aresta.hpp"
+
+struct Aresta;
 
 struct Vertice
 {
     int id;
     int peso;
-    int numArestas;
-    std::vector<Vertice *> adjacencias;
+    std::list<Aresta *> arestas;
 };
 
 #endif
