@@ -75,6 +75,26 @@ void Grafo::printDirecionado(std::ofstream &output)
 
 void Grafo::printNaoDirecionado(std::ofstream &output)
 {
+    output << "graph G {\n\n";
+    std::vector<int> impressos; 
+    for (Vertice *v : vertices)
+    {
+        for (Aresta *e : v->arestas)
+        {   
+            if (std::count(impressos.begin(), impressos.end(), e->destino->id))
+            {
+                continue;
+            }
+            output << '\t' << v->id << " -- " << e->destino->id;
+            if (ponderadoArestas)
+            {
+                output << " [weight=" << e->peso << "]";
+            }
+            output << '\n';
+        }
+        impressos.push_back(v->id);
+    }
+    output << "\n}\n";
 }
 
 void Grafo::print(std::ofstream &output)
