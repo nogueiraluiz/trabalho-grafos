@@ -27,10 +27,6 @@ Grafo::Grafo(std::ifstream &arquivoInstancia, bool direcionado, bool ponderadoVe
         int pesoAresta = itens[2];
         adicionaAresta(idVerticeA, idVerticeB, pesoAresta); // para grafos direcionados e ponderados nas arestas a princípio
     }
-    this->print();
-    std::cout << this->direcionado << "\n"; 
-    removeAresta(2, 3);
-    this->print();
 }
 
 Grafo::~Grafo()
