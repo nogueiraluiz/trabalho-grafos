@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     std::ifstream input(arquivoInput);
     std::ofstream output;
     output.open(arquivoOutput);
-    Grafo *g = new Grafo(input, direcionado, ponderadoVertices, ponderadoArestas);
+    Grafo *g = new Grafo(input, direcionado, ponderadoArestas, ponderadoVertices);
     g->print();
     g->print(output);
     input.close();

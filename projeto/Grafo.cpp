@@ -7,7 +7,7 @@
 #include <algorithm>
 #include "Grafo.hpp"
 
-Grafo::Grafo(std::ifstream &arquivoInstancia, bool direcionado, bool ponderadoVertices, bool ponderadoArestas)
+Grafo::Grafo(std::ifstream &arquivoInstancia, bool direcionado,  bool ponderadoArestas, bool ponderadoVertices)
 {
     this->direcionado = direcionado;
     this->ponderadoVertices = ponderadoVertices;
@@ -113,12 +113,8 @@ void Grafo::print(std::ofstream &output)
 // NOTA: funcionando para ordenados e não ordenados, vértices ponderados ou não
 void Grafo::adicionaVertice(int idVertice, int peso)
 {
-    for (Vertice *vertice : vertices)
-    {
-        if (vertice->id == idVertice)
-        {
-            return;
-        }
+    if (getVertice(idVertice) != nullptr) {
+        return;
     }
     Vertice *v = new Vertice;
     v->id = idVertice;

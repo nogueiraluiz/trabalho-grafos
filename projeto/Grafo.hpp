@@ -14,10 +14,10 @@ public:
     ~Grafo();
     void print();
     void print(std::ofstream &output);
-    void adicionaAresta(int idVerticeA, int idVerticeB, int peso = 0);
     void adicionaVertice(int idVertice, int peso = 0);
-    void removeAresta(int idVerticeA, int idVeritceB);
+    void adicionaAresta(int idVerticeA, int idVerticeB, int peso = 0);
     void removeVertice(int idVertice);
+    void removeAresta(int idVerticeA, int idVeritceB);
 private:
     bool direcionado;
     bool ponderadoVertices;
