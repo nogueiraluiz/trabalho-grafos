@@ -8,6 +8,9 @@
 #include <algorithm>
 #include "Grafo.hpp"
 
+/**
+ * Construtor que instancia um grafo de acordo com as arestas definidas em um arquivo .dat lido como argumento para a execução.
+*/
 Grafo::Grafo(std::ifstream &arquivoInstancia, bool direcionado,  bool ponderadoArestas, bool ponderadoVertices)
 {
     this->direcionado = direcionado;
@@ -15,7 +18,6 @@ Grafo::Grafo(std::ifstream &arquivoInstancia, bool direcionado,  bool ponderadoA
     this->ponderadoVertices = ponderadoVertices;
     std::string linha;
     getline(arquivoInstancia, linha);
-    int tamanhoInicialEsperado = std::stoi(linha);
     while (getline(arquivoInstancia, linha)) {
         std::stringstream stream(linha);
         std::string item;
@@ -26,10 +28,13 @@ Grafo::Grafo(std::ifstream &arquivoInstancia, bool direcionado,  bool ponderadoA
         int idVerticeA = itens[0];
         int idVerticeB = itens[1];
         int pesoAresta = itens[2];
-        adicionaAresta(idVerticeA, idVerticeB, pesoAresta); // para grafos direcionados e ponderados nas arestas a princípio
+        adicionaAresta(idVerticeA, idVerticeB, pesoAresta);
     }
 }
 
+/**
+ * Construtor mais básico, não define quaisquer elementos dos conjuntos de vértices e de arestas.
+*/
 Grafo::Grafo(bool direcionado, bool ponderadoVertices, bool ponderadoArestas)
 {
     this->direcionado = direcionado;
@@ -49,6 +54,9 @@ Grafo::~Grafo()
     }
 }
 
+/**
+ * Método para impressão de um grafo diretamente para o console, seguindo a visão de sua lista de adjacências.
+*/
 void Grafo::print()
 {
     std::cout << "Número de vértices: " << vertices.size() << '\n';
@@ -63,6 +71,9 @@ void Grafo::print()
     } 
 }
 
+/**
+ * Escreve para o ofstream especificado a saída de um grafo direcionado para visualização seguindo a linguagem DOT.
+*/
 void Grafo::printDirecionado(std::ofstream &output)
 {
     output << "digraph G {\n\n";
@@ -81,6 +92,11 @@ void Grafo::printDirecionado(std::ofstream &output)
     output << "\n}\n";
 }
 
+
+/**
+ * Escreve para o ofstream especificado a saída de um grafo não direcionado para
+ * visualização seguindo a linguagem DOT.
+*/
 void Grafo::printNaoDirecionado(std::ofstream &output)
 {
     output << "graph G {\n\n";
@@ -105,6 +121,10 @@ void Grafo::printNaoDirecionado(std::ofstream &output)
     output << "\n}\n";
 }
 
+/**
+ * Método público para escrever o grafo num arquivo especificado pela referência
+ * à ofstream passada como parâmetro. 
+*/
 void Grafo::print(std::ofstream &output)
 {
     if (direcionado)
@@ -117,12 +137,13 @@ void Grafo::print(std::ofstream &output)
     }
 }
 
-// Verifica se um vértice já existe na lista de vértices do grafo e, caso não esteja, o adiciona
-// NOTA: funcionando para ordenados e não ordenados, vértices ponderados ou não
+/**
+ * Adiciona um novo vértice ao grafo, caso não exista um com o id especificado.
+*/
 void Grafo::adicionaVertice(int idVertice, int peso)
 {
     if (vertices.count(idVertice) > 0) {
-        return; // checa se já existe
+        return; // o vértice já existe
     }
     Vertice *v = new Vertice;
     v->id = idVertice;
@@ -130,8 +151,9 @@ void Grafo::adicionaVertice(int idVertice, int peso)
     vertices[idVertice] = v;
 }
 
-// Válido para grafos direcionados ou não.
-// idVerticeA deve ser referente ao ponto de partida da aresta em casos de grafos direcionados.
+/**
+ * Verifica se dois vértices A e B são vizinhos, ou seja, se há aresta de A para B. 
+*/
 bool Grafo::saoVizinhos(int idVerticeA, int idVerticeB)
 {
     const auto& itr = vertices.find(idVerticeA);
@@ -151,11 +173,6 @@ bool Grafo::saoVizinhos(int idVerticeA, int idVerticeB)
 
 void Grafo::adicionaAdjacencias(int idVerticeA, int idVerticeB, int peso)
 {
-    // TODO: Verificar se a aresta já existe
-    if (saoVizinhos(idVerticeA, idVerticeB))
-    {
-        return;
-    }
     Vertice* verticeA = vertices.find(idVerticeA)->second;
     Aresta* aresta = new Aresta;
     Vertice* verticeB = vertices.find(idVerticeB)->second;
@@ -167,21 +184,20 @@ void Grafo::adicionaAdjacencias(int idVerticeA, int idVerticeB, int peso)
     }
 }
 
-// Funcionando para direcionados ou não
 void Grafo::adicionaAresta(int idVerticeA, int idVerticeB, int peso)
 {
+    if (saoVizinhos(idVerticeA, idVerticeB))
+    {
+        return; // já existe aresta pelo par
+    }
     adicionaVertice(idVerticeA);
     adicionaVertice(idVerticeB);
+    adicionaAdjacencias(idVerticeA, idVerticeB, peso);
     if (!direcionado) {
         adicionaAdjacencias(idVerticeB, idVerticeA, peso);
     }
-    adicionaAdjacencias(idVerticeA, idVerticeB, peso);
 }
 
-// Caso exista o vértice correspondente a idVerticeA, busca em suas arestas incidentes
-// uma o conecte ao vértice correspondente a idVerticeB, a remove e libera a memória
-// alocada, caso a encontre.
-// Se o grafo em questão não for direcionado, remove a aresta criada no caminho contrário.
 void Grafo::removeAresta(int idVerticeA, int idVerticeB)
 {
     const auto& itrA = vertices.find(idVerticeA);
@@ -234,11 +250,11 @@ void Grafo::removeVertice(int idVertice)
     }
     for (const auto& [idAtual, idDestino] : vertices)
     {
-        if (idAtual != idVertice)
-        {
-            removeAresta(idVertice, idAtual);
-            removeAresta(idAtual, idVertice);
+        if (idAtual == idVertice) {
+            continue; // não deve haver self-loop no conjunto de arestas
         }
+        removeAresta(idVertice, idAtual);
+        removeAresta(idAtual, idVertice);
     }
     vertices.erase(idVertice);
     delete itr->second;

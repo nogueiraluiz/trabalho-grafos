@@ -2,8 +2,7 @@
 #define GRAFO_HPP
 
 #include <fstream>
-#include <vector>
-#include <list>
+#include <map>
 #include "Vertice.hpp"
 #include "Aresta.hpp"
 
@@ -11,6 +10,7 @@ class Grafo {
 
 public:
     Grafo(std::ifstream &arquivoInstancia, bool direcionado, bool ponderadoVertices, bool ponderadoArestas);
+    Grafo(bool direcionado, bool ponderadoVertices, bool ponderadoArestas);
     ~Grafo();
     void print();
     void print(std::ofstream &output);
@@ -22,9 +22,8 @@ private:
     bool direcionado;
     bool ponderadoVertices;
     bool ponderadoArestas;
-    std::list<Vertice *> vertices;
+    std::map<int, Vertice*> vertices;
     void adicionaAdjacencias(int idA, int idB, int peso = 0);
-    Vertice* getVertice(int idVerticeAlvo);
     bool saoVizinhos(int idVerticeA, int idVerticeB);
     void printDirecionado(std::ofstream &output);
     void printNaoDirecionado(std::ofstream &output);
