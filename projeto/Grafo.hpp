@@ -1,6 +1,7 @@
 #ifndef GRAFO_HPP
 #define GRAFO_HPP
 
+#include <iostream>
 #include <fstream>
 #include <map>
 #include "Vertice.hpp"
@@ -18,6 +19,10 @@ public:
     void adicionaAresta(int idVerticeA, int idVerticeB, int peso = 0);
     void removeVertice(int idVertice);
     void removeAresta(int idVerticeA, int idVeritceB);
+    std::map<int, Vertice*> getMapaVertices();
+    bool getOpcaoVertices();
+    bool getOpcaoArestas();
+    bool getOpcaoDirecionado();
 private:
     bool direcionado;
     bool ponderadoVertices;
@@ -25,8 +30,6 @@ private:
     std::map<int, Vertice*> vertices;
     void adicionaAdjacencias(int idA, int idB, int peso = 0);
     bool saoVizinhos(int idVerticeA, int idVerticeB);
-    void printDirecionado(std::ofstream &output);
-    void printNaoDirecionado(std::ofstream &output);
 };
 
 #endif

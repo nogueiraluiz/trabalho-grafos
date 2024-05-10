@@ -1,12 +1,11 @@
 #include <iostream>
-
 #include <vector>
-#include <set>
 #include <map>
 #include <string>
 #include <sstream>
 #include <algorithm>
 #include "Grafo.hpp"
+#include "Printer.hpp"
 
 /**
  * Construtor que instancia um grafo de acordo com as arestas definidas em um arquivo .dat lido como argumento para a execução.
@@ -59,66 +58,7 @@ Grafo::~Grafo()
 */
 void Grafo::print()
 {
-    std::cout << "Número de vértices: " << vertices.size() << '\n';
-    for (const auto& [id, vertice] : vertices)
-    {
-        std::cout << id << " -> { ";
-        for (const auto& [idDestino, vertice] : vertice->arestas)
-        {
-            std::cout << idDestino << " ";
-        }
-        std::cout << "}\n";
-    } 
-}
-
-/**
- * Escreve para o ofstream especificado a saída de um grafo direcionado para visualização seguindo a linguagem DOT.
-*/
-void Grafo::printDirecionado(std::ofstream &output)
-{
-    output << "digraph G {\n\n";
-    for (const auto& [id, vertice] : vertices)
-    {
-        for (const auto& [idDestino, aresta] : vertice->arestas)
-        {
-            output << '\t' << id << " -> " << idDestino;
-            if (ponderadoArestas)
-            {
-                output << " [weight=" << aresta->peso << "]";
-            }
-            output << '\n';
-        }
-    }
-    output << "\n}\n";
-}
-
-
-/**
- * Escreve para o ofstream especificado a saída de um grafo não direcionado para
- * visualização seguindo a linguagem DOT.
-*/
-void Grafo::printNaoDirecionado(std::ofstream &output)
-{
-    output << "graph G {\n\n";
-    std::set<int> impressos; 
-    for (const auto& [id, vertice] : vertices)
-    {
-        for (const auto& [idVizinho, aresta] : vertice->arestas)
-        {   
-            if (std::count(impressos.begin(), impressos.end(), idVizinho))
-            {
-                continue;
-            }
-            output << '\t' << id << " -- " << idVizinho;
-            if (ponderadoArestas)
-            {
-                output << " [weight=" << aresta->peso << "]";
-            }
-            output << '\n';
-        }
-        impressos.insert(id);
-    }
-    output << "\n}\n";
+    Printer::printGrafo(*this);
 }
 
 /**
@@ -127,14 +67,7 @@ void Grafo::printNaoDirecionado(std::ofstream &output)
 */
 void Grafo::print(std::ofstream &output)
 {
-    if (direcionado)
-    {
-        printDirecionado(output);
-    }
-    else
-    {
-        printNaoDirecionado(output);
-    }
+    Printer::printGrafo(*this, output);
 }
 
 /**
@@ -156,11 +89,11 @@ void Grafo::adicionaVertice(int idVertice, int peso)
 */
 bool Grafo::saoVizinhos(int idVerticeA, int idVerticeB)
 {
-    const auto& itr = vertices.find(idVerticeA);
-    if (itr == vertices.end()) {
+    const auto& iterator = vertices.find(idVerticeA);
+    if (iterator == vertices.end()) {
         return false;
     }
-    Vertice *a = itr->second;  
+    Vertice *a = iterator->second;  
     for (const auto& [idDestino, aresta] : a->arestas)
     {
         if (idDestino == idVerticeB)
@@ -200,18 +133,18 @@ void Grafo::adicionaAresta(int idVerticeA, int idVerticeB, int peso)
 
 void Grafo::removeAresta(int idVerticeA, int idVerticeB)
 {
-    const auto& itrA = vertices.find(idVerticeA);
+    const auto& iteratorA = vertices.find(idVerticeA);
     bool removido;
-    if (itrA == vertices.end())
+    if (iteratorA == vertices.end())
     {
         return; // A não existe no conjunto de vértices
     }
-    const auto& itrB = vertices.find(idVerticeA);
-    if (itrB == vertices.end())
+    const auto& iteratorB = vertices.find(idVerticeA);
+    if (iteratorB == vertices.end())
     {
-        return; // A não existe no conjunto de vértices
+        return; // B não existe no conjunto de vértices
     }
-    Vertice *a = itrA->second;
+    Vertice *a = iteratorA->second;
     for (const auto& [idDestino, aresta] : a->arestas)
     {
         if (idDestino == idVerticeB)
@@ -224,7 +157,7 @@ void Grafo::removeAresta(int idVerticeA, int idVerticeB)
     }
     if (!direcionado)
     {
-        Vertice *b = itrB->second;
+        Vertice *b = iteratorB->second;
         for (const auto& [idDestino, aresta]: b->arestas)
         {
             if (idDestino == idVerticeA)
@@ -241,10 +174,18 @@ void Grafo::removeAresta(int idVerticeA, int idVerticeB)
     }
 }
 
+std::map<int, Vertice*> Grafo::getMapaVertices() { return vertices; }
+
+bool Grafo::getOpcaoVertices() { return this->ponderadoVertices; }
+
+bool Grafo::getOpcaoArestas() { return this->ponderadoArestas; }
+
+bool Grafo::getOpcaoDirecionado() { return this->direcionado; }
+
 void Grafo::removeVertice(int idVertice)
 {
-    const auto& itr = vertices.find(idVertice);
-    if (itr == vertices.end())
+    const auto& iterator = vertices.find(idVertice);
+    if (iterator == vertices.end())
     {
         return; // vértice buscado não existe
     }
@@ -257,5 +198,5 @@ void Grafo::removeVertice(int idVertice)
         removeAresta(idAtual, idVertice);
     }
     vertices.erase(idVertice);
-    delete itr->second;
+    delete iterator->second;
 }
