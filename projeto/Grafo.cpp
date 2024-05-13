@@ -1,6 +1,5 @@
 #include <iostream>
 #include <vector>
-#include <map>
 #include <string>
 #include <sstream>
 #include <algorithm>
@@ -9,44 +8,44 @@
 
 /**
  * Construtor que instancia um grafo de acordo com as arestas definidas em um arquivo .dat lido como argumento para a execução.
-*/
-Grafo::Grafo(std::ifstream &arquivoInstancia, bool direcionado,  bool ponderadoArestas, bool ponderadoVertices)
+ */
+Grafo::Grafo(std::ifstream &arquivoInstancia, bool direcionado, bool arestasPonderadas, bool verticesPonderados)
 {
     this->direcionado = direcionado;
-    this->ponderadoArestas = ponderadoArestas;
-    this->ponderadoVertices = ponderadoVertices;
+    this->arestasPonderadas = arestasPonderadas;
+    this->verticesPonderados = verticesPonderados;
     std::string linha;
     getline(arquivoInstancia, linha);
-    while (getline(arquivoInstancia, linha)) {
+    while (getline(arquivoInstancia, linha))
+    {
         std::stringstream stream(linha);
         std::string item;
         std::vector<int> itens;
-        while (getline(stream, item, ' ')) {
+        while (getline(stream, item, ' '))
+        {
             itens.push_back(std::stoi(item));
         }
-        int idVerticeA = itens[0];
-        int idVerticeB = itens[1];
+        int idVerticeU = itens[0];
+        int idVerticeV = itens[1];
         int pesoAresta = itens[2];
-        adicionaAresta(idVerticeA, idVerticeB, pesoAresta);
+        adicionaAresta(idVerticeU, idVerticeV, pesoAresta);
     }
 }
 
 /**
  * Construtor mais básico, não define quaisquer elementos dos conjuntos de vértices e de arestas.
-*/
-Grafo::Grafo(bool direcionado, bool ponderadoVertices, bool ponderadoArestas)
+ */
+Grafo::Grafo(bool direcionado, bool verticesPonderados, bool arestasPonderadas)
 {
     this->direcionado = direcionado;
-    this->ponderadoArestas = ponderadoArestas;
-    this->ponderadoVertices = ponderadoVertices;
+    this->arestasPonderadas = arestasPonderadas;
+    this->verticesPonderados = verticesPonderados;
 }
 
 Grafo::~Grafo()
 {
-    for (const auto& [id, vertice] : vertices) {
-        Vertice *v = vertice;
-        for (const auto& [idDestino, aresta] : vertice->arestas)
-        {
+    for (Vertice* vertice : vertices) {
+        for (Aresta* aresta : vertice->arestas) {
             delete aresta;
         }
         delete vertice;
@@ -55,148 +54,130 @@ Grafo::~Grafo()
 
 /**
  * Método para impressão de um grafo diretamente para o console, seguindo a visão de sua lista de adjacências.
-*/
+ */
 void Grafo::print()
 {
-    Printer::printGrafo(*this);
+    Printer::printGrafo(vertices, direcionado, arestasPonderadas, verticesPonderados);
 }
 
 /**
  * Método público para escrever o grafo num arquivo especificado pela referência
- * à ofstream passada como parâmetro. 
-*/
+ * à ofstream passada como parâmetro.
+ */
 void Grafo::print(std::ofstream &output)
 {
-    Printer::printGrafo(*this, output);
+    Printer::printGrafo(vertices, direcionado, arestasPonderadas, verticesPonderados, output);
+}
+
+/**
+ * Verifica se se há aresta de U para V.
+ */
+bool Grafo::existeAresta(int idVerticeU, int idVerticeV)
+{
+    Vertice *u = getVertice(idVerticeU);
+    if (u == nullptr)
+    {
+        return false; // não existe vértice V
+    }
+    for (Aresta* aresta : u->arestas) {
+        if (aresta->destino->id == idVerticeV) {
+            return true;
+        }
+    }
+    return false; // V não é adjacente a U (ou não existe)
+}
+
+Vertice *Grafo::getVertice(int idAlvo)
+{
+    for (Vertice *vertice : vertices)
+    {
+        if (vertice->id == idAlvo)
+        {
+            return vertice;
+        }
+    }
+    return nullptr;
+}
+
+void Grafo::adicionaAdjacencias(int idVerticeU, int idVerticeV, int peso)
+{
+    Vertice *u = getVertice(idVerticeU);
+    Vertice *v = getVertice(idVerticeV);
+    Aresta *e = new Aresta;
+    e->destino = v;
+    e->peso = peso;
+    u->arestas.push_back(e);
 }
 
 /**
  * Adiciona um novo vértice ao grafo, caso não exista um com o id especificado.
-*/
+ */
 void Grafo::adicionaVertice(int idVertice, int peso)
 {
-    if (vertices.count(idVertice) > 0) {
-        return; // o vértice já existe
-    }
-    Vertice *v = new Vertice;
-    v->id = idVertice;
-    v->peso = peso;
-    vertices[idVertice] = v;
-}
-
-/**
- * Verifica se dois vértices A e B são vizinhos, ou seja, se há aresta de A para B. 
-*/
-bool Grafo::saoVizinhos(int idVerticeA, int idVerticeB)
-{
-    const auto& iterator = vertices.find(idVerticeA);
-    if (iterator == vertices.end()) {
-        return false;
-    }
-    Vertice *a = iterator->second;  
-    for (const auto& [idDestino, aresta] : a->arestas)
+    if (getVertice(idVertice) != nullptr)
     {
-        if (idDestino == idVerticeB)
-        {
-            return true;
-        }
+        return; // já existe o vértice com o id especificado
     }
-    return false;
+    Vertice *u = new Vertice;
+    u->id = idVertice;
+    u->peso = peso;
+    vertices.push_back(u);
 }
 
-void Grafo::adicionaAdjacencias(int idVerticeA, int idVerticeB, int peso)
+void Grafo::adicionaAresta(int idVerticeU, int idVerticeV, int peso)
 {
-    Vertice* verticeA = vertices.find(idVerticeA)->second;
-    Aresta* aresta = new Aresta;
-    Vertice* verticeB = vertices.find(idVerticeB)->second;
-    aresta->destino = verticeB;
-    aresta->peso = peso;
-    if (verticeA != nullptr)
-    {
-        verticeA->arestas[idVerticeB] = aresta;
-    }
-}
-
-void Grafo::adicionaAresta(int idVerticeA, int idVerticeB, int peso)
-{
-    if (saoVizinhos(idVerticeA, idVerticeB))
+    if (existeAresta(idVerticeU, idVerticeV))
     {
         return; // já existe aresta pelo par
     }
-    adicionaVertice(idVerticeA);
-    adicionaVertice(idVerticeB);
-    adicionaAdjacencias(idVerticeA, idVerticeB, peso);
-    if (!direcionado) {
-        adicionaAdjacencias(idVerticeB, idVerticeA, peso);
-    }
-}
-
-void Grafo::removeAresta(int idVerticeA, int idVerticeB)
-{
-    const auto& iteratorA = vertices.find(idVerticeA);
-    bool removido;
-    if (iteratorA == vertices.end())
-    {
-        return; // A não existe no conjunto de vértices
-    }
-    const auto& iteratorB = vertices.find(idVerticeA);
-    if (iteratorB == vertices.end())
-    {
-        return; // B não existe no conjunto de vértices
-    }
-    Vertice *a = iteratorA->second;
-    for (const auto& [idDestino, aresta] : a->arestas)
-    {
-        if (idDestino == idVerticeB)
-        {
-            a->arestas.erase(idDestino);
-            delete aresta;
-            removido = true;
-            break;
-        }
-    }
+    adicionaVertice(idVerticeU);
+    adicionaVertice(idVerticeV);
+    adicionaAdjacencias(idVerticeU, idVerticeV, peso);
     if (!direcionado)
     {
-        Vertice *b = iteratorB->second;
-        for (const auto& [idDestino, aresta]: b->arestas)
-        {
-            if (idDestino == idVerticeA)
-            {
-                b->arestas.erase(idDestino);
-                delete aresta;
-                return;
-            }
-        }
-    }
-    if (!removido) {
-        std::cout << "Não foi encontrada aresta definida pelos vértices " << idVerticeA 
-                << "e " << idVerticeB << '\n';
+        adicionaAdjacencias(idVerticeV, idVerticeU, peso);
     }
 }
 
-std::map<int, Vertice*> Grafo::getMapaVertices() { return vertices; }
-
-bool Grafo::getOpcaoVertices() { return this->ponderadoVertices; }
-
-bool Grafo::getOpcaoArestas() { return this->ponderadoArestas; }
-
-bool Grafo::getOpcaoDirecionado() { return this->direcionado; }
+void Grafo::removeAresta(int idVerticeU, int idVerticeV)
+{
+    if (!existeAresta(idVerticeU, idVerticeV))
+    {
+        return;
+    }
+    Vertice *u = getVertice(idVerticeU);
+    for (Aresta *aresta : u->arestas)
+    {
+        if (aresta->destino->id == idVerticeV)
+        {
+            delete aresta;
+        }
+    }
+    if (direcionado)
+    {
+        return;
+    }
+    Vertice *v = getVertice(idVerticeV);
+    for (Aresta *aresta : v->arestas)
+    {
+        if (aresta->destino->id == idVerticeU)
+        {
+            delete aresta;
+        }
+    }
+}
 
 void Grafo::removeVertice(int idVertice)
 {
-    const auto& iterator = vertices.find(idVertice);
-    if (iterator == vertices.end())
+    Vertice *v = getVertice(idVertice);
+    if (v == nullptr)
     {
         return; // vértice buscado não existe
     }
-    for (const auto& [idAtual, idDestino] : vertices)
+    for (Aresta *aresta : v->arestas)
     {
-        if (idAtual == idVertice) {
-            continue; // não deve haver self-loop no conjunto de arestas
-        }
-        removeAresta(idVertice, idAtual);
-        removeAresta(idAtual, idVertice);
+        removeAresta(idVertice, aresta->destino->id);
+        removeAresta(aresta->destino->id, idVertice);
     }
-    vertices.erase(idVertice);
-    delete iterator->second;
+    delete v;
 }

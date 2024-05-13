@@ -1,8 +1,8 @@
 #ifndef VERTICE_HPP
 #define VERTICE_HPP
 
-#include <map>
 #include "Aresta.hpp"
+#include <list>
 
 struct Aresta;
 
@@ -10,7 +10,7 @@ struct Vertice
 {
     int id;
     int peso;
-    std::map<int, Aresta *> arestas;
+    std::list<Aresta*> arestas;
 };
 
 #endif

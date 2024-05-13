@@ -11,12 +11,12 @@ int main(int argc, char *argv[])
     char *arquivoInput = argv[1];
     char *arquivoOutput = argv[2];
     int direcionado = std::stoi(argv[3]);
-    int ponderadoArestas = std::stoi(argv[4]);
-    int ponderadoVertices = std::stoi(argv[5]);
+    int arestasPonderadas = std::stoi(argv[4]);
+    int verticesPonderados = std::stoi(argv[5]);
     std::ifstream input(arquivoInput);
     std::ofstream output;
     output.open(arquivoOutput);
-    Grafo *g = new Grafo(input, direcionado, ponderadoArestas, ponderadoVertices);
+    Grafo *g = new Grafo(input, direcionado, arestasPonderadas, verticesPonderados);
     g->print();
     g->print(output);
     input.close();

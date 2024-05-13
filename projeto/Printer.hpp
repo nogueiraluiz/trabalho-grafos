@@ -1,5 +1,8 @@
+#ifndef PRINTER_HPP
+#define PRINTER_HPP
+
 #include <iostream>
-#include <map>
+#include <list>
 #include <set>
 #include <string>
 #include <algorithm>
@@ -8,10 +11,12 @@
 
 namespace Printer
 {
-    void printVerticesPonderados(std::map<int, const Vertice*> vertices, std::ofstream &arquivo);
-    std::string getRepresentacaoAresta(int id, std::string separador, int idDestino, Aresta &aresta, bool ponderada);
-    void printArestasDirecionadas(std::map<int, const Vertice*> vertices, bool ponderadoNasArestas, std::ofstream &arquivo);
-    void printArestasNaoDirecionadas(std::map<int, const Vertice*> vertices, bool ponderadoNasArestas, std::ofstream &arquivo);
-    void printGrafo(Grafo &g, std::ofstream &arquivo);
-    void printGrafo(Grafo &g);
+    void printGrafo(std::list<Vertice*>& vertices, bool direcionado, bool arestasPonderadas, bool verticesPonderados, std::ofstream &arquivo);
+    void printGrafo(std::list<Vertice*>& vertices, bool direcionado, bool arestasPonderadas, bool verticesPonderados);
+    void printVerticesPonderados(std::list<Vertice*>& vertices, std::ofstream &arquivo);
+    std::string getRepresentacaoAresta(int idOrigem, std::string separador, int idDestino, const Aresta &aresta, bool ponderada);
+    void printArestasDirecionadas(std::list<Vertice*>& vertices, bool ponderadoNasArestas, std::ofstream &arquivo);
+    void printArestasNaoDirecionadas(std::list<Vertice*>& vertices, bool ponderadoNasArestas, std::ofstream &arquivo);
 }
+
+#endif

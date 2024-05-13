@@ -3,33 +3,33 @@
 
 #include <iostream>
 #include <fstream>
-#include <map>
+#include <list>
 #include "Vertice.hpp"
 #include "Aresta.hpp"
 
 class Grafo {
 
 public:
-    Grafo(std::ifstream &arquivoInstancia, bool direcionado, bool ponderadoVertices, bool ponderadoArestas);
-    Grafo(bool direcionado, bool ponderadoVertices, bool ponderadoArestas);
+    Grafo(std::ifstream &arquivoInstancia, bool direcionado, bool verticesPonderados, bool arestasPonderadas);
+    Grafo(bool direcionado, bool verticesPonderados, bool arestasPonderadas);
     ~Grafo();
     void print();
     void print(std::ofstream &output);
     void adicionaVertice(int idVertice, int peso = 0);
-    void adicionaAresta(int idVerticeA, int idVerticeB, int peso = 0);
+    void adicionaAresta(int idVerticeU, int idVerticeV, int peso = 0);
     void removeVertice(int idVertice);
-    void removeAresta(int idVerticeA, int idVeritceB);
-    std::map<int, Vertice*> getMapaVertices();
+    void removeAresta(int idVerticeU, int idVerticeV);
     bool getOpcaoVertices();
     bool getOpcaoArestas();
     bool getOpcaoDirecionado();
 private:
     bool direcionado;
-    bool ponderadoVertices;
-    bool ponderadoArestas;
-    std::map<int, Vertice*> vertices;
+    bool verticesPonderados;
+    bool arestasPonderadas;
+    std::list<Vertice*> vertices;
+    Vertice* getVertice(int id);
     void adicionaAdjacencias(int idA, int idB, int peso = 0);
-    bool saoVizinhos(int idVerticeA, int idVerticeB);
+    bool existeAresta(int idVerticeU, int idVerticeV);
 };
 
 #endif
