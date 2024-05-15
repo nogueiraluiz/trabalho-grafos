@@ -7,7 +7,8 @@
 #include "Vertice.hpp"
 #include "Aresta.hpp"
 
-class Grafo {
+class Grafo
+{
 
 public:
     Grafo(std::ifstream &arquivoInstancia, bool direcionado, bool verticesPonderados, bool arestasPonderadas);
@@ -19,15 +20,13 @@ public:
     void adicionaAresta(int idVerticeU, int idVerticeV, int peso = 0);
     void removeVertice(int idVertice);
     void removeAresta(int idVerticeU, int idVerticeV);
-    bool getOpcaoVertices();
-    bool getOpcaoArestas();
-    bool getOpcaoDirecionado();
+
 private:
     bool direcionado;
     bool verticesPonderados;
     bool arestasPonderadas;
-    std::list<Vertice*> vertices;
-    Vertice* getVertice(int id);
+    std::list<Vertice *> vertices;
+    Vertice *getVertice(int id);
     void adicionaAdjacencias(int idA, int idB, int peso = 0);
     bool existeAresta(int idVerticeU, int idVerticeV);
 };

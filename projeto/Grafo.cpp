@@ -44,8 +44,10 @@ Grafo::Grafo(bool direcionado, bool verticesPonderados, bool arestasPonderadas)
 
 Grafo::~Grafo()
 {
-    for (Vertice* vertice : vertices) {
-        for (Aresta* aresta : vertice->arestas) {
+    for (Vertice *vertice : vertices)
+    {
+        for (Aresta *aresta : vertice->arestas)
+        {
             delete aresta;
         }
         delete vertice;
@@ -69,9 +71,6 @@ void Grafo::print(std::ofstream &output)
     Printer::printGrafo(vertices, direcionado, arestasPonderadas, verticesPonderados, output);
 }
 
-/**
- * Verifica se se há aresta de U para V.
- */
 bool Grafo::existeAresta(int idVerticeU, int idVerticeV)
 {
     Vertice *u = getVertice(idVerticeU);
@@ -79,8 +78,10 @@ bool Grafo::existeAresta(int idVerticeU, int idVerticeV)
     {
         return false; // não existe vértice V
     }
-    for (Aresta* aresta : u->arestas) {
-        if (aresta->destino->id == idVerticeV) {
+    for (Aresta *aresta : u->arestas)
+    {
+        if (aresta->destino->id == idVerticeV)
+        {
             return true;
         }
     }
