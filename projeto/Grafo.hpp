@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <list>
+#include <set>
 #include "Vertice.hpp"
 #include "Aresta.hpp"
 
@@ -20,7 +21,7 @@ public:
     void adicionaAresta(int idVerticeU, int idVerticeV, int peso = 0);
     void removeVertice(int idVertice);
     void removeAresta(int idVerticeU, int idVerticeV);
-
+    void fechoTransitivoDireto(int idVertice);
 private:
     bool direcionado;
     bool verticesPonderados;
@@ -29,6 +30,7 @@ private:
     Vertice *getVertice(int id);
     void adicionaAdjacencias(int idA, int idB, int peso = 0);
     bool existeAresta(int idVerticeU, int idVerticeV);
+    void auxFechoDireto(Vertice* vertice, std::set<int>& fecho);
 };
 
 #endif
