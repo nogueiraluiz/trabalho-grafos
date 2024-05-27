@@ -168,6 +168,58 @@ void Grafo::removeAresta(int idVerticeU, int idVerticeV)
     }
 }
 
+/**
+ * Método recursivo auxiliar para a funcionalidade de fecho transitivo direto.
+ * Busca os sucessores dos sucessores do vértice solicitado.
+ */
+void Grafo::auxFechoDireto(Vertice *vertice, std::set<int> &fecho)
+{
+    for (Aresta *aresta : vertice->arestas)
+    {
+        Vertice *sucessor = aresta->destino;
+        fecho.insert(sucessor->id);
+        auxFechoDireto(sucessor, fecho);
+    }
+}
+
+/**
+ * Imprime na tela o fecho transitivo direto de um vértice no grafo dado seu id.
+ * - caso o grafo não seja direcionado, retorna, visto que a operação não pode ser feita;
+ * - caso o vértice não existe no conjunto de vértices, retorna;
+ */
+void Grafo::fechoTransitivoDireto(int idVertice)
+{
+    if (!direcionado)
+    {
+        std::cout << "O grafo deve ser direcionado\n";
+        return;
+    }
+    Vertice *v = getVertice(idVertice);
+    if (v == nullptr)
+    {
+        std::cout << "Nao existe no grafo vertice com o id especificado (" << idVertice << ")\n";
+        return;
+    }
+    std::set<int> fecho;
+    for (Aresta *aresta : v->arestas)
+    {
+        Vertice *sucessor = aresta->destino;
+        fecho.insert(sucessor->id);
+        auxFechoDireto(sucessor, fecho);
+    }
+    if (fecho.empty())
+    {
+        std::cout << "O fecho transitivo direto do vértice é vazio\n";
+        return;
+    }
+    std::cout << "Fecho transitivo direto do vertice " << idVertice << ":\n { ";
+    for (int idVerticeFecho : fecho)
+    {
+        std::cout << idVerticeFecho << " ";
+    }
+    std::cout << "}\n";
+}
+
 void Grafo::removeVertice(int idVertice)
 {
     Vertice *v = getVertice(idVertice);
