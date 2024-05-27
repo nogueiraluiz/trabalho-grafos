@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <list>
+#include <vector>
 #include <set>
 #include "Vertice.hpp"
 #include "Aresta.hpp"
@@ -26,7 +27,7 @@ private:
     bool direcionado;
     bool verticesPonderados;
     bool arestasPonderadas;
-    std::list<Vertice *> vertices;
+    std::vector<Vertice *> vertices;
     Vertice *getVertice(int id);
     void adicionaAdjacencias(int idA, int idB, int peso = 0);
     bool existeAresta(int idVerticeU, int idVerticeV);
