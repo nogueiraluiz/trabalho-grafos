@@ -4,7 +4,7 @@
  * Retorna a string que representa uma aresta a ser inserida no arquivo de saída de acordo com as
  * configurações específicadas.
  */
-void Printer::printGrafo(std::list<Vertice *> &vertices, bool direcionado, bool arestasPonderadas, bool verticesPonderados, std::ofstream &arquivo)
+void Printer::printGrafo(std::vector<Vertice *> &vertices, bool direcionado, bool arestasPonderadas, bool verticesPonderados, std::ofstream &arquivo)
 {
     std::string cabecalho = direcionado ? "digraph G {\n\n" : "graph G {\n\n";
     arquivo << cabecalho;
@@ -23,7 +23,7 @@ void Printer::printGrafo(std::list<Vertice *> &vertices, bool direcionado, bool 
     arquivo << "\n\n}";
 }
 
-void Printer::printGrafo(std::list<Vertice *> &vertices, bool direcionado, bool arestasPonderadas, bool verticesPonderados)
+void Printer::printGrafo(std::vector<Vertice *> &vertices, bool direcionado, bool arestasPonderadas, bool verticesPonderados)
 {
     std::cout << "O grafo possui " << vertices.size() << " vertices\n";
     for (const Vertice *vertice : vertices)
@@ -41,7 +41,7 @@ void Printer::printGrafo(std::list<Vertice *> &vertices, bool direcionado, bool 
  * Imprime os vértices para o arquivo definindo o label de cada um como "<id> <(peso)>",
  * no caso de grafos com vértices ponderados.
  */
-void Printer::printVerticesPonderados(std::list<Vertice *> &vertices, std::ofstream &arquivo)
+void Printer::printVerticesPonderados(std::vector<Vertice *> &vertices, std::ofstream &arquivo)
 {
     for (const Vertice *vertice : vertices)
     {
@@ -62,7 +62,7 @@ std::string Printer::getRepresentacaoAresta(int id, std::string separador, int i
     return formatoAresta.str();
 }
 
-void Printer::printArestasDirecionadas(std::list<Vertice *> &vertices, bool arestasPonderadas, std::ofstream &arquivo)
+void Printer::printArestasDirecionadas(std::vector<Vertice *> &vertices, bool arestasPonderadas, std::ofstream &arquivo)
 {
     std::string separador = " -> ";
     for (const Vertice *vertice : vertices)
@@ -74,7 +74,7 @@ void Printer::printArestasDirecionadas(std::list<Vertice *> &vertices, bool ares
     }
 }
 
-void Printer::printArestasNaoDirecionadas(std::list<Vertice *> &vertices, bool arestasPonderadas, std::ofstream &arquivo)
+void Printer::printArestasNaoDirecionadas(std::vector<Vertice *> &vertices, bool arestasPonderadas, std::ofstream &arquivo)
 {
     std::string separador = " -- ";
     std::set<int> impressos;
