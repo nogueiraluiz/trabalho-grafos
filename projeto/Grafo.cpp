@@ -234,3 +234,9 @@ void Grafo::removeVertice(int idVertice)
     }
     delete v;
 }
+
+
+void Grafo::Dijkstra(int idVertice)
+{
+    std::cout << "funciona \n" ;
+}

@@ -21,6 +21,7 @@ public:
     void adicionaVertice(int idVertice, int peso = 0);
     void adicionaAresta(int idVerticeU, int idVerticeV, int peso = 0);
     void removeVertice(int idVertice);
+    void Dijkstra(int idVertice);
     void removeAresta(int idVerticeU, int idVerticeV);
     void fechoTransitivoDireto(int idVertice);
 private:
