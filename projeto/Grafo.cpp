@@ -3,6 +3,7 @@
 #include <string>
 #include <sstream>
 #include <algorithm>
+#include "limits.h"
 #include "Grafo.hpp"
 #include "Printer.hpp"
 
@@ -218,6 +219,80 @@ void Grafo::fechoTransitivoDireto(int idVertice)
         std::cout << idVerticeFecho << " ";
     }
     std::cout << "}\n";
+}
+
+int Grafo::encontraIndiceVertice(int id)
+{
+    for (int i = 0; i < vertices.size(); i++)
+    {
+        if (vertices[i]->id == id)
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void Grafo::inicializaMatrizDistancias(std::vector<std::vector<int>> distancias, int ordem)
+{
+    for (int i = 0; i < ordem; i++)
+    {
+        for (int j = 0; j < ordem; j++)
+        {
+            if (i == j)
+            {
+                distancias[i][j] = 0;
+            }
+            else
+            {
+                distancias[i][j] = INT_MAX;
+            } 
+        }
+    }
+    for (int i = 0; i < ordem; i++)
+    {
+        Vertice* u = vertices[i];
+        for (Aresta* e : u->arestas)
+        {
+            Vertice* v = e->destino;
+            int j = encontraIndiceVertice(v->id);
+            distancias[i][j] = e->peso;
+        }
+    }
+}
+
+void Grafo::atualizaMatrizDistancias(std::vector<std::vector<int>> distancias, int ordem, int indice)
+{
+    for (int i = 0; i < ordem; i++)
+    {
+        if (i == indice) continue; // é necessário?
+        for (int j = 0; j < ordem; j++)
+        {
+            if (j == indice) continue; // é necessário?
+            
+        }
+    }
+    
+}
+
+void Grafo::caminhoMinimoFloyd(int idVerticeU, int idVerticeV)
+{
+    int u = encontraIndiceVertice(idVerticeU);
+    if (u == -1)
+    {
+        std::cout << "Nao existe vertice de id " << idVerticeU << '\n';
+        return;
+    }
+    int v = encontraIndiceVertice(idVerticeV);
+    if (v == -1)
+    {
+        std::cout << "Nao existe vertice de id " << idVerticeV << '\n';
+        return;
+    }
+    int ordem = vertices.size();
+    std::vector<std::vector<int>> distancias;
+    inicializaMatrizDistancias(distancias, ordem);
+    atualizaMatrizDistancias(distancias, ordem, 0);
 }
 
 void Grafo::removeVertice(int idVertice)

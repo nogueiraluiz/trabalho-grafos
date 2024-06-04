@@ -23,6 +23,8 @@ public:
     void removeVertice(int idVertice);
     void removeAresta(int idVerticeU, int idVerticeV);
     void fechoTransitivoDireto(int idVertice);
+    void caminhoMinimoFloyd(int idVerticeU, int idVerticeV);
+
 private:
     bool direcionado;
     bool verticesPonderados;
@@ -32,6 +34,9 @@ private:
     void adicionaAdjacencias(int idA, int idB, int peso = 0);
     bool existeAresta(int idVerticeU, int idVerticeV);
     void auxFechoDireto(Vertice* vertice, std::set<int>& fecho);
+    int encontraIndiceVertice(int id);
+    void inicializaMatrizDistancias(std::vector<std::vector<int>> distancias, int ordem);
+    void atualizaMatrizDistancias(std::vector<std::vector<int>> distancias, int ordem, int indice);
 };
 
 #endif
