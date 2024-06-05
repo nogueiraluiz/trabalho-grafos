@@ -35,8 +35,8 @@ private:
     bool existeAresta(int idVerticeU, int idVerticeV);
     void auxFechoDireto(Vertice* vertice, std::set<int>& fecho);
     int encontraIndiceVertice(int id);
-    void inicializaMatrizDistancias(std::vector<std::vector<int>> distancias, int ordem);
-    void atualizaMatrizDistancias(std::vector<std::vector<int>> distancias, int ordem, int indice);
+    void inicializaMatrizDistancias(std::vector<std::vector<int>>& distancias, int ordem);
+    void atualizaMatrizDistancias(std::vector<std::vector<int>>& distancias, int ordem, int indice);
 };
 
 #endif

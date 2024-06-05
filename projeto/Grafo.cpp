@@ -233,21 +233,23 @@ int Grafo::encontraIndiceVertice(int id)
     return -1;
 }
 
-void Grafo::inicializaMatrizDistancias(std::vector<std::vector<int>> distancias, int ordem)
+void Grafo::inicializaMatrizDistancias(std::vector<std::vector<int>>& distancias, int ordem)
 {
     for (int i = 0; i < ordem; i++)
     {
+        std::vector<int> linhaInicial;
         for (int j = 0; j < ordem; j++)
         {
             if (i == j)
             {
-                distancias[i][j] = 0;
+                linhaInicial.push_back(0);
             }
             else
             {
-                distancias[i][j] = INT_MAX;
+                linhaInicial.push_back(INT_MAX);
             } 
         }
+        distancias.push_back(linhaInicial);
     }
     for (int i = 0; i < ordem; i++)
     {
@@ -261,38 +263,55 @@ void Grafo::inicializaMatrizDistancias(std::vector<std::vector<int>> distancias,
     }
 }
 
-void Grafo::atualizaMatrizDistancias(std::vector<std::vector<int>> distancias, int ordem, int indice)
+void Grafo::atualizaMatrizDistancias(std::vector<std::vector<int>>& distancias, int ordem, int indice)
 {
+    if (indice == ordem)
+        return;
     for (int i = 0; i < ordem; i++)
     {
         if (i == indice) continue; // é necessário?
         for (int j = 0; j < ordem; j++)
         {
             if (j == indice) continue; // é necessário?
-            
+            int distanciaAtual = distancias[i][j];
+            int distanciaIntermediariaA = distancias[i][indice];
+            int distanciaIntermediariaB = distancias[indice][j];
+            if (distanciaIntermediariaA == INT_MAX || distanciaIntermediariaB == INT_MAX) continue; // evitando cálculos imprevisíveis
+            int novaDistancia = distanciaIntermediariaA + distanciaIntermediariaB;
+            distanciaAtual = std::min(distanciaAtual, novaDistancia);
+            distancias[i][j] = distanciaAtual;
         }
     }
-    
+    atualizaMatrizDistancias(distancias, ordem, indice + 1);
 }
 
 void Grafo::caminhoMinimoFloyd(int idVerticeU, int idVerticeV)
 {
+    if (!arestasPonderadas) {
+        std::cout << "As operacoes de caminho minimo nao sao permitidas para grafos sem ponderacao nas arestas" << std::endl;
+        return;
+    }
     int u = encontraIndiceVertice(idVerticeU);
     if (u == -1)
     {
-        std::cout << "Nao existe vertice de id " << idVerticeU << '\n';
+        std::cout << "Nao existe vertice de id " << idVerticeU << std::endl;
         return;
     }
     int v = encontraIndiceVertice(idVerticeV);
     if (v == -1)
     {
-        std::cout << "Nao existe vertice de id " << idVerticeV << '\n';
+        std::cout << "Nao existe vertice de id " << idVerticeV << std::endl;
         return;
     }
     int ordem = vertices.size();
     std::vector<std::vector<int>> distancias;
     inicializaMatrizDistancias(distancias, ordem);
     atualizaMatrizDistancias(distancias, ordem, 0);
+    int distanciaUV = distancias[u][v];
+    if (distanciaUV == INT_MAX)
+        std::cout << "Nao ha qualquer caminho entre " << idVerticeU << " e " << idVerticeV << '\n';
+    else
+        std::cout << "O caminho minimo entre os vertices " << idVerticeU << " e " << idVerticeV << " eh: " << distanciaUV << '\n';
 }
 
 void Grafo::removeVertice(int idVertice)
