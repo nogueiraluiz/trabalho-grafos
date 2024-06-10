@@ -37,6 +37,7 @@ private:
     int encontraIndiceVertice(int id);
     void inicializaMatrizDistancias(std::vector<std::vector<int>>& distancias, int ordem);
     void atualizaMatrizDistancias(std::vector<std::vector<int>>& distancias, int ordem, int indice);
+    int custo(int idVerticeU, int idVerticeV);
 };
 
 #endif

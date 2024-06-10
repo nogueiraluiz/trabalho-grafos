@@ -285,6 +285,21 @@ void Grafo::atualizaMatrizDistancias(std::vector<std::vector<int>>& distancias, 
     atualizaMatrizDistancias(distancias, ordem, indice + 1);
 }
 
+/**
+ * Retorna o peso de uma aresta. Se o vértice de origem não existir, retorna -1. Se não existir a aresta, retorna -1.
+ */
+int Grafo::custo(int idVerticeU, int idVerticeV)
+{
+    Vertice* u = getVertice(idVerticeU);
+    if (u == nullptr) {
+        return -1;
+    }
+    for (Aresta* e : u->arestas)
+        if (e->destino->id == idVerticeV)
+            return e->peso;
+    return INT_MAX;
+}
+
 void Grafo::caminhoMinimoFloyd(int idVerticeU, int idVerticeV)
 {
     if (!arestasPonderadas) {
