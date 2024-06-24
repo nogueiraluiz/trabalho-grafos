@@ -22,6 +22,7 @@ public:
     void adicionaAresta(int idVerticeU, int idVerticeV, int peso = 0);
     void removeVertice(int idVertice);
     void removeAresta(int idVerticeU, int idVerticeV);
+    void liberaMemoriaArestas(std::list<Aresta*>& arestas);
     void fechoTransitivoDireto(int idVertice);
     void caminhoMinimoFloyd(int idVerticeU, int idVerticeV);
 

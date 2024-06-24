@@ -141,6 +141,9 @@ void Grafo::adicionaAresta(int idVerticeU, int idVerticeV, int peso)
     }
 }
 
+/**
+ * Remove a aresta da(s) lista(s) de arestas e libera a memória alocada.
+ */
 void Grafo::removeAresta(int idVerticeU, int idVerticeV)
 {
     if (!existeAresta(idVerticeU, idVerticeV))
@@ -148,13 +151,17 @@ void Grafo::removeAresta(int idVerticeU, int idVerticeV)
         return;
     }
     Vertice *u = getVertice(idVerticeU);
+    Aresta *e;
     for (Aresta *aresta : u->arestas)
     {
         if (aresta->destino->id == idVerticeV)
         {
-            delete aresta;
+            e = aresta;
         }
     }
+    std::list<Aresta*>::iterator it = std::find(u->arestas.begin(), u->arestas.end(), e);
+    u->arestas.erase(it);
+    delete e;
     if (direcionado)
     {
         return;
@@ -164,9 +171,12 @@ void Grafo::removeAresta(int idVerticeU, int idVerticeV)
     {
         if (aresta->destino->id == idVerticeU)
         {
-            delete aresta;
+            e = aresta;
         }
     }
+    it = std::find(v->arestas.begin(), v->arestas.end(), e);
+    v->arestas.erase(it);
+    delete e;
 }
 
 /**
@@ -314,17 +324,28 @@ void Grafo::caminhoMinimoFloyd(int idVerticeU, int idVerticeV)
         std::cout << "O caminho minimo entre os vertices " << idVerticeU << " e " << idVerticeV << " eh: " << distanciaUV << '\n';
 }
 
+void Grafo::liberaMemoriaArestas(std::list<Aresta *> &arestas)
+{
+    for (Aresta* aresta : arestas)
+    {
+        delete aresta;
+    }
+}
+
 void Grafo::removeVertice(int idVertice)
 {
-    Vertice *v = getVertice(idVertice);
-    if (v == nullptr)
+    Vertice *u = getVertice(idVertice);
+    if (u == nullptr)
     {
         return; // vértice buscado não existe
     }
-    for (Aresta *aresta : v->arestas)
+    std::list<Aresta*>& arestas = u->arestas;
+    for (Vertice* vertice : vertices)
     {
-        removeAresta(idVertice, aresta->destino->id);
-        removeAresta(aresta->destino->id, idVertice);
+        removeAresta(vertice->id, idVertice);
     }
-    delete v;
+    liberaMemoriaArestas(arestas);
+    std::vector<Vertice*>::iterator it = std::find(vertices.begin(), vertices.end(), u);
+    vertices.erase(it);
+    delete u;
 }
