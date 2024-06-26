@@ -296,29 +296,17 @@ void Grafo::atualizaMatrizDistancias(std::vector<std::vector<int>>& distancias, 
     atualizaMatrizDistancias(distancias, ordem, indice + 1);
 }
 
+/**
+ * Retorna a matriz representativa dos caminhos mínimos entre quaisquer vértices do grafo.
+ * distancias(i,j) = INT_MAX -> não existe qualquer caminho entre os dois vértices;
+ * distancias(i,j) = 0 -> caminho não é permitido (self-loop), só ocorre quando i = j.
+ */
 std::vector<std::vector<int>> Grafo::getMatrizDistancias()
 {
     std::vector<std::vector<int>> distancias;
     inicializaMatrizDistancias(distancias, vertices.size());
     atualizaMatrizDistancias(distancias, vertices.size(), 0);
     return distancias;
-}
-
-/**
- * parâmetros:
- * - distanciasVertice: vetor contendo as distâncias do vértice para todos os vértices do grafo.
- */
-int Grafo::getExcentricidade(const std::vector<int> &distanciasVertice)
-{
-    int excentricidade = INT_MIN;
-    for (int distancia : distanciasVertice)
-    {
-        if (distancia != 0 && distancia != INT_MAX && distancia > excentricidade)
-        {
-            excentricidade = distancia;
-        }
-    }
-    return excentricidade;
 }
 
 void Grafo::caminhoMinimoFloyd(int idVerticeU, int idVerticeV)
@@ -340,16 +328,38 @@ void Grafo::caminhoMinimoFloyd(int idVerticeU, int idVerticeV)
         return;
     }
     int ordem = vertices.size();
-    std::vector<std::vector<int>> distancias;
-    inicializaMatrizDistancias(distancias, ordem);
-    atualizaMatrizDistancias(distancias, ordem, 0);
+    std::vector<std::vector<int>> distancias = getMatrizDistancias();
     int distanciaUV = distancias[u][v];
     if (distanciaUV == INT_MAX)
+    {
         std::cout << "Nao ha qualquer caminho entre " << idVerticeU << " e " << idVerticeV << '\n';
+    }
     else
+    {
         std::cout << "O caminho minimo entre os vertices " << idVerticeU << " e " << idVerticeV << " eh: " << distanciaUV << '\n';
+    }
 }
 
+/**
+ * parâmetros:
+ * - distanciasVertice: vetor contendo as distâncias do vértice para todos os vértices do grafo.
+ */
+int Grafo::getExcentricidade(const std::vector<int> &distanciasVertice)
+{
+    int excentricidade = INT_MIN;
+    for (int distancia : distanciasVertice)
+    {
+        if (distancia != 0 && distancia != INT_MAX && distancia > excentricidade)
+        {
+            excentricidade = distancia;
+        }
+    }
+    return excentricidade;
+}
+
+/**
+ * Analisa um grafo e os caminhos entre seus vértices em busca de seu centro, periferia, diâmetro e raio.
+ */
 void Grafo::analiseExcentricidade()
 {
     if (!arestasPonderadas)
@@ -365,11 +375,17 @@ void Grafo::analiseExcentricidade()
     {
         int e = getExcentricidade(distancias[i]);
         if (e == INT_MIN)
+        {
             continue;
+        }
         if (raio > e)
+        {
             raio = e;
+        }
         if (diametro < e)
+        {
             diametro = e;
+        }
         excentricidades[e].push_back(i);
     }
     if (raio == INT_MAX)
