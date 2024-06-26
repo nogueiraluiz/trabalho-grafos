@@ -25,6 +25,7 @@ public:
     void liberaMemoriaArestas(std::list<Aresta*>& arestas);
     void fechoTransitivoDireto(int idVertice);
     void caminhoMinimoFloyd(int idVerticeU, int idVerticeV);
+    void analiseExcentricidade();
 
 private:
     bool direcionado;
@@ -38,6 +39,8 @@ private:
     int encontraIndiceVertice(int id);
     void inicializaMatrizDistancias(std::vector<std::vector<int>>& distancias, int ordem);
     void atualizaMatrizDistancias(std::vector<std::vector<int>>& distancias, int ordem, int indice);
+    std::vector<std::vector<int>> getMatrizDistancias();
+    int getExcentricidade(const std::vector<int>& distanciasVertice);
 };
 
 #endif
