@@ -5,6 +5,8 @@
 #include <fstream>
 #include <list>
 #include <vector>
+#include <limits.h>
+#include <limits>
 #include <set>
 #include "Vertice.hpp"
 #include "Aresta.hpp"
@@ -21,6 +23,9 @@ public:
     void adicionaVertice(int idVertice, int peso = 0);
     void adicionaAresta(int idVerticeU, int idVerticeV, int peso = 0);
     void removeVertice(int idVertice);
+    bool auxDijkstra();
+    std::list<int> listaAdjacentes(int idVertice);
+    int auxDijkstra1(int idVertice);
     void Dijkstra(int idVertice);
     void removeAresta(int idVerticeU, int idVerticeV);
     void fechoTransitivoDireto(int idVertice);
