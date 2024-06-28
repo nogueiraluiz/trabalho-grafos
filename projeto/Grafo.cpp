@@ -3,6 +3,8 @@
 #include <string>
 #include <sstream>
 #include <algorithm>
+#include <limits.h>
+#include <limits>
 #include "Grafo.hpp"
 #include "Printer.hpp"
 
@@ -234,9 +236,79 @@ void Grafo::removeVertice(int idVertice)
     }
     delete v;
 }
-
-
-void Grafo::Dijkstra(int idVertice)
-{
-    std::cout << "funciona \n" ;
+  
+bool Grafo::auxDijkstra() {
+    for (auto v : vertices) {
+        if (v->aberto && v->distancia != std::numeric_limits<int>::max()) {
+            return true;
+        }
+    }
+    return false;
 }
+
+std::list<int> Grafo::listaAdjacentes(int idVertice) {
+    std::list<int> lista;
+    for (auto a : getVertice(idVertice)->arestas) {
+        lista.push_front(a->destino->id);
+    }
+    return lista;
+}
+
+void Grafo::Dijkstra(int idVertice) {
+    if (!direcionado)
+    {
+        std::cout << "O grafo deve ser direcionado\n";
+        return;
+    }
+    if(!arestasPonderadas)
+    {
+        std::cout << "O grafo ter arestas ponderadas\n";
+        return;
+    }
+    Vertice *v = getVertice(idVertice);
+    if (v == nullptr)
+    {
+        std::cout << "Nao existe no grafo vertice com o id especificado (" << idVertice << ")\n";
+        return;
+    }
+    for(auto a: vertices){
+        for (auto ares : a->arestas) {
+            if(a->peso < 0){
+                std::cout << "O peso das sarestas não pode ser negativo\n";
+                return;
+            }
+        }
+    }
+    v->distancia = 0; // Distância do vértice de origem para ele mesmo é 0
+
+    while (auxDijkstra()) {
+        // Pegar o vértice com a menor distância
+        Vertice* verticeAtual = nullptr;
+        int menorDistancia = std::numeric_limits<int>::max();
+        for (auto vert : vertices) {
+            if (vert->aberto && vert->distancia < menorDistancia) {
+                menorDistancia = vert->distancia;
+                verticeAtual = vert;
+            }
+        }
+
+        // Verificar se encontrou um vértice válido
+        if (verticeAtual == nullptr) {
+            break;
+        }
+
+        verticeAtual->aberto = false; // Marcar o vértice atual como fechado
+        std::cout << verticeAtual->id << " distancia: " << verticeAtual->distancia << "\n";
+        
+        // Atualizar as distâncias dos vértices adjacentes
+        for(auto a: vertices){
+            for (auto ares : a->arestas) {
+            Vertice* destino = ares->destino;
+            if (destino->aberto && verticeAtual->distancia + ares->peso < destino->distancia) {
+                destino->distancia = a->distancia + ares->peso;
+            }
+        }
+        }
+    }
+}
+    
