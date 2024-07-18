@@ -6,6 +6,7 @@
 #include <list>
 #include <vector>
 #include <set>
+#include <map>
 #include "Vertice.hpp"
 #include "Aresta.hpp"
 
@@ -22,10 +23,11 @@ public:
     void adicionaAresta(int idVerticeU, int idVerticeV, int peso = 0);
     void removeVertice(int idVertice);
     void removeAresta(int idVerticeU, int idVerticeV);
-    void liberaMemoriaArestas(std::list<Aresta*>& arestas);
+    void liberaMemoriaArestas(std::list<Aresta *> &arestas);
     void fechoTransitivoDireto(int idVertice);
     void caminhoMinimoFloyd(int idVerticeU, int idVerticeV);
     void analiseExcentricidade();
+    void caminhamentoProfundidade(int idVerticeInicio);
 
 private:
     bool direcionado;
@@ -35,12 +37,14 @@ private:
     Vertice *getVertice(int id);
     void adicionaAdjacencias(int idA, int idB, int peso = 0);
     bool existeAresta(int idVerticeU, int idVerticeV);
-    void auxFechoDireto(Vertice* vertice, std::set<int>& fecho);
+    void auxFechoDireto(Vertice *vertice, std::set<int> &fecho);
     int encontraIndiceVertice(int id);
-    void inicializaMatrizDistancias(std::vector<std::vector<int>>& distancias, int ordem);
-    void atualizaMatrizDistancias(std::vector<std::vector<int>>& distancias, int ordem, int indice);
+    void inicializaMatrizDistancias(std::vector<std::vector<int>> &distancias, int ordem);
+    void atualizaMatrizDistancias(std::vector<std::vector<int>> &distancias, int ordem, int indice);
     std::vector<std::vector<int>> getMatrizDistancias();
-    int getExcentricidade(const std::vector<int>& distanciasVertice);
+    int getExcentricidade(const std::vector<int> &distanciasVertice);
+    void caminhaProfundidade(Vertice *u, std::map<Vertice *, int> &entrada, std::map<Vertice *, int> &saida, std::map<Vertice *, int> &cor, int &tempo);
+    void preencheMapaInicialProfundidade(std::map<Vertice *, int> &mapa);
 };
 
 #endif
