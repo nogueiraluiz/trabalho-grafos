@@ -232,6 +232,56 @@ void Grafo::fechoTransitivoDireto(int idVertice)
     std::cout << "}\n";
 }
 
+bool Grafo::buscaProfundidade(Vertice *v, int idAlvo)
+{
+    if (v->id == idAlvo)
+    {
+        return true;
+    }
+    for (Aresta *e : v->arestas)
+    {
+        return buscaProfundidade(e->destino, idAlvo);
+    }
+    return false;
+}
+
+void Grafo::fechoTransitivoIndireto(int idVertice)
+{
+    if (!direcionado)
+    {
+        std::cout << "O grafo deve ser direcionado\n";
+        return;
+    }
+    if (getVertice(idVertice) == nullptr)
+    {
+        std::cout << "Não existe o vértice definido pelo id " << idVertice << std::endl;
+        return;
+    }
+    std::set<int> fecho;
+    for (Vertice *u : vertices)
+    {
+        if (idVertice == u->id)
+        {
+            continue;
+        }
+        if (buscaProfundidade(u, idVertice))
+        {
+            fecho.insert(u->id);
+        }
+    }
+    if (fecho.empty())
+    {
+        std::cout << "O fecho do vértice " << idVertice << " é o conjunto vazio." << std::endl;
+        return;
+    }
+    std::cout << "O fecho transitivo indireto do vértice " << idVertice << " é o conjunto composto pelos vértices:\n{ ";
+    for (int id : fecho)
+    {
+        std::cout << id << ' ';
+    }
+    std::cout << '}' << std::endl;
+}
+
 int Grafo::encontraIndiceVertice(int id)
 {
     for (int i = 0; i < vertices.size(); i++)
@@ -407,14 +457,6 @@ void Grafo::analiseExcentricidade()
         std::cout << ' ' << vertices[i]->id << ' ';
     }
     std::cout << '}' << std::endl;
-}
-
-void Grafo::liberaMemoriaArestas(std::list<Aresta *> &arestas)
-{
-    for (Aresta* aresta : arestas)
-    {
-        delete aresta;
-    }
 }
 
 void Grafo::liberaMemoriaArestas(std::list<Aresta *> &arestas)
