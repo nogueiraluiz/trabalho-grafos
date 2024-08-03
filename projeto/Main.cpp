@@ -2,6 +2,31 @@
 #include <fstream>
 #include "Grafo.hpp"
 
+void opcoes(Grafo* g, std::ofstream& output)
+{
+    int opcao = 0;
+    while (opcao != 10) {
+        std::cout << "Escolha uma opção:\n";
+        std::cout << "1 - Fecho transitivo direto\n";
+        std::cout << "2 - Fecho transitivo indireto\n";
+        std::cout << "3 - Caminho mínimo por Dijkstra\n";
+        std::cout << "4 - Caminho mínimo por Floyd\n";
+        std::cout << "5 - AGM (Prim)\n";
+        std::cout << "6 - AGM (Kruskal)\n";
+        std::cout << "7 - Árvore de caminhamento em profundidade\n";
+        std::cout << "8 - Análise de excentricidade\n";
+        std::cout << "9 - Conjunto dos vértices de articulação\n";
+        std::cout << "10 - Sair" << std::endl;
+        std::cin >> opcao;
+        switch (opcao) {
+            // TODO: implementar os tratamentos especiais de cada opção (obtenção do parâmetro que o usuário deseja)
+            default:
+                std::cout << "Opção inválida\n";
+                break;
+        }
+        // espaço para implementação da opção de salvar ou não o resultado no arquivo 'output'
+    }
+}
 
 int main(int argc, char *argv[])
 {
@@ -19,6 +44,7 @@ int main(int argc, char *argv[])
     Grafo *g = new Grafo(input, direcionado, arestasPonderadas, verticesPonderados);
     g->print();
     g->print(output);
+    opcoes(g, output);
     input.close();
     output.close();
     return 0;
