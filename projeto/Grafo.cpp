@@ -184,45 +184,54 @@ void Grafo::removeAresta(int idVerticeU, int idVerticeV)
  * Método recursivo auxiliar para a funcionalidade de fecho transitivo direto.
  * Busca os sucessores dos sucessores do vértice solicitado.
  */
-void Grafo::auxFechoDireto(Vertice *vertice, std::set<int> &fecho)
+void Grafo::auxFechoDireto(Vertice *vertice, std::set<int> &fecho, Grafo *grafoFecho)
 {
     for (Aresta *aresta : vertice->arestas)
     {
         Vertice *sucessor = aresta->destino;
+        if (fecho.find(sucessor->id) != fecho.end())
+        {
+            continue;
+        }
         fecho.insert(sucessor->id);
-        auxFechoDireto(sucessor, fecho);
+        grafoFecho->adicionaAresta(vertice->id, sucessor->id);
+        auxFechoDireto(sucessor, fecho, grafoFecho);
     }
 }
 
 /**
- * Imprime na tela o fecho transitivo direto de um vértice no grafo dado seu id.
- * - caso o grafo não seja direcionado, retorna, visto que a operação não pode ser feita;
- * - caso o vértice não existe no conjunto de vértices, retorna;
+ * Através de um caminhamento em profundidade, tendo como início o vértice com o id especificado, imprime seu fecho
+ * transitivo direto e retorna um grafo que represente tal fecho com os vértices e as arestas que o justificam.
+ * - caso o grafo não seja direcionado ou não exista tal vértice no grafo, retorna um nullptr a ser tratado,
+ *      visto que a operação não pode ser feita;
+ * - caso o vértice exista, mas seu fecho seja vazia, retorna um grafo também vazio, visto que o próprio vértice não faz parte de seu fecho.
  */
-void Grafo::fechoTransitivoDireto(int idVertice)
+Grafo* Grafo::fechoTransitivoDireto(int idVertice)
 {
     if (!direcionado)
     {
         std::cout << "O grafo deve ser direcionado\n";
-        return;
+        return nullptr;
     }
     Vertice *v = getVertice(idVertice);
     if (v == nullptr)
     {
         std::cout << "Nao existe no grafo vertice com o id especificado (" << idVertice << ")\n";
-        return;
+        return nullptr;
     }
+    Grafo* grafoFecho = new Grafo(direcionado, 0, 0);
     std::set<int> fecho;
     for (Aresta *aresta : v->arestas)
     {
         Vertice *sucessor = aresta->destino;
-        fecho.insert(sucessor->id);
-        auxFechoDireto(sucessor, fecho);
+        grafoFecho->adicionaAresta(v->id, sucessor->id);
+        fecho.insert(sucessor->id); 
+        auxFechoDireto(sucessor, fecho, grafoFecho);
     }
     if (fecho.empty())
     {
         std::cout << "O fecho transitivo direto do vértice é vazio\n";
-        return;
+        return grafoFecho;
     }
     std::cout << "Fecho transitivo direto do vertice " << idVertice << ":\n { ";
     for (int idVerticeFecho : fecho)
@@ -230,6 +239,7 @@ void Grafo::fechoTransitivoDireto(int idVertice)
         std::cout << idVerticeFecho << " ";
     }
     std::cout << "}\n";
+    return grafoFecho;
 }
 
 bool Grafo::buscaProfundidade(Vertice *v, int idAlvo)
