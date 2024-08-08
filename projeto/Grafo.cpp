@@ -402,12 +402,13 @@ void Grafo::caminhoMinimoFloyd(int idVerticeU, int idVerticeV)
 
 /**
  * parâmetros:
- * - distanciasVertice: vetor contendo as distâncias do vértice para todos os vértices do grafo.
+ * - distanciasParaOutros: vetor contendo as distâncias do vértice para todos os vértices do grafo.
+ * obs.: distância 0 indica selfloop e distância INT_MAX indica que não há caminho entre os vértices.
  */
-int Grafo::getExcentricidade(const std::vector<int> &distanciasVertice)
+int Grafo::getExcentricidade(const std::vector<int> &distanciasParaOutros)
 {
     int excentricidade = INT_MIN;
-    for (int distancia : distanciasVertice)
+    for (int distancia : distanciasParaOutros)
     {
         if (distancia != 0 && distancia != INT_MAX && distancia > excentricidade)
         {
@@ -419,6 +420,10 @@ int Grafo::getExcentricidade(const std::vector<int> &distanciasVertice)
 
 /**
  * Analisa um grafo e os caminhos entre seus vértices em busca de seu centro, periferia, diâmetro e raio.
+ * - Diâmetro: maior excentricidade do grafo;
+ * - Raio: menor excentricidade do grafo.
+ * - Centro: vértice com menor excentricidade, ou seja, vértices que possuem excentricidade igual ao raio;
+ * - Periferia: vértice com maior excentricidade, ou seja, vértices que possuem excentricidade igual ao diâmetro.
  */
 void Grafo::analiseExcentricidade()
 {
