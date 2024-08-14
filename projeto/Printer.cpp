@@ -20,7 +20,7 @@ void Printer::printGrafo(std::vector<Vertice *> &vertices, bool direcionado, boo
     {
         printArestasNaoDirecionadas(vertices, arestasPonderadas, arquivo);
     }
-    arquivo << "\n\n}";
+    arquivo << "\n}\n\n";
 }
 
 void Printer::printGrafo(std::vector<Vertice *> &vertices, bool direcionado, bool arestasPonderadas, bool verticesPonderados)

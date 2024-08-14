@@ -108,6 +108,7 @@ void Grafo::adicionaAdjacencias(int idVerticeU, int idVerticeV, int peso)
     Vertice *v = getVertice(idVerticeV);
     Aresta *e = new Aresta;
     e->destino = v;
+    e->id_origem = idVerticeU;
     e->peso = peso;
     u->arestas.push_back(e);
 }
@@ -184,45 +185,54 @@ void Grafo::removeAresta(int idVerticeU, int idVerticeV)
  * Método recursivo auxiliar para a funcionalidade de fecho transitivo direto.
  * Busca os sucessores dos sucessores do vértice solicitado.
  */
-void Grafo::auxFechoDireto(Vertice *vertice, std::set<int> &fecho)
+void Grafo::auxFechoDireto(Vertice *vertice, std::set<int> &fecho, Grafo *grafoFecho)
 {
     for (Aresta *aresta : vertice->arestas)
     {
         Vertice *sucessor = aresta->destino;
+        if (fecho.find(sucessor->id) != fecho.end())
+        {
+            continue;
+        }
         fecho.insert(sucessor->id);
-        auxFechoDireto(sucessor, fecho);
+        grafoFecho->adicionaAresta(vertice->id, sucessor->id);
+        auxFechoDireto(sucessor, fecho, grafoFecho);
     }
 }
 
 /**
- * Imprime na tela o fecho transitivo direto de um vértice no grafo dado seu id.
- * - caso o grafo não seja direcionado, retorna, visto que a operação não pode ser feita;
- * - caso o vértice não existe no conjunto de vértices, retorna;
+ * Através de um caminhamento em profundidade, tendo como início o vértice com o id especificado, imprime seu fecho
+ * transitivo direto e retorna um grafo que represente tal fecho com os vértices e as arestas que o justificam.
+ * - caso o grafo não seja direcionado ou não exista tal vértice no grafo, retorna um nullptr a ser tratado,
+ *      visto que a operação não pode ser feita;
+ * - caso o vértice exista, mas seu fecho seja vazia, retorna um grafo também vazio, visto que o próprio vértice não faz parte de seu fecho.
  */
-void Grafo::fechoTransitivoDireto(int idVertice)
+Grafo* Grafo::fechoTransitivoDireto(int idVertice)
 {
     if (!direcionado)
     {
         std::cout << "O grafo deve ser direcionado\n";
-        return;
+        return nullptr;
     }
     Vertice *v = getVertice(idVertice);
     if (v == nullptr)
     {
         std::cout << "Nao existe no grafo vertice com o id especificado (" << idVertice << ")\n";
-        return;
+        return nullptr;
     }
+    Grafo* grafoFecho = new Grafo(direcionado, 0, 0);
     std::set<int> fecho;
     for (Aresta *aresta : v->arestas)
     {
         Vertice *sucessor = aresta->destino;
-        fecho.insert(sucessor->id);
-        auxFechoDireto(sucessor, fecho);
+        grafoFecho->adicionaAresta(v->id, sucessor->id);
+        fecho.insert(sucessor->id); 
+        auxFechoDireto(sucessor, fecho, grafoFecho);
     }
     if (fecho.empty())
     {
         std::cout << "O fecho transitivo direto do vértice é vazio\n";
-        return;
+        return grafoFecho;
     }
     std::cout << "Fecho transitivo direto do vertice " << idVertice << ":\n { ";
     for (int idVerticeFecho : fecho)
@@ -230,56 +240,85 @@ void Grafo::fechoTransitivoDireto(int idVertice)
         std::cout << idVerticeFecho << " ";
     }
     std::cout << "}\n";
+    return grafoFecho;
 }
 
-bool Grafo::buscaProfundidade(Vertice *v, int idAlvo)
-{
-    if (v->id == idAlvo)
+/**
+ * Retorna: true se foi adicionado ao menos novo vértice ao fecho.
+ */
+bool Grafo::auxFechoIndireto(std::set<int>& fecho, std::vector<Vertice*>& naoUtilizados, Grafo *grafoFecho) {
+    bool adicionou = false;
+    for (std::vector<Vertice*>::iterator it = naoUtilizados.begin(); it != naoUtilizados.end(); it++)
     {
-        return true;
+        for (int idVerticeFecho : fecho)
+        {
+            if (existeAresta((*it)->id, idVerticeFecho))
+            {
+                fecho.insert((*it)->id);
+                grafoFecho->adicionaAresta((*it)->id, idVerticeFecho);
+                naoUtilizados.erase(it);
+                adicionou = true;
+                break;
+            }
+        }
     }
-    for (Aresta *e : v->arestas)
-    {
-        return buscaProfundidade(e->destino, idAlvo);
-    }
-    return false;
+    return adicionou;
 }
 
-void Grafo::fechoTransitivoIndireto(int idVertice)
+/**
+ * Através de um caminhamento em profundidade, tendo como início o vértice com o id especificado, imprime seu fecho
+ * transitivo indireto e retorna um grafo que represente tal fecho com os vértices e as arestas que o justificam.
+ * - caso o grafo não seja direcionado ou não exista tal vértice no grafo, retorna um nullptr a ser tratado,
+ *      visto que a operação não pode ser feita;
+ * - caso o vértice exista, mas seu fecho seja vazia, retorna um grafo também vazio, visto que o próprio vértice não faz parte de seu fecho.
+ */
+Grafo* Grafo::fechoTransitivoIndireto(int idVertice)
 {
     if (!direcionado)
     {
         std::cout << "O grafo deve ser direcionado\n";
-        return;
+        return nullptr;
     }
-    if (getVertice(idVertice) == nullptr)
+    Vertice *u = getVertice(idVertice);
+    if (u == nullptr)
     {
         std::cout << "Não existe o vértice definido pelo id " << idVertice << std::endl;
-        return;
+        return nullptr;
+    }
+    Grafo *grafoFecho = new Grafo(direcionado, 0, 0);
+    std::vector<Vertice*> nao_utilizados;
+    for (Vertice* v : vertices) 
+    {
+        if (v->id != u->id)
+        { 
+            nao_utilizados.push_back(v);
+        }
     }
     std::set<int> fecho;
-    for (Vertice *u : vertices)
+    for (std::vector<Vertice*>::iterator it = nao_utilizados.begin(); it != nao_utilizados.end(); it++)
     {
-        if (idVertice == u->id)
+        Vertice* v = *it;
+        if (existeAresta(v->id, idVertice))
         {
-            continue;
-        }
-        if (buscaProfundidade(u, idVertice))
-        {
-            fecho.insert(u->id);
+            grafoFecho->adicionaAresta(v->id, u->id);
+            fecho.insert(v->id);
+            nao_utilizados.erase(it);
         }
     }
-    if (fecho.empty())
+    if (fecho.empty()) // o vértice é isolado
     {
         std::cout << "O fecho do vértice " << idVertice << " é o conjunto vazio." << std::endl;
-        return;
+        return grafoFecho;
     }
+    while (auxFechoIndireto(fecho, nao_utilizados, grafoFecho));
     std::cout << "O fecho transitivo indireto do vértice " << idVertice << " é o conjunto composto pelos vértices:\n{ ";
     for (int id : fecho)
     {
         std::cout << id << ' ';
     }
+    grafoFecho->adicionaVertice(u->id);
     std::cout << '}' << std::endl;
+    return grafoFecho;
 }
 
 int Grafo::encontraIndiceVertice(int id)
@@ -392,12 +431,13 @@ void Grafo::caminhoMinimoFloyd(int idVerticeU, int idVerticeV)
 
 /**
  * parâmetros:
- * - distanciasVertice: vetor contendo as distâncias do vértice para todos os vértices do grafo.
+ * - distanciasParaOutros: vetor contendo as distâncias do vértice para todos os vértices do grafo.
+ * obs.: distância 0 indica selfloop e distância INT_MAX indica que não há caminho entre os vértices.
  */
-int Grafo::getExcentricidade(const std::vector<int> &distanciasVertice)
+int Grafo::getExcentricidade(const std::vector<int> &distanciasParaOutros)
 {
     int excentricidade = INT_MIN;
-    for (int distancia : distanciasVertice)
+    for (int distancia : distanciasParaOutros)
     {
         if (distancia != 0 && distancia != INT_MAX && distancia > excentricidade)
         {
@@ -409,6 +449,10 @@ int Grafo::getExcentricidade(const std::vector<int> &distanciasVertice)
 
 /**
  * Analisa um grafo e os caminhos entre seus vértices em busca de seu centro, periferia, diâmetro e raio.
+ * - Diâmetro: maior excentricidade do grafo;
+ * - Raio: menor excentricidade do grafo.
+ * - Centro: vértice com menor excentricidade, ou seja, vértices que possuem excentricidade igual ao raio;
+ * - Periferia: vértice com maior excentricidade, ou seja, vértices que possuem excentricidade igual ao diâmetro.
  */
 void Grafo::analiseExcentricidade()
 {
