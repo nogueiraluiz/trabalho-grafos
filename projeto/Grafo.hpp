@@ -21,8 +21,7 @@ public:
     void adicionaVertice(int idVertice, int peso = 0);
     void adicionaAresta(int idVerticeU, int idVerticeV, int peso = 0);
     void removeVertice(int idVertice);
-    void removeAresta(int idVerticeU, int idVerticeV);
-    void liberaMemoriaArestas(std::list<Aresta*>& arestas);
+    bool removeAresta(int idVerticeU, int idVerticeV);
     Grafo *fechoTransitivoDireto(int idVertice);
     Grafo *fechoTransitivoIndireto(int idVertice);
     void caminhoMinimoFloyd(int idVerticeU, int idVerticeV);
@@ -43,6 +42,7 @@ private:
     std::vector<std::vector<int>> getMatrizDistancias();
     int getExcentricidade(const std::vector<int>& distanciasVertice);
     bool auxFechoIndireto(std::set<int>& fecho, std::vector<Vertice*>& naoUtilizados, Grafo *grafoFecho);
+    void liberaMemoriaArestas(Aresta* arestas);
 };
 
 #endif

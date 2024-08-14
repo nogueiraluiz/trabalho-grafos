@@ -9,7 +9,8 @@ struct Aresta
 {
     int peso;
     int id_origem;
-    Vertice* destino;
+    Aresta *prox;
+    Vertice *destino;
 };
 
 #endif
