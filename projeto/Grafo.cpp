@@ -48,10 +48,7 @@ Grafo::~Grafo()
 {
     for (Vertice *vertice : vertices)
     {
-        for (Aresta *aresta : vertice->arestas)
-        {
-            delete aresta;
-        }
+        liberaMemoriaArestas(vertice->arestas);
         delete vertice;
     }
 }
@@ -73,23 +70,36 @@ void Grafo::print(std::ofstream &output)
     Printer::printGrafo(vertices, direcionado, arestasPonderadas, verticesPonderados, output);
 }
 
+/**
+ * - Retorna true se existir aresta ou arco definidos pelo par (u, v)
+ * - Retorna false caso contrário:
+ *      - Se u não existir;
+ *      - Se v não existir.
+ *      - Se u existir, mas não houver aresta definida pelo par (u, v);
+ *      - Se u existir, mas o grafo for não-direcionado e não houver aresta definida pelo par (v, u);
+ */
 bool Grafo::existeAresta(int idVerticeU, int idVerticeV)
 {
     Vertice *u = getVertice(idVerticeU);
     if (u == nullptr)
     {
-        return false; // não existe vértice V
+        return false;
     }
-    for (Aresta *aresta : u->arestas)
-    {
+    Aresta *aresta = u->arestas;
+    while (aresta != nullptr) {
         if (aresta->destino->id == idVerticeV)
         {
             return true;
         }
+        aresta = aresta->prox;
     }
     return false; // V não é adjacente a U (ou não existe)
 }
 
+/**
+ * Retorna o vértice com o id especificado, caso exista.
+ * Caso contrário, retorna nullptr.
+ */
 Vertice *Grafo::getVertice(int idAlvo)
 {
     for (Vertice *vertice : vertices)
@@ -102,6 +112,10 @@ Vertice *Grafo::getVertice(int idAlvo)
     return nullptr;
 }
 
+/**
+ * Adiciona uma nova adjacência ao vértice U, com destino ao vértice V e peso especificado.
+ * Trata os ponteiros para as arestas de U e V, adicionando a nova aresta ao final da lista.
+ */
 void Grafo::adicionaAdjacencias(int idVerticeU, int idVerticeV, int peso)
 {
     Vertice *u = getVertice(idVerticeU);
@@ -110,7 +124,20 @@ void Grafo::adicionaAdjacencias(int idVerticeU, int idVerticeV, int peso)
     e->destino = v;
     e->id_origem = idVerticeU;
     e->peso = peso;
-    u->arestas.push_back(e);
+    e->prox = nullptr;
+    if (u->arestas == nullptr)
+    {
+        u->arestas = e;
+    }
+    else
+    {
+        Aresta *aresta = u->arestas;
+        while (aresta->prox != nullptr)
+        {
+            aresta = aresta->prox;
+        }
+        aresta->prox = e;
+    }
 }
 
 /**
@@ -126,13 +153,18 @@ void Grafo::adicionaVertice(int idVertice, int peso)
     u->id = idVertice;
     u->peso = peso;
     vertices.push_back(u);
+    u->arestas = nullptr;
 }
 
+/**
+ * Adiciona uma nova aresta ao grafo, caso não exista uma com os vértices especificados.
+ * Caso o grafo seja não-direcionado, adiciona a aresta no sentido contrário.
+ */
 void Grafo::adicionaAresta(int idVerticeU, int idVerticeV, int peso)
 {
     if (existeAresta(idVerticeU, idVerticeV))
     {
-        return; // já existe aresta pelo par
+        return; // já existe aresta definida pelo par
     }
     adicionaVertice(idVerticeU);
     adicionaVertice(idVerticeV);
@@ -144,41 +176,63 @@ void Grafo::adicionaAresta(int idVerticeU, int idVerticeV, int peso)
 }
 
 /**
- * Remove a aresta da(s) lista(s) de arestas e libera a memória alocada.
+ * Remove o arco definido pelo par ordenado (u,v) e, se o grafo for não-direcionado, a aresta definida pelo não ordenado de mesmos vértices.
  */
-void Grafo::removeAresta(int idVerticeU, int idVerticeV)
+bool Grafo::removeAresta(int idVerticeU, int idVerticeV)
 {
-    if (!existeAresta(idVerticeU, idVerticeV))
-    {
-        return;
-    }
+    bool removida = false;
     Vertice *u = getVertice(idVerticeU);
-    Aresta *e;
-    for (Aresta *aresta : u->arestas)
+    if (u == nullptr)
     {
-        if (aresta->destino->id == idVerticeV)
-        {
-            e = aresta;
-        }
+        return false;
     }
-    std::list<Aresta*>::iterator it = std::find(u->arestas.begin(), u->arestas.end(), e);
-    u->arestas.erase(it);
+    Aresta *e = u->arestas;
+    if (e == nullptr)
+    {
+        return false;
+    }
+    Aresta *anterior = nullptr;
+    while (e != nullptr) {
+        if (e->destino->id == idVerticeV)
+        {
+            removida = true;
+            break;
+        }
+        anterior = e;
+        e = e->prox;
+    }
+    if (e == nullptr)
+    {
+        return false;
+    }
+    if (e == u->arestas) {
+        u->arestas = e->prox;
+    } else {
+        anterior->prox = e->prox;
+    }
     delete e;
     if (direcionado)
     {
-        return;
+        return removida;
     }
-    Vertice *v = getVertice(idVerticeV);
-    for (Aresta *aresta : v->arestas)
-    {
-        if (aresta->destino->id == idVerticeU)
+    Vertice *v = getVertice(idVerticeV); // v não pode ser nullptr nessa linha
+    e = v->arestas;
+    anterior = nullptr;
+    while (e != nullptr) {
+        if (e->destino->id == idVerticeU)
         {
-            e = aresta;
+            break;
         }
+        anterior = e;
+        e = e->prox;
     }
-    it = std::find(v->arestas.begin(), v->arestas.end(), e);
-    v->arestas.erase(it);
+    if (e == v->arestas) {
+        v->arestas = e->prox;
+    } else {
+        anterior->prox = e->prox;
+    }
     delete e;
+    return removida;
 }
 
 /**
@@ -187,9 +241,11 @@ void Grafo::removeAresta(int idVerticeU, int idVerticeV)
  */
 void Grafo::auxFechoDireto(Vertice *vertice, std::set<int> &fecho, Grafo *grafoFecho)
 {
-    for (Aresta *aresta : vertice->arestas)
+    Aresta *aresta = vertice->arestas;
+    while (aresta != nullptr) 
     {
         Vertice *sucessor = aresta->destino;
+        aresta = aresta->prox;
         if (fecho.find(sucessor->id) != fecho.end())
         {
             continue;
@@ -222,12 +278,14 @@ Grafo* Grafo::fechoTransitivoDireto(int idVertice)
     }
     Grafo* grafoFecho = new Grafo(direcionado, 0, 0);
     std::set<int> fecho;
-    for (Aresta *aresta : v->arestas)
+    Aresta *aresta = v->arestas;
+    while (aresta != nullptr)
     {
         Vertice *sucessor = aresta->destino;
         grafoFecho->adicionaAresta(v->id, sucessor->id);
-        fecho.insert(sucessor->id); 
+        fecho.insert(sucessor->id);
         auxFechoDireto(sucessor, fecho, grafoFecho);
+        aresta = aresta->prox;
     }
     if (fecho.empty())
     {
@@ -354,11 +412,13 @@ void Grafo::inicializaMatrizDistancias(std::vector<std::vector<int>>& distancias
     for (int i = 0; i < ordem; i++)
     {
         Vertice* u = vertices[i];
-        for (Aresta* e : u->arestas)
+        Aresta *aresta = u->arestas;
+        while (aresta != nullptr)
         {
-            Vertice* v = e->destino;
+            Vertice* v = aresta->destino;
             int j = encontraIndiceVertice(v->id);
-            distancias[i][j] = e->peso;
+            distancias[i][j] = aresta->peso;
+            aresta = aresta->prox;
         }
     }
 }
@@ -503,14 +563,20 @@ void Grafo::analiseExcentricidade()
     std::cout << '}' << std::endl;
 }
 
-void Grafo::liberaMemoriaArestas(std::list<Aresta *> &arestas)
+void Grafo::liberaMemoriaArestas(Aresta* inicio)
 {
-    for (Aresta* aresta : arestas)
+    Aresta* aresta = inicio;
+    while (aresta != nullptr)
     {
+        Aresta* prox = aresta->prox;
         delete aresta;
+        aresta = prox;
     }
 }
 
+/**
+ * Remove um vértice do grafo, caso exista, tratando de remover as adjacências por ele definidas.
+ */
 void Grafo::removeVertice(int idVertice)
 {
     Vertice *u = getVertice(idVertice);
@@ -518,12 +584,15 @@ void Grafo::removeVertice(int idVertice)
     {
         return; // vértice buscado não existe
     }
-    std::list<Aresta*>& arestas = u->arestas;
     for (Vertice* vertice : vertices)
     {
-        removeAresta(vertice->id, idVertice);
+        if (vertice->id != idVertice)
+        {
+            removeAresta(vertice->id, idVertice);
+        }
     }
-    liberaMemoriaArestas(arestas);
+    Aresta *aresta = u->arestas;
+    liberaMemoriaArestas(aresta);
     std::vector<Vertice*>::iterator it = std::find(vertices.begin(), vertices.end(), u);
     vertices.erase(it);
     delete u;
