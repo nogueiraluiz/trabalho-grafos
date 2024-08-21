@@ -52,6 +52,7 @@ private:
     std::set<std::set<Vertice*>> getComponentesConexas();
     void buscaProfundidadeArticulacoes(std::set<int>& articulacoes, Vertice *v, Vertice* pai, std::map<int, int>& tempoEntrada, std::map<int, int>& minimo, std::map<int, bool> visitado, int& cronometro);
     std::set<int> encontraArticulacoesComponente(Vertice *v, std::set<Vertice*> componente);
+
 };
 
 #endif
