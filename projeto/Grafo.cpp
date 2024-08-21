@@ -563,7 +563,6 @@ Grafo* Grafo::caminhoMinimoFloyd(int idVerticeU, int idVerticeV)
     std::vector<std::vector<int>> proximos; // controla qual é o próximo no caminho mínimo de i a j
     inicializaMatrizesFloyd(distancias, proximos, vertices.size());
     atualizaMatrizesFloyd(distancias, proximos, vertices.size(), 0);
-    Printer::print(distancias, proximos);
     int distanciaUV = distancias[u][v];
     if (distanciaUV == INF)
     {
@@ -691,4 +690,165 @@ void Grafo::removeVertice(int idVertice)
     std::vector<Vertice*>::iterator it = std::find(vertices.begin(), vertices.end(), u);
     vertices.erase(it);
     delete u;
+}
+
+/**
+ * Método auxiliar para a busca em profundidade de uma componente conexa.
+ * O método é recursivo e, a cada chamada, adiciona um vértice ao conjunto que representa a componente conexa.
+ * Parâmetros:
+ * - v: vértice de início da busca;
+ * - usados: mapa que indica quais vértices já foram visitados;
+ * - componente: conjunto que armazena os vértices da componente conexa, inicialmente, contem apenas o vértice da primeira chamada.
+ */
+void Grafo::buscaProfundidadeComponente(Vertice *v, std::map<Vertice*, bool>& usados, std::set<Vertice*>& componente)
+{
+    Aresta *aresta = v->arestas;
+    while (aresta != nullptr)
+    {
+        Vertice *u = aresta->destino;
+        if (!usados[u])
+        {
+            usados[u] = true;
+            componente.insert(u);
+            buscaProfundidadeComponente(u, usados, componente);
+        }
+        aresta = aresta->prox;
+    }
+}
+
+/**
+ * Encontra e retorna a componente conexa do grafo que contém o vértice passado como argumento.
+ * Parâmetros:
+ * - v: vértice de início da busca;
+ * - usados: mapa que indica quais vértices já foram visitados.
+ */
+std::set<Vertice*> Grafo::buscaComponente(Vertice *v, std::map<Vertice*, bool>& usados)
+{
+    usados[v] = true;
+    std::set<Vertice*> componente;
+    componente.insert(v);
+    buscaProfundidadeComponente(v, usados, componente);
+    return componente;
+}
+
+/**
+ * Retorna um set de set de vértices, onde cada set interno representa uma componente conexa do grafo.
+ */
+std::set<std::set<Vertice*>> Grafo::getComponentesConexas()
+{
+    std::set<std::set<Vertice*>> componentes;
+    std::map<Vertice*, bool> usados;
+    for (Vertice* v : vertices)
+    {
+        usados[v] = false;
+    }
+    for (Vertice* v : vertices)
+    {
+        if (!usados[v])
+        {
+            std::set<Vertice*> componente = buscaComponente(v, usados);
+            componentes.insert(componente);
+        }
+    }
+    return componentes;
+}
+
+/**
+ * Através de uma busca em profundidade, encontra quais são os vértices de articulação
+ * da componente conexa que contém o vértice passado como argumento.
+ * Parâmetros:
+ * - articulacoes: conjunto que armazena os vértices de articulação;
+ * - v: vértice de início da busca;
+ * - pai: vértice pai do vértice de início da busca;
+ * - tempoEntrada: mapa que armazena o tempo de entrada de cada vértice na busca;
+ * - minimo: mapa que armazena o menor tempo de entrada dos vértices alcançáveis por cada vértice;
+ * - visitado: mapa que indica quais vértices já foram visitados;
+ * - cronometro: contador que armazena o tempo de entrada dos vértices.
+ */
+void Grafo::buscaProfundidadeArticulacoes(std::set<int> &articulacoes, Vertice *v, Vertice *pai,
+        std::map<int, int> &tempoEntrada, std::map<int, int> &minimo, std::map<int, bool> visitado, int &cronometro)
+{
+    visitado[v->id] = true;
+    cronometro++;
+    tempoEntrada[v->id] = cronometro;
+    minimo[v->id] = cronometro;
+    int filhos = 0;
+    Aresta *aresta = v->arestas;
+    while (aresta != nullptr)
+    {
+        Vertice *u = aresta->destino;
+        if (u == pai)
+        {
+            aresta = aresta->prox;
+            continue;
+        }
+        if (visitado[u->id])
+        {
+            minimo[v->id] = std::min(minimo[v->id], tempoEntrada[u->id]);
+        }
+        else
+        {
+            buscaProfundidadeArticulacoes(articulacoes, u, v, tempoEntrada, minimo, visitado, cronometro);
+            minimo[v->id] = std::min(minimo[v->id], minimo[u->id]);
+            if (minimo[u->id] >= tempoEntrada[v->id] && pai != nullptr)
+            {
+                articulacoes.insert(v->id);
+            }
+            filhos++;
+        }
+        aresta = aresta->prox;
+    }
+}
+
+/**
+ * Método auxiliar para a busca dos vértices de articulação de uma componente conexa.
+ * Parâmetros:
+ * - v: vértice de início da busca;
+ * - componente: conjunto que armazena os vértices da componente conexa.
+ * Retorna um set de inteiros, com os IDs dos vértices de articulação.
+ */
+std::set<int> Grafo::encontraArticulacoesComponente(Vertice *v, std::set<Vertice*> componente)
+{
+    int cronometro = 0;
+    std::set<int> articulacoes;
+    std::map<int, int> tempoEntrada, minimo;
+    std::map<int, bool> visitado;
+    for (Vertice* v : componente) // inicializações
+    {
+        tempoEntrada[v->id] = -1;
+        minimo[v->id] = -1;
+        visitado[v->id] = false;
+    }
+    buscaProfundidadeArticulacoes(articulacoes, v, nullptr, tempoEntrada, minimo, visitado, cronometro);
+    return articulacoes;
+}
+
+/**
+ * Retorna um grafo com os vértices de articulação do grafo original.
+ * - Caso o grafo não possua vértices, retorna um nullptr.
+ */
+Grafo* Grafo::verticesDeArticulacao()
+{
+    if (vertices.empty())
+    {
+        std::cout << "O grafo nao possui vertices" << std::endl;
+        return nullptr;
+    }
+    Grafo *grafoArticulacoes = new Grafo(direcionado, 0, 0);
+    std::set<std::set<Vertice*>> componentes = getComponentesConexas();
+    std::cout << "Componentes conexas do grafo: " << componentes.size() << std::endl;
+    for (std::set<std::set<Vertice*>>::iterator it = componentes.begin(); it != componentes.end(); it++)
+    {
+        std::set<Vertice*> componente = *it;
+        int cronometro = 0;
+
+        Vertice *v = *componente.begin();
+        std::cout << "Componente conexa comecando em " << v->id << std::endl;
+        std::set<int> articulacoes = encontraArticulacoesComponente(v, componente);
+        for (int id : articulacoes)
+        {
+            grafoArticulacoes->adicionaVertice(id);
+        }
+    }
+    return grafoArticulacoes;
 }
