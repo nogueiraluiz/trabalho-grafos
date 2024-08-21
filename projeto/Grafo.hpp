@@ -24,7 +24,7 @@ public:
     bool removeAresta(int idVerticeU, int idVerticeV);
     Grafo *fechoTransitivoDireto(int idVertice);
     Grafo *fechoTransitivoIndireto(int idVertice);
-    void caminhoMinimoFloyd(int idVerticeU, int idVerticeV);
+    Grafo *caminhoMinimoFloyd(int idVerticeU, int idVerticeV);
     void analiseExcentricidade();
 
 private:
@@ -40,6 +40,8 @@ private:
     void inicializaMatrizDistancias(std::vector<std::vector<int>>& distancias, int ordem);
     void atualizaMatrizDistancias(std::vector<std::vector<int>>& distancias, int ordem, int indice);
     std::vector<std::vector<int>> getMatrizDistancias();
+    void inicializaMatrizesFloyd(std::vector<std::vector<int>>& distancias, std::vector<std::vector<int>>& proximos, int ordem);
+    void atualizaMatrizesFloyd(std::vector<std::vector<int>>& distancias, std::vector<std::vector<int>>& proximos, int ordem, int indice);
     int getExcentricidade(const std::vector<int>& distanciasVertice);
     bool auxFechoIndireto(std::set<int>& fecho, std::vector<Vertice*>& naoUtilizados, Grafo *grafoFecho);
     void liberaMemoriaArestas(Aresta* arestas);
