@@ -6,6 +6,7 @@
 #include <list>
 #include <vector>
 #include <set>
+#include <map>
 #include "Vertice.hpp"
 #include "Aresta.hpp"
 
@@ -26,6 +27,7 @@ public:
     Grafo *fechoTransitivoIndireto(int idVertice);
     Grafo *caminhoMinimoFloyd(int idVerticeU, int idVerticeV);
     void analiseExcentricidade();
+    Grafo *verticesDeArticulacao();
 
 private:
     bool direcionado;
@@ -45,6 +47,11 @@ private:
     int getExcentricidade(const std::vector<int>& distanciasVertice);
     bool auxFechoIndireto(std::set<int>& fecho, std::vector<Vertice*>& naoUtilizados, Grafo *grafoFecho);
     void liberaMemoriaArestas(Aresta* arestas);
+    void buscaProfundidadeComponente(Vertice *v, std::map<Vertice*, bool>& usados, std::set<Vertice*>& componente);
+    std::set<Vertice*> buscaComponente(Vertice *v, std::map<Vertice*, bool>& usados);
+    std::set<std::set<Vertice*>> getComponentesConexas();
+    void buscaProfundidadeArticulacoes(std::set<int>& articulacoes, Vertice *v, Vertice* pai, std::map<int, int>& tempoEntrada, std::map<int, int>& minimo, std::map<int, bool> visitado, int& cronometro);
+    std::set<int> encontraArticulacoesComponente(Vertice *v, std::set<Vertice*> componente);
 };
 
 #endif
