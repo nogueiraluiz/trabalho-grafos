@@ -4,9 +4,12 @@
 #include <string>
 #include <sstream>
 #include <algorithm>
-#include "limits.h"
+#include <limits>
 #include "Grafo.hpp"
 #include "Printer.hpp"
+
+const int INF = std::numeric_limits<int>::max();
+const int MIN = std::numeric_limits<int>::min();
 
 /**
  * Construtor que instancia um grafo de acordo com as arestas definidas em um arquivo .dat lido como argumento para a execução.
@@ -404,7 +407,7 @@ void Grafo::inicializaMatrizDistancias(std::vector<std::vector<int>>& distancias
             }
             else
             {
-                linhaInicial.push_back(INT_MAX);
+                linhaInicial.push_back(INF);
             } 
         }
         distancias.push_back(linhaInicial);
@@ -436,7 +439,7 @@ void Grafo::atualizaMatrizDistancias(std::vector<std::vector<int>>& distancias, 
             int distanciaAtual = distancias[i][j];
             int distanciaIntermediariaA = distancias[i][indice];
             int distanciaIntermediariaB = distancias[indice][j];
-            if (distanciaIntermediariaA == INT_MAX || distanciaIntermediariaB == INT_MAX) continue; // evitando cálculos imprevisíveis
+            if (distanciaIntermediariaA == INF || distanciaIntermediariaB == INF) continue; // evitando cálculos imprevisíveis
             int novaDistancia = distanciaIntermediariaA + distanciaIntermediariaB;
             distanciaAtual = std::min(distanciaAtual, novaDistancia);
             distancias[i][j] = distanciaAtual;
@@ -447,7 +450,7 @@ void Grafo::atualizaMatrizDistancias(std::vector<std::vector<int>>& distancias, 
 
 /**
  * Retorna a matriz representativa dos caminhos mínimos entre quaisquer vértices do grafo.
- * distancias(i,j) = INT_MAX -> não existe qualquer caminho entre os dois vértices;
+ * distancias(i,j) = INF -> não existe qualquer caminho entre os dois vértices;
  * distancias(i,j) = 0 -> caminho não é permitido (self-loop), só ocorre quando i = j.
  */
 std::vector<std::vector<int>> Grafo::getMatrizDistancias()
@@ -458,48 +461,140 @@ std::vector<std::vector<int>> Grafo::getMatrizDistancias()
     return distancias;
 }
 
-void Grafo::caminhoMinimoFloyd(int idVerticeU, int idVerticeV)
+void Grafo::inicializaMatrizesFloyd(std::vector<std::vector<int>>& distancias, std::vector<std::vector<int>>& proximos, int ordem)
+{
+    for (int i = 0; i < ordem; i++)
+    {
+        std::vector<int> linhaDistancias;
+        std::vector<int> linhaProximos;
+        for (int j = 0; j < ordem; j++)
+        {
+            if (i == j)
+            {
+                linhaDistancias.push_back(0);
+                linhaProximos.push_back(j);
+            }
+            else
+            {
+                linhaDistancias.push_back(INF);
+                linhaProximos.push_back(-1);
+            } 
+        }
+        distancias.push_back(linhaDistancias);
+        proximos.push_back(linhaProximos);
+    }
+    for (int i = 0; i < ordem; i++)
+    {
+        Vertice* u = vertices[i];
+        Aresta *aresta = u->arestas;
+        while (aresta != nullptr)
+        {
+            Vertice* v = aresta->destino;
+            int j = encontraIndiceVertice(v->id);
+            distancias[i][j] = aresta->peso; // custo é o peso da aresta
+            proximos[i][j] = j; // o próximo é o vértice de destino da aresta
+            aresta = aresta->prox;
+        }
+    }
+}
+
+void Grafo::atualizaMatrizesFloyd(std::vector<std::vector<int>>& distancias, std::vector<std::vector<int>>& proximos, int ordem, int indice)
+{
+    if (indice == ordem)
+    {
+        return;
+    }
+    for (int i = 0; i < ordem; i++)
+    {
+        if (i == indice) 
+        {
+            continue; // é necessário?
+        }
+        for (int j = 0; j < ordem; j++)
+        {
+            if (j == indice) 
+            {
+                continue; // é necessário?
+            }
+            int distanciaAtual = distancias[i][j];
+            if (distancias[i][indice] == INF || distancias[indice][j] == INF)
+            {
+                continue; // evitando cálculos imprevisíveis e irrelevantes
+            }
+            int novaDistancia = distancias[i][indice] + distancias[indice][j];
+            if (novaDistancia < distanciaAtual)
+            {
+                distancias[i][j] = novaDistancia;
+                proximos[i][j] = proximos[i][indice];
+            }
+        }
+    }
+    atualizaMatrizesFloyd(distancias, proximos, ordem, indice + 1);
+}
+
+/**
+ * Calcula o caminho mínimo entre dois vértices do grafo.
+ * - Caso o grafo não possua arestas ponderadas, retorna um nullptr
+ * - Caso um ou ambos os vértices não exista, retorna um nullptr
+ * - Caso não exista caminho entre os vértices, retorna um grafo vazio
+ * - Caso exista caminho, retorna um grafo com as arestas que compõem o caminho mínimo
+ */
+Grafo* Grafo::caminhoMinimoFloyd(int idVerticeU, int idVerticeV)
 {
     if (!arestasPonderadas) {
         std::cout << "As operacoes de caminho minimo nao sao permitidas para grafos sem ponderacao nas arestas" << std::endl;
-        return;
+        return nullptr;
     }
     int u = encontraIndiceVertice(idVerticeU);
     if (u == -1)
     {
         std::cout << "Nao existe vertice de id " << idVerticeU << std::endl;
-        return;
+        return nullptr;
     }
     int v = encontraIndiceVertice(idVerticeV);
     if (v == -1)
     {
         std::cout << "Nao existe vertice de id " << idVerticeV << std::endl;
-        return;
+        return nullptr;
     }
+    std::cout << "Calculando caminho mínimo entre os vértices " << idVerticeU << ":" << u << " e " << idVerticeV << ":" << v << '\n';
     int ordem = vertices.size();
-    std::vector<std::vector<int>> distancias = getMatrizDistancias();
+    std::vector<std::vector<int>> distancias; // controla o caminho mínimo entre i e j
+    std::vector<std::vector<int>> proximos; // controla qual é o próximo no caminho mínimo de i a j
+    inicializaMatrizesFloyd(distancias, proximos, vertices.size());
+    atualizaMatrizesFloyd(distancias, proximos, vertices.size(), 0);
+    Printer::print(distancias, proximos);
     int distanciaUV = distancias[u][v];
-    if (distanciaUV == INT_MAX)
+    if (distanciaUV == INF)
     {
         std::cout << "Nao ha qualquer caminho entre " << idVerticeU << " e " << idVerticeV << '\n';
+        return new Grafo(direcionado, 0, 0);
     }
-    else
+    std::cout << "O custo do caminho minimo entre os vertices " << idVerticeU << " e " << idVerticeV << " é: " << distanciaUV << '\n';
+    std::vector<int> caminho = {vertices[u]->id};
+    while (u != v)
     {
-        std::cout << "O caminho minimo entre os vertices " << idVerticeU << " e " << idVerticeV << " eh: " << distanciaUV << '\n';
+        u = proximos[u][v];
+        caminho.push_back(vertices[u]->id);
     }
+    Grafo* grafoCaminho = new Grafo(direcionado, 0, 0);
+    for (int i = 0; i < caminho.size() - 1; i++) {
+        grafoCaminho->adicionaAresta(caminho[i], caminho[i + 1]);
+    }
+    return grafoCaminho;
 }
 
 /**
  * parâmetros:
  * - distanciasParaOutros: vetor contendo as distâncias do vértice para todos os vértices do grafo.
- * obs.: distância 0 indica selfloop e distância INT_MAX indica que não há caminho entre os vértices.
+ * obs.: distância 0 indica selfloop e distância INF indica que não há caminho entre os vértices.
  */
 int Grafo::getExcentricidade(const std::vector<int> &distanciasParaOutros)
 {
-    int excentricidade = INT_MIN;
+    int excentricidade = MIN;
     for (int distancia : distanciasParaOutros)
     {
-        if (distancia != 0 && distancia != INT_MAX && distancia > excentricidade)
+        if (distancia != 0 && distancia != INF && distancia > excentricidade)
         {
             excentricidade = distancia;
         }
@@ -522,13 +617,13 @@ void Grafo::analiseExcentricidade()
         return;
     }
     std::map<int, std::vector<int>> excentricidades;
-    int raio = INT_MAX;
-    int diametro = INT_MIN;
+    int raio = INF;
+    int diametro = MIN;
     auto distancias = getMatrizDistancias();
     for (int i = 0; i < distancias.size(); i++)
     {
         int e = getExcentricidade(distancias[i]);
-        if (e == INT_MIN)
+        if (e == MIN)
         {
             continue;
         }
@@ -542,7 +637,7 @@ void Grafo::analiseExcentricidade()
         }
         excentricidades[e].push_back(i);
     }
-    if (raio == INT_MAX)
+    if (raio == INF)
     {
         std::cout << "Nao ha caminho de um vertice para qualquer outro vertice no grafo" << std::endl;
         return;
