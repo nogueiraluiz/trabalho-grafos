@@ -394,7 +394,7 @@ int Grafo::encontraIndiceVertice(int id)
     return -1;
 }
 
-void Grafo::inicializaMatrizDistancias(std::vector<std::vector<int>>& distancias, int ordem)
+void Grafo::inicializaMatrizDistancias(std::vector<std::vector<int>> &distancias, int ordem)
 {
     for (int i = 0; i < ordem; i++)
     {
@@ -426,16 +426,18 @@ void Grafo::inicializaMatrizDistancias(std::vector<std::vector<int>>& distancias
     }
 }
 
-void Grafo::atualizaMatrizDistancias(std::vector<std::vector<int>>& distancias, int ordem, int indice)
+void Grafo::atualizaMatrizDistancias(std::vector<std::vector<int>> &distancias, int ordem, int indice)
 {
     if (indice == ordem)
         return;
     for (int i = 0; i < ordem; i++)
     {
-        if (i == indice) continue; // é necessário?
+        if (i == indice)
+            continue; // é necessário?
         for (int j = 0; j < ordem; j++)
         {
-            if (j == indice) continue; // é necessário?
+            if (j == indice)
+                continue; // é necessário?
             int distanciaAtual = distancias[i][j];
             int distanciaIntermediariaA = distancias[i][indice];
             int distanciaIntermediariaB = distancias[indice][j];
@@ -541,7 +543,8 @@ void Grafo::atualizaMatrizesFloyd(std::vector<std::vector<int>>& distancias, std
  */
 Grafo* Grafo::caminhoMinimoFloyd(int idVerticeU, int idVerticeV)
 {
-    if (!arestasPonderadas) {
+    if (!arestasPonderadas)
+    {
         std::cout << "As operacoes de caminho minimo nao sao permitidas para grafos sem ponderacao nas arestas" << std::endl;
         return nullptr;
     }
@@ -668,6 +671,63 @@ void Grafo::liberaMemoriaArestas(Aresta* inicio)
     }
 }
 
+void Grafo::preencheMapaInicialProfundidade(std::map<Vertice *, int> &mapa)
+{
+    for (Vertice *vertice : vertices)
+    {
+        mapa[vertice] = 0;
+    }
+}
+
+/**
+ * Método auxiliar que percorre o grafo em profundidade recursivamente.
+ * u: vértice visitado
+ * entrada: mapa que guarda o tempo de entrada de cada vértice
+ */
+void Grafo::caminhaProfundidade(Vertice *u, std::map<Vertice *, int> &entrada, std::map<Vertice *, int> &saida,
+                                std::map<Vertice *, int> &cor, int &tempo)
+{
+    std::cout << "Visitando: " + u->id + '\n';
+    entrada[u] = ++tempo;
+    cor[u] = 1;
+    for (Aresta *aresta : u->arestas)
+    {
+        Vertice *v = aresta->destino;
+        std::cout << "Adjacente: " + v->id + '\n';
+        caminhaProfundidade(v, entrada, saida, cor, tempo);
+    }
+    cor[u] = 2;
+    saida[u] = ++tempo;
+    std::cout << "Visitado: " + u->id + '\n';
+
+}
+
+void Grafo::caminhamentoProfundidade(int idVerticeInicio)
+{
+    if (vertices.size() == 0)
+    {
+        std::cout << "Nao ha vertices no grafo" << std::endl;
+        return;
+    }
+    Vertice *inicial = getVertice(idVerticeInicio);
+    if (inicial = nullptr)
+    {
+        std::cout << "O vertice especificado nao existe" << std::endl;
+        return;
+    }
+    std::cout << "Iniciando o caminhamento pelo vértice " + inicial->id + '\n';
+    int tempo = 0;
+    std::map<Vertice *, int> tempoEntrada;
+    std::map<Vertice *, int> tempoSaida;
+    std::map<Vertice *, int> cor;
+    preencheMapaInicialProfundidade(tempoEntrada);
+    preencheMapaInicialProfundidade(tempoSaida);
+    preencheMapaInicialProfundidade(cor);
+    int& cronometro = tempo;
+    caminhaProfundidade(inicial, tempoEntrada, tempoSaida, cor, cronometro);
+    // perguntar ao tutor como deve ser feita a impressão desse troço
+}
+
 /**
  * Remove um vértice do grafo, caso exista, tratando de remover as adjacências por ele definidas.
  */
@@ -679,6 +739,7 @@ void Grafo::removeVertice(int idVertice)
         return; // vértice buscado não existe
     }
     for (Vertice* vertice : vertices)
+
     {
         if (vertice->id != idVertice)
         {
