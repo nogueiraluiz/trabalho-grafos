@@ -690,11 +690,16 @@ void Grafo::caminhaProfundidade(Vertice *u, std::map<Vertice *, int> &entrada, s
     std::cout << "Visitando: " + u->id + '\n';
     entrada[u] = ++tempo;
     cor[u] = 1;
-    for (Aresta *aresta : u->arestas)
+    Aresta *e = u->arestas;
+    while (e != nullptr)
     {
-        Vertice *v = aresta->destino;
-        std::cout << "Adjacente: " + v->id + '\n';
-        caminhaProfundidade(v, entrada, saida, cor, tempo);
+        Vertice *v = e->destino;
+        if (cor[v] == 0)
+        {
+            std::cout << "Aresta: " << u->id << " -> " << v->id << '\n';
+            caminhaProfundidade(v, entrada, saida, cor, tempo);
+        }
+        e = e->prox;
     }
     cor[u] = 2;
     saida[u] = ++tempo;
