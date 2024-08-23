@@ -671,24 +671,16 @@ void Grafo::liberaMemoriaArestas(Aresta* inicio)
     }
 }
 
-void Grafo::preencheMapaInicialProfundidade(std::map<Vertice *, int> &mapa)
-{
-    for (Vertice *vertice : vertices)
-    {
-        mapa[vertice] = 0;
-    }
-}
-
 /**
  * Método auxiliar que percorre o grafo em profundidade recursivamente.
- * u: vértice visitado
- * entrada: mapa que guarda o tempo de entrada de cada vértice
+ * Parâmetros:
+ * - u: vértice sendo visitado
+ * - pai: vértice que antecede u na busca
+ * - cor: mapa que indica se o vértice foi visitado (2), se não (0) ou se está em processo de visita (1).
+ * - arvore: grafo que representa a árvore de caminhamento em profundidade.
  */
-void Grafo::caminhaProfundidade(Vertice *u, std::map<Vertice *, int> &entrada, std::map<Vertice *, int> &saida,
-                                std::map<Vertice *, int> &cor, int &tempo)
+void Grafo::caminhaProfundidade(Vertice *u, std::map<Vertice *, int> &cor, Grafo* arvore)
 {
-    std::cout << "Visitando: " + u->id + '\n';
-    entrada[u] = ++tempo;
     cor[u] = 1;
     Aresta *e = u->arestas;
     while (e != nullptr)
@@ -696,41 +688,49 @@ void Grafo::caminhaProfundidade(Vertice *u, std::map<Vertice *, int> &entrada, s
         Vertice *v = e->destino;
         if (cor[v] == 0)
         {
-            std::cout << "Aresta: " << u->id << " -> " << v->id << '\n';
-            caminhaProfundidade(v, entrada, saida, cor, tempo);
+            arvore->adicionaAresta(u->id, v->id);
+            caminhaProfundidade(v, cor, arvore);
+        } else if (cor[v] == 1)
+        {
+            arvore->adicionaAresta(u->id, v->id, -1);
         }
         e = e->prox;
     }
     cor[u] = 2;
-    saida[u] = ++tempo;
-    std::cout << "Visitado: " + u->id + '\n';
-
 }
 
-void Grafo::caminhamentoProfundidade(int idVerticeInicio)
+/**
+ * Imprime no terminal e retorna como um grafo a árvore de caminhamento em
+ * profundidade do grafo partindo do vértice especificado.
+ * - Caso o grafo seja vazio, retorna um nullptr;
+ * - Caso o vértice especificado não exista, retorna um nullptr;
+ * Obs.: a árvore de caminhamento em profundidade é um grafo que representa as arestas percorridas
+ * e usa arestas com peso -1 para indicar arestas de retorno.
+ * - Aresta de retorno: aresta que liga um vértice a um ancestral na árvore de caminhamento em profundidade.
+ */
+Grafo* Grafo::caminhamentoProfundidade(int idVerticeInicio)
 {
-    if (vertices.size() == 0)
+    if (vertices.empty())
     {
-        std::cout << "Nao ha vertices no grafo" << std::endl;
-        return;
+        std::cout << "Nao há vertices no grafo" << std::endl;
+        return nullptr;
     }
     Vertice *inicial = getVertice(idVerticeInicio);
-    if (inicial = nullptr)
+    if (inicial == nullptr)
     {
-        std::cout << "O vertice especificado nao existe" << std::endl;
-        return;
+        std::cout << "O vértice especificado não existe" << std::endl;
+        return nullptr;
     }
-    std::cout << "Iniciando o caminhamento pelo vértice " + inicial->id + '\n';
+    Grafo *arvore = new Grafo(1, 0, 0); // deve ser direcionando para representar a árvore corretamente com as arestas de retorno
+    arvore->adicionaVertice(inicial->id);
     int tempo = 0;
-    std::map<Vertice *, int> tempoEntrada;
-    std::map<Vertice *, int> tempoSaida;
     std::map<Vertice *, int> cor;
-    preencheMapaInicialProfundidade(tempoEntrada);
-    preencheMapaInicialProfundidade(tempoSaida);
-    preencheMapaInicialProfundidade(cor);
-    int& cronometro = tempo;
-    caminhaProfundidade(inicial, tempoEntrada, tempoSaida, cor, cronometro);
-    // perguntar ao tutor como deve ser feita a impressão desse troço
+    for (Vertice *v : vertices)
+    {
+        cor[v] = 0;
+    }
+    caminhaProfundidade(inicial, cor, arvore);
+    return arvore;
 }
 
 /**
