@@ -2,7 +2,6 @@
 #define VERTICE_HPP
 
 #include "Aresta.hpp"
-#include <list>
 
 struct Aresta;
 
@@ -10,7 +9,7 @@ struct Vertice
 {
     int id;
     int peso;
-    std::list<Aresta*> arestas;
+    Aresta* arestas;
 };
 
 #endif

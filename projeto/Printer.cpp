@@ -20,7 +20,7 @@ void Printer::printGrafo(std::vector<Vertice *> &vertices, bool direcionado, boo
     {
         printArestasNaoDirecionadas(vertices, arestasPonderadas, arquivo);
     }
-    arquivo << "\n\n}";
+    arquivo << "\n}\n\n";
 }
 
 void Printer::printGrafo(std::vector<Vertice *> &vertices, bool direcionado, bool arestasPonderadas, bool verticesPonderados)
@@ -29,9 +29,11 @@ void Printer::printGrafo(std::vector<Vertice *> &vertices, bool direcionado, boo
     for (const Vertice *vertice : vertices)
     {
         std::cout << vertice->id << " -> { ";
-        for (const Aresta *aresta : vertice->arestas)
+        Aresta *aresta = vertice->arestas;
+        while (aresta != nullptr)
         {
             std::cout << aresta->destino->id << " ";
+            aresta = aresta->prox;
         }
         std::cout << "}\n";
     }
@@ -67,9 +69,11 @@ void Printer::printArestasDirecionadas(std::vector<Vertice *> &vertices, bool ar
     std::string separador = " -> ";
     for (const Vertice *vertice : vertices)
     {
-        for (const Aresta *aresta : vertice->arestas)
+        Aresta *aresta = vertice->arestas;
+        while (aresta != nullptr)
         {
             arquivo << '\t' << getRepresentacaoAresta(vertice->id, separador, aresta->destino->id, *aresta, arestasPonderadas);
+            aresta = aresta->prox;
         }
     }
 }
@@ -80,13 +84,16 @@ void Printer::printArestasNaoDirecionadas(std::vector<Vertice *> &vertices, bool
     std::set<int> impressos;
     for (const Vertice *vertice : vertices)
     {
-        for (const Aresta *aresta : vertice->arestas)
+        Aresta *aresta = vertice->arestas;
+        while (aresta != nullptr)
         {
             if (std::count(impressos.begin(), impressos.end(), aresta->destino->id)) 
             {
+                aresta = aresta->prox;
                 continue; // evita impressão duplicada de uma aresta que tem como uma das extremidades o vértice com tal id
             }
             arquivo << '\t' << getRepresentacaoAresta(vertice->id, separador, aresta->destino->id, *aresta, arestasPonderadas);
+            aresta = aresta->prox;
         }
         impressos.insert(vertice->id);
     }
