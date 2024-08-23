@@ -98,3 +98,38 @@ void Printer::printArestasNaoDirecionadas(std::vector<Vertice *> &vertices, bool
         impressos.insert(vertice->id);
     }
 }
+
+/**
+ * Imprime apenas as arestas comuns percorridas no caminhamento em profundidade no terminal.
+ */
+void Printer:: printArvoreCaminhamento(Grafo* arvore) {
+
+}
+
+std::string Printer::getRepresentacaoArestaRetorno(int idOrigem, std::string separador, int idDestino, const Aresta &aresta)
+{
+    std::stringstream formatoAresta;
+    formatoAresta << idOrigem << separador << idDestino << " [style=dashed];\n";
+    return formatoAresta.str();
+}
+
+/**
+ * Imprime as arestas comuns e as arestas de retorno encontradas durante o caminhamento em profundidade
+ * tendo como origem o nó raiz.
+ * no arquivo de saída.
+ */
+void Printer:: printArvoreCaminhamento(Grafo* arvore, std::ofstream &arquivo) {
+    arquivo << "digraph G {\n\n";
+    for (Vertice* vertice : arvore->vertices) {
+        Aresta* aresta = vertice->arestas;
+        while (aresta != nullptr) {
+            if (aresta->peso == -1) {
+                arquivo << '\t' << getRepresentacaoArestaRetorno(vertice->id, " -> ", aresta->destino->id, *aresta);
+            } else {
+                arquivo << '\t' << getRepresentacaoAresta(vertice->id, " -> ", aresta->destino->id, *aresta, false);
+            }
+            aresta = aresta->prox;
+        }
+    }
+    arquivo << "\n}\n\n";
+}
