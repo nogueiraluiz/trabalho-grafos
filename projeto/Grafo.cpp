@@ -730,6 +730,7 @@ Grafo* Grafo::caminhamentoProfundidade(int idVerticeInicio)
         cor[v] = 0;
     }
     caminhaProfundidade(inicial, cor, arvore);
+    Printer::printArvoreCaminhamento(arvore->vertices);
     return arvore;
 }
 

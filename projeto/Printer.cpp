@@ -102,8 +102,23 @@ void Printer::printArestasNaoDirecionadas(std::vector<Vertice *> &vertices, bool
 /**
  * Imprime apenas as arestas comuns percorridas no caminhamento em profundidade no terminal.
  */
-void Printer:: printArvoreCaminhamento(Grafo* arvore) {
-
+void Printer:: printArvoreCaminhamento(std::vector<Vertice*>& vertices) 
+{
+    std::cout << "Árvore de caminhamento em profundidade:\n";
+    for (Vertice *vertice : vertices) 
+    {
+        std::cout << vertice->id << " -> { ";
+        Aresta *aresta = vertice->arestas;
+        while (aresta != nullptr) 
+        {
+            if (aresta->peso != -1) 
+            {
+                std::cout << aresta->destino->id << " ";
+            }
+            aresta = aresta->prox;
+        }
+        std::cout << "}\n";
+    }
 }
 
 std::string Printer::getRepresentacaoArestaRetorno(int idOrigem, std::string separador, int idDestino, const Aresta &aresta)
@@ -118,14 +133,18 @@ std::string Printer::getRepresentacaoArestaRetorno(int idOrigem, std::string sep
  * tendo como origem o nó raiz.
  * no arquivo de saída.
  */
-void Printer:: printArvoreCaminhamento(Grafo* arvore, std::ofstream &arquivo) {
+void Printer:: printArvoreCaminhamento(std::vector<Vertice*>& vertices, std::ofstream &arquivo)
+{
     arquivo << "digraph G {\n\n";
-    for (Vertice* vertice : arvore->vertices) {
+    for (Vertice* vertice : vertices)
+    {
         Aresta* aresta = vertice->arestas;
         while (aresta != nullptr) {
-            if (aresta->peso == -1) {
+            if (aresta->peso == -1)
+            {
                 arquivo << '\t' << getRepresentacaoArestaRetorno(vertice->id, " -> ", aresta->destino->id, *aresta);
-            } else {
+            } else
+            {
                 arquivo << '\t' << getRepresentacaoAresta(vertice->id, " -> ", aresta->destino->id, *aresta, false);
             }
             aresta = aresta->prox;
