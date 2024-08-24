@@ -541,7 +541,8 @@ void Grafo::atualizaMatrizesFloyd(std::vector<std::vector<int>>& distancias, std
  */
 Grafo* Grafo::caminhoMinimoFloyd(int idVerticeU, int idVerticeV)
 {
-    if (!arestasPonderadas) {
+    if (!arestasPonderadas)
+    {
         std::cout << "As operacoes de caminho minimo nao sao permitidas para grafos sem ponderacao nas arestas" << std::endl;
         return nullptr;
     }
