@@ -19,7 +19,6 @@ int main(int argc, char *argv[])
     Grafo *g = new Grafo(input, direcionado, arestasPonderadas, verticesPonderados);
     g->print();
     g->print(output);
-    g->caminhamentoProfundidade(1);
     input.close();
     output.close();
     return 0;

@@ -394,7 +394,7 @@ int Grafo::encontraIndiceVertice(int id)
     return -1;
 }
 
-void Grafo::inicializaMatrizDistancias(std::vector<std::vector<int>> &distancias, int ordem)
+void Grafo::inicializaMatrizDistancias(std::vector<std::vector<int>>& distancias, int ordem)
 {
     for (int i = 0; i < ordem; i++)
     {
@@ -426,18 +426,16 @@ void Grafo::inicializaMatrizDistancias(std::vector<std::vector<int>> &distancias
     }
 }
 
-void Grafo::atualizaMatrizDistancias(std::vector<std::vector<int>> &distancias, int ordem, int indice)
+void Grafo::atualizaMatrizDistancias(std::vector<std::vector<int>>& distancias, int ordem, int indice)
 {
     if (indice == ordem)
         return;
     for (int i = 0; i < ordem; i++)
     {
-        if (i == indice)
-            continue; // é necessário?
+        if (i == indice) continue; // é necessário?
         for (int j = 0; j < ordem; j++)
         {
-            if (j == indice)
-                continue; // é necessário?
+            if (j == indice) continue; // é necessário?
             int distanciaAtual = distancias[i][j];
             int distanciaIntermediariaA = distancias[i][indice];
             int distanciaIntermediariaB = distancias[indice][j];
@@ -464,7 +462,6 @@ std::vector<std::vector<int>> Grafo::getMatrizDistancias()
 }
 
 void Grafo::inicializaMatrizesFloyd(std::vector<std::vector<int>>& distancias, std::vector<std::vector<int>>& proximos, int ordem)
-
 {
     for (int i = 0; i < ordem; i++)
     {
@@ -548,48 +545,6 @@ Grafo* Grafo::caminhoMinimoFloyd(int idVerticeU, int idVerticeV)
         std::cout << "As operacoes de caminho minimo nao sao permitidas para grafos sem ponderacao nas arestas" << std::endl;
         return nullptr;
     }
-    for (int i = 0; i < ordem; i++)
-    {
-        if (i == indice) 
-        {
-            continue; // é necessário?
-        }
-        for (int j = 0; j < ordem; j++)
-        {
-            if (j == indice) 
-            {
-                continue; // é necessário?
-            }
-            int distanciaAtual = distancias[i][j];
-            if (distancias[i][indice] == INF || distancias[indice][j] == INF)
-            {
-                continue; // evitando cálculos imprevisíveis e irrelevantes
-            }
-            int novaDistancia = distancias[i][indice] + distancias[indice][j];
-            if (novaDistancia < distanciaAtual)
-            {
-                distancias[i][j] = novaDistancia;
-                proximos[i][j] = proximos[i][indice];
-            }
-        }
-    }
-    atualizaMatrizesFloyd(distancias, proximos, ordem, indice + 1);
-}
-
-/**
- * Calcula o caminho mínimo entre dois vértices do grafo.
- * - Caso o grafo não possua arestas ponderadas, retorna um nullptr
- * - Caso um ou ambos os vértices não exista, retorna um nullptr
- * - Caso não exista caminho entre os vértices, retorna um grafo vazio
- * - Caso exista caminho, retorna um grafo com as arestas que compõem o caminho mínimo
- */
-Grafo* Grafo::caminhoMinimoFloyd(int idVerticeU, int idVerticeV)
-{
-    if (!arestasPonderadas)
-    {
-        std::cout << "As operacoes de caminho minimo nao sao permitidas para grafos sem ponderacao nas arestas" << std::endl;
-        return nullptr;
-    }
     int u = encontraIndiceVertice(idVerticeU);
     if (u == -1)
     {
@@ -619,7 +574,7 @@ Grafo* Grafo::caminhoMinimoFloyd(int idVerticeU, int idVerticeV)
     while (u != v)
     {
         u = proximos[u][v];
-        caminho.push_back(vertices[u]->id)
+        caminho.push_back(vertices[u]->id);
     }
     Grafo* grafoCaminho = new Grafo(direcionado, 0, 0);
     for (int i = 0; i < caminho.size() - 1; i++) {
@@ -714,70 +669,6 @@ void Grafo::liberaMemoriaArestas(Aresta* inicio)
 }
 
 /**
- * Método auxiliar que percorre o grafo em profundidade recursivamente.
- * Parâmetros:
- * - u: vértice sendo visitado
- * - pai: vértice que antecede u na busca
- * - cor: mapa que indica se o vértice foi visitado (2), se não (0) ou se está em processo de visita (1).
- * - arvore: grafo que representa a árvore de caminhamento em profundidade.
- */
-void Grafo::caminhaProfundidade(Vertice *u, std::map<Vertice *, int> &cor, Grafo* arvore)
-{
-    cor[u] = 1;
-    Aresta *e = u->arestas;
-    while (e != nullptr)
-    {
-        Vertice *v = e->destino;
-        if (cor[v] == 0)
-        {
-            arvore->adicionaAresta(u->id, v->id);
-            caminhaProfundidade(v, cor, arvore);
-        } else if (cor[v] == 1)
-        {
-            arvore->adicionaAresta(u->id, v->id, -1);
-        }
-        e = e->prox;
-    }
-    cor[u] = 2;
-}
-
-/**
- * Imprime no terminal e retorna como um grafo a árvore de caminhamento em
- * profundidade do grafo partindo do vértice especificado.
- * - Caso o grafo seja vazio, retorna um nullptr;
- * - Caso o vértice especificado não exista, retorna um nullptr;
- * Obs.: a árvore de caminhamento em profundidade é um grafo que representa as arestas percorridas
- * e usa arestas com peso -1 para indicar arestas de retorno.
- * - Aresta de retorno: aresta que liga um vértice a um ancestral na árvore de caminhamento em profundidade.
- */
-Grafo* Grafo::caminhamentoProfundidade(int idVerticeInicio)
-{
-    if (vertices.empty())
-    {
-        std::cout << "Nao há vertices no grafo" << std::endl;
-        return nullptr;
-    }
-    Vertice *inicial = getVertice(idVerticeInicio);
-    if (inicial == nullptr)
-    {
-        std::cout << "O vértice especificado não existe" << std::endl;
-        return nullptr;
-
-    }
-    Grafo *arvore = new Grafo(1, 0, 0); // deve ser direcionando para representar a árvore corretamente com as arestas de retorno
-    arvore->adicionaVertice(inicial->id);
-    int tempo = 0;
-    std::map<Vertice *, int> cor;
-    for (Vertice *v : vertices)
-    {
-        cor[v] = 0;
-    }
-    caminhaProfundidade(inicial, cor, arvore);
-    Printer::printArvoreCaminhamento(arvore->vertices);
-    return arvore;
-}
-
-/**
  * Remove um vértice do grafo, caso exista, tratando de remover as adjacências por ele definidas.
  */
 void Grafo::removeVertice(int idVertice)
@@ -788,7 +679,6 @@ void Grafo::removeVertice(int idVertice)
         return; // vértice buscado não existe
     }
     for (Vertice* vertice : vertices)
-
     {
         if (vertice->id != idVertice)
         {
