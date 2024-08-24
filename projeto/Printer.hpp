@@ -17,9 +17,6 @@ namespace Printer
     std::string getRepresentacaoAresta(int idOrigem, std::string separador, int idDestino, const Aresta &aresta, bool ponderada);
     void printArestasDirecionadas(std::vector<Vertice*>& vertices, bool ponderadoNasArestas, std::ofstream &arquivo);
     void printArestasNaoDirecionadas(std::vector<Vertice*>& vertices, bool ponderadoNasArestas, std::ofstream &arquivo);
-    void printArvoreCaminhamento(std::vector<Vertice*>& vertices);
-    std::string getRepresentacaoArestaRetorno(int idOrigem, std::string separador, int idDestino, const Aresta &aresta);
-    void printArvoreCaminhamento(std::vector<Vertice*>& vertices, std::ofstream &arquivo);
 }
 
 #endif
