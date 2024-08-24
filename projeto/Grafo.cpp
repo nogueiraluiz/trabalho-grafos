@@ -670,6 +670,69 @@ void Grafo::liberaMemoriaArestas(Aresta* inicio)
 }
 
 /**
+ * Método auxiliar que percorre o grafo em profundidade recursivamente.
+ * Parâmetros:
+ * - u: vértice sendo visitado
+ * - pai: vértice que antecede u na busca
+ * - cor: mapa que indica se o vértice foi visitado (2), se não (0) ou se está em processo de visita (1).
+ * - arvore: grafo que representa a árvore de caminhamento em profundidade.
+ */
+void Grafo::caminhaProfundidade(Vertice *u, std::map<Vertice *, int> &cor, Grafo* arvore)
+{
+    cor[u] = 1;
+    Aresta *e = u->arestas;
+    while (e != nullptr)
+    {
+        Vertice *v = e->destino;
+        if (cor[v] == 0)
+        {
+            arvore->adicionaAresta(u->id, v->id);
+            caminhaProfundidade(v, cor, arvore);
+        } else if (cor[v] == 1)
+        {
+            arvore->adicionaAresta(u->id, v->id, -1);
+        }
+        e = e->prox;
+    }
+    cor[u] = 2;
+}
+
+/**
+ * Imprime no terminal e retorna como um grafo a árvore de caminhamento em
+ * profundidade do grafo partindo do vértice especificado.
+ * - Caso o grafo seja vazio, retorna um nullptr;
+ * - Caso o vértice especificado não exista, retorna um nullptr;
+ * Obs.: a árvore de caminhamento em profundidade é um grafo que representa as arestas percorridas
+ * e usa arestas com peso -1 para indicar arestas de retorno.
+ * - Aresta de retorno: aresta que liga um vértice a um ancestral na árvore de caminhamento em profundidade.
+ */
+Grafo* Grafo::caminhamentoProfundidade(int idVerticeInicio)
+{
+    if (vertices.empty())
+    {
+        std::cout << "Nao há vertices no grafo" << std::endl;
+        return nullptr;
+    }
+    Vertice *inicial = getVertice(idVerticeInicio);
+    if (inicial == nullptr)
+    {
+        std::cout << "O vértice especificado não existe" << std::endl;
+        return nullptr;
+    }
+    Grafo *arvore = new Grafo(1, 0, 0); // deve ser direcionando para representar a árvore corretamente com as arestas de retorno
+    arvore->adicionaVertice(inicial->id);
+    int tempo = 0;
+    std::map<Vertice *, int> cor;
+    for (Vertice *v : vertices)
+    {
+        cor[v] = 0;
+    }
+    caminhaProfundidade(inicial, cor, arvore);
+    Printer::printArvoreCaminhamento(vertices);
+    return arvore;
+}
+
+/**
  * Remove um vértice do grafo, caso exista, tratando de remover as adjacências por ele definidas.
  */
 void Grafo::removeVertice(int idVertice)
