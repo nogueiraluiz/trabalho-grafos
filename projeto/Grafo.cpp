@@ -464,6 +464,7 @@ std::vector<std::vector<int>> Grafo::getMatrizDistancias()
 }
 
 void Grafo::inicializaMatrizesFloyd(std::vector<std::vector<int>>& distancias, std::vector<std::vector<int>>& proximos, int ordem)
+
 {
     for (int i = 0; i < ordem; i++)
     {
@@ -543,6 +544,47 @@ void Grafo::atualizaMatrizesFloyd(std::vector<std::vector<int>>& distancias, std
  */
 Grafo* Grafo::caminhoMinimoFloyd(int idVerticeU, int idVerticeV)
 {
+    if (!arestasPonderadas) {
+        std::cout << "As operacoes de caminho minimo nao sao permitidas para grafos sem ponderacao nas arestas" << std::endl;
+        return nullptr;
+    }
+    for (int i = 0; i < ordem; i++)
+    {
+        if (i == indice) 
+        {
+            continue; // é necessário?
+        }
+        for (int j = 0; j < ordem; j++)
+        {
+            if (j == indice) 
+            {
+                continue; // é necessário?
+            }
+            int distanciaAtual = distancias[i][j];
+            if (distancias[i][indice] == INF || distancias[indice][j] == INF)
+            {
+                continue; // evitando cálculos imprevisíveis e irrelevantes
+            }
+            int novaDistancia = distancias[i][indice] + distancias[indice][j];
+            if (novaDistancia < distanciaAtual)
+            {
+                distancias[i][j] = novaDistancia;
+                proximos[i][j] = proximos[i][indice];
+            }
+        }
+    }
+    atualizaMatrizesFloyd(distancias, proximos, ordem, indice + 1);
+}
+
+/**
+ * Calcula o caminho mínimo entre dois vértices do grafo.
+ * - Caso o grafo não possua arestas ponderadas, retorna um nullptr
+ * - Caso um ou ambos os vértices não exista, retorna um nullptr
+ * - Caso não exista caminho entre os vértices, retorna um grafo vazio
+ * - Caso exista caminho, retorna um grafo com as arestas que compõem o caminho mínimo
+ */
+Grafo* Grafo::caminhoMinimoFloyd(int idVerticeU, int idVerticeV)
+{
     if (!arestasPonderadas)
     {
         std::cout << "As operacoes de caminho minimo nao sao permitidas para grafos sem ponderacao nas arestas" << std::endl;
@@ -577,7 +619,7 @@ Grafo* Grafo::caminhoMinimoFloyd(int idVerticeU, int idVerticeV)
     while (u != v)
     {
         u = proximos[u][v];
-        caminho.push_back(vertices[u]->id);
+        caminho.push_back(vertices[u]->id)
     }
     Grafo* grafoCaminho = new Grafo(direcionado, 0, 0);
     for (int i = 0; i < caminho.size() - 1; i++) {
@@ -720,6 +762,7 @@ Grafo* Grafo::caminhamentoProfundidade(int idVerticeInicio)
     {
         std::cout << "O vértice especificado não existe" << std::endl;
         return nullptr;
+
     }
     Grafo *arvore = new Grafo(1, 0, 0); // deve ser direcionando para representar a árvore corretamente com as arestas de retorno
     arvore->adicionaVertice(inicial->id);
