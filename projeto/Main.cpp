@@ -18,6 +18,7 @@ int main(int argc, char *argv[])
     std::ofstream output;
     output.open(arquivoOutput);
     Grafo *g = new Grafo(input, direcionado, arestasPonderadas, verticesPonderados);
+    std::vector<int> subconjunto =  {1, 2, 3, 4, 5, 6}; //subconjunto de vértices
     g->print();
     g->print(output);
     input.close();

@@ -32,6 +32,10 @@ public:
     void analiseExcentricidade();
     Grafo *verticesDeArticulacao();
     Grafo *caminhamentoProfundidade(int idVerticeInicio);
+    Grafo* arvoreGeradoraMinimaPrim(std::vector<int> &subconjunto);
+    int buscar(int subset[], int i);
+    void unir(int subset[], int v1, int v2);
+    Grafo* arvoreGeradoraMinimaKruskal(std::vector<int> &subconjunto);
     Grafo *caminhoMinimoDijkstra(int idOrigem, int idDestino);
 
 private:
@@ -57,6 +61,8 @@ private:
     std::set<int> encontraArticulacoesComponente(Vertice *v, std::set<Vertice*> componente);
     int getExcentricidade(const std::vector<int> &distanciasVertice);
     void caminhaProfundidade(Vertice *u, std::map<Vertice *, int> &cor, Grafo* arvoreProfundidade);
+    int custo(int idVerticeU, int idVerticeV);
+    Grafo *subgrafoInduzidoVertices(std::vector<int> &subconjunto);
     bool existeVerticeAberto(std::map<Vertice *, bool> &abertos);
   
 };

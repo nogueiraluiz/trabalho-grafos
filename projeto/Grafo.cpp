@@ -7,6 +7,13 @@
 #include <limits>
 #include "Grafo.hpp"
 #include "Printer.hpp"
+#include <string.h>
+
+const int INF = std::numeric_limits<int>::max();
+const int MIN = std::numeric_limits<int>::min();
+
+const int INF = std::numeric_limits<int>::max();
+const int MIN = std::numeric_limits<int>::min();
 
 const int INF = std::numeric_limits<int>::max();
 const int MIN = std::numeric_limits<int>::min();
@@ -449,6 +456,26 @@ void Grafo::atualizaMatrizDistancias(std::vector<std::vector<int>>& distancias, 
 }
 
 /**
+ * Retorna o peso de uma aresta. Se o vértice de origem não existir, retorna -1. Se não existir a aresta,
+ * retorna INF (máximo inteiro).
+ */
+int Grafo::custo(int idVerticeU, int idVerticeV)
+{
+    Vertice* u = getVertice(idVerticeU);
+    if (u == nullptr) {
+        return -1;
+    }
+    Aresta* aresta = u->arestas;
+    while (aresta != nullptr) {
+        if (aresta->destino->id == idVerticeV) {
+            return aresta->peso;
+        }
+        aresta = aresta->prox;
+    }
+    return INF;
+}
+
+/**
  * Retorna a matriz representativa dos caminhos mínimos entre quaisquer vértices do grafo.
  * distancias(i,j) = INF -> não existe qualquer caminho entre os dois vértices;
  * distancias(i,j) = 0 -> caminho não é permitido (self-loop), só ocorre quando i = j.
@@ -888,36 +915,6 @@ std::set<int> Grafo::encontraArticulacoesComponente(Vertice *v, std::set<Vertice
 }
 
 /**
- * Retorna um grafo com os vértices de articulação do grafo original.
- * - Caso o grafo não possua vértices, retorna um nullptr.
- */
-Grafo* Grafo::verticesDeArticulacao()
-{
-    if (vertices.empty())
-    {
-        std::cout << "O grafo nao possui vertices" << std::endl;
-        return nullptr;
-    }
-    Grafo *grafoArticulacoes = new Grafo(direcionado, 0, 0);
-    std::set<std::set<Vertice*>> componentes = getComponentesConexas();
-    std::cout << "Componentes conexas do grafo: " << componentes.size() << std::endl;
-    for (std::set<std::set<Vertice*>>::iterator it = componentes.begin(); it != componentes.end(); it++)
-    {
-        std::set<Vertice*> componente = *it;
-        int cronometro = 0;
-
-        Vertice *v = *componente.begin();
-        std::cout << "Componente conexa comecando em " << v->id << std::endl;
-        std::set<int> articulacoes = encontraArticulacoesComponente(v, componente);
-        for (int id : articulacoes)
-        {
-            grafoArticulacoes->adicionaVertice(id);
-        }
-    }
-    return grafoArticulacoes;
-}
-
-/**
  * Método auxiliar para a busca em profundidade de uma componente conexa.
  * O método é recursivo e, a cada chamada, adiciona um vértice ao conjunto que representa a componente conexa.
  * Parâmetros:
@@ -1199,4 +1196,379 @@ Grafo* Grafo::caminhoMinimoDijkstra(int idOrigem, int idDestino)
     }
     std::cout << caminho[0] << std::endl;
     return grafoCaminho;
+}
+
+/**
+ * Método auxiliar para a busca em profundidade de uma componente conexa.
+ * O método é recursivo e, a cada chamada, adiciona um vértice ao conjunto que representa a componente conexa.
+ * Parâmetros:
+ * - v: vértice de início da busca;
+ * - usados: mapa que indica quais vértices já foram visitados;
+ * - componente: conjunto que armazena os vértices da componente conexa, inicialmente, contem apenas o vértice da primeira chamada.
+ */
+void Grafo::buscaProfundidadeComponente(Vertice *v, std::map<Vertice*, bool>& usados, std::set<Vertice*>& componente)
+{
+    Aresta *aresta = v->arestas;
+    while (aresta != nullptr)
+    {
+        Vertice *u = aresta->destino;
+        if (!usados[u])
+        {
+            usados[u] = true;
+            componente.insert(u);
+            buscaProfundidadeComponente(u, usados, componente);
+        }
+        aresta = aresta->prox;
+    }
+}
+
+/**
+ * Encontra e retorna a componente conexa do grafo que contém o vértice passado como argumento.
+ * Parâmetros:
+ * - v: vértice de início da busca;
+ * - usados: mapa que indica quais vértices já foram visitados.
+ */
+std::set<Vertice*> Grafo::buscaComponente(Vertice *v, std::map<Vertice*, bool>& usados)
+{
+    usados[v] = true;
+    std::set<Vertice*> componente;
+    componente.insert(v);
+    buscaProfundidadeComponente(v, usados, componente);
+    return componente;
+}
+
+/**
+ * Retorna um set de set de vértices, onde cada set interno representa uma componente conexa do grafo.
+ */
+std::set<std::set<Vertice*>> Grafo::getComponentesConexas()
+{
+    std::set<std::set<Vertice*>> componentes;
+    std::map<Vertice*, bool> usados;
+    for (Vertice* v : vertices)
+    {
+        usados[v] = false;
+    }
+    for (Vertice* v : vertices)
+    {
+        if (!usados[v])
+        {
+            std::set<Vertice*> componente = buscaComponente(v, usados);
+            componentes.insert(componente);
+        }
+    }
+    return componentes;
+}
+
+/**
+ * Através de uma busca em profundidade, encontra quais são os vértices de articulação
+ * da componente conexa que contém o vértice passado como argumento.
+ * Parâmetros:
+ * - articulacoes: conjunto que armazena os vértices de articulação;
+ * - v: vértice de início da busca;
+ * - pai: vértice pai do vértice de início da busca;
+ * - tempoEntrada: mapa que armazena o tempo de entrada de cada vértice na busca;
+ * - minimo: mapa que armazena o menor tempo de entrada dos vértices alcançáveis por cada vértice;
+ * - visitado: mapa que indica quais vértices já foram visitados;
+ * - cronometro: contador que armazena o tempo de entrada dos vértices.
+ */
+void Grafo::buscaProfundidadeArticulacoes(std::set<int> &articulacoes, Vertice *v, Vertice *pai,
+        std::map<int, int> &tempoEntrada, std::map<int, int> &minimo, std::map<int, bool> visitado, int &cronometro)
+{
+    visitado[v->id] = true;
+    cronometro++;
+    tempoEntrada[v->id] = cronometro;
+    minimo[v->id] = cronometro;
+    int filhos = 0;
+    Aresta *aresta = v->arestas;
+    while (aresta != nullptr)
+    {
+        Vertice *u = aresta->destino;
+        if (u == pai)
+        {
+            aresta = aresta->prox;
+            continue;
+        }
+        if (visitado[u->id])
+        {
+            minimo[v->id] = std::min(minimo[v->id], tempoEntrada[u->id]);
+        }
+        else
+        {
+            buscaProfundidadeArticulacoes(articulacoes, u, v, tempoEntrada, minimo, visitado, cronometro);
+            minimo[v->id] = std::min(minimo[v->id], minimo[u->id]);
+            if (minimo[u->id] >= tempoEntrada[v->id] && pai != nullptr)
+            {
+                articulacoes.insert(v->id);
+            }
+            filhos++;
+        }
+        aresta = aresta->prox;
+    }
+}
+
+/**
+ * Retorna um grafo com os vértices de articulação do grafo original.
+ * - Caso o grafo não possua vértices, retorna um nullptr.
+ */
+Grafo* Grafo::verticesDeArticulacao()
+{
+    if (vertices.empty())
+    {
+        std::cout << "O grafo nao possui vertices" << std::endl;
+        return nullptr;
+    }
+    Grafo *grafoArticulacoes = new Grafo(direcionado, 0, 0);
+    std::set<std::set<Vertice*>> componentes = getComponentesConexas();
+    std::cout << "Componentes conexas do grafo: " << componentes.size() << std::endl;
+    for (std::set<std::set<Vertice*>>::iterator it = componentes.begin(); it != componentes.end(); it++)
+    {
+        std::set<Vertice*> componente = *it;
+        int cronometro = 0;
+
+        Vertice *v = *componente.begin();
+        std::cout << "Componente conexa comecando em " << v->id << std::endl;
+        std::set<int> articulacoes = encontraArticulacoesComponente(v, componente);
+        for (int id : articulacoes)
+        {
+            grafoArticulacoes->adicionaVertice(id);
+        }
+    }
+    return grafoArticulacoes;
+}
+
+/**
+ * Retorna o subgrafo vértice-induzido pelo 'subconjunto' de vértices.
+ * - Caso algum dos vértices não exista no grafo, retorna nullptr.
+ */
+Grafo* Grafo::subgrafoInduzidoVertices(std::vector<int>& subconjunto)
+{
+    Grafo* subgrafo = new Grafo(direcionado, arestasPonderadas, verticesPonderados);
+    for (int id : subconjunto)
+    {
+        Vertice* v = getVertice(id);
+        if (v == nullptr)
+        {
+            std::cout << "O vértice " << id << " não existe no grafo" << std::endl;
+            return nullptr;
+        }
+    } 
+    for (Vertice* v : vertices)
+    {
+        if (std::find(subconjunto.begin(), subconjunto.end(), v->id) == subconjunto.end())
+        {
+            std::cout << "O vértice " << v->id << " não está no subconjunto" << std::endl;
+            continue;
+        }
+        subgrafo->adicionaVertice(v->id, v->peso);
+        Aresta* e = v->arestas;
+        while (e != nullptr)
+        {
+            if (std::find(subconjunto.begin(), subconjunto.end(), e->destino->id) != subconjunto.end())
+            {
+                subgrafo->adicionaAresta(v->id, e->destino->id, e->peso);
+            }
+            e = e->prox;
+        }
+    }
+    return subgrafo;
+}
+
+int Grafo::buscar(int subset[], int i)
+{
+    if (subset[i] == -1)
+    {
+       return i;
+    }
+    return subset[i]=buscar(subset, subset[i]);
+
+}
+
+void Grafo::unir(int subset[], int v1, int v2)
+{
+    int v1_set = buscar(subset, v1);
+    int v2_set = buscar(subset, v2);
+    subset[v2_set] = v1_set;
+}
+
+/**
+ * Retorna a árvore geradora mínima do subgrafo induzido pelo conjunto de
+ * vértices 'listavertice' utilizando o algoritmo de Prim.
+ * - Caso o grafo não seja ponderado nas arestas, retorna um nullptr.
+ * - Caso o subgrafo não possa existir, retorna um nullptr.
+ * - Caso o subgrafo não seja conexo, retorna um nullptr.
+ */
+Grafo *Grafo::arvoreGeradoraMinimaPrim(std::vector<int> &subconjunto)
+{
+    if (!arestasPonderadas)
+    {
+        std::cout << "O grafo deve ser ponderado nas arestas" << std::endl;
+        return nullptr;
+    }
+    Grafo *subgrafo = subgrafoInduzidoVertices(subconjunto);
+    if (subgrafo == nullptr)
+    {
+        std::cout << "O subgrafo vértice-induzido não existe" << std::endl;
+        return nullptr;
+    }
+    if (subgrafo->getComponentesConexas().size() > 1)
+    {
+        std::cout << "O subgrafo vértice-induzido não é conexo" << std::endl;
+        return nullptr;
+    }
+    // Tratamento de erro
+    int n = subconjunto.size();
+    int prox[n];
+    std::vector<std::vector<int>> solucao;
+    int menorId;
+    int menorpeso = INF;
+    int u;
+    int v;
+    for (int i = 0; i < n; i++)
+    {
+        Vertice *a = getVertice(subconjunto[i]);
+        Aresta *e = a->arestas;
+        while (e != nullptr)
+        {
+            if (e->peso <= menorpeso)
+            {
+                menorpeso = e->peso;
+                menorId = a->id;
+                u = a->id;
+                v = e->destino->id;
+            }
+            e = e->prox;
+        }
+    }
+    std::vector<int> aux = {u, v};
+    Grafo *arvore = new Grafo(direcionado, arestasPonderadas, verticesPonderados);
+    solucao.push_back(aux);
+    arvore->adicionaAresta(u, v);
+    for (int i = 1; i <= n; i++)
+    {
+        if (custo(i, u) < custo(i, v))
+        {
+            prox[i - 1] = u;
+        }
+        else
+        {
+            prox[i - 1] = v;
+        }
+    }
+    prox[u - 1] = 0;
+    prox[v - 1] = 0;
+    int cont = 0;
+    int j = 1;
+    while (cont < n - 2)
+    {
+        int menor2 = INF;
+        for (int i = 1; i <= n; i++)
+        {
+            if (prox[i - 1] != 0)
+            {
+                if (custo(i, prox[i - 1]) < menor2)
+                {
+                    menor2 = custo(i, prox[i - 1]);
+                    j = i;
+                }
+            }
+        }
+        aux = {j, prox[j - 1]};
+        solucao.push_back(aux);
+        arvore->adicionaAresta(j, prox[j - 1]);
+        prox[j - 1] = 0;
+        for (int i = 0; i < n; i++)
+        {
+            if (prox[i] != 0 && custo(i + 1, prox[i]) > custo(i + 1, j))
+            {
+                prox[i] = j;
+            }
+        }
+        cont = cont + 1;
+    }
+    return arvore;
+}
+
+/**
+ * Retorna a árvore geradora mínima do subgrafo induzido pelo conjunto de
+ * vértices 'subconjunto' utilizando o algoritmo de Kruskal.
+ * - Caso o grafo não seja ponderado nas arestas, retorna um nullptr.
+ * - Caso o subgrafo não possa existir, retorna um nullptr.
+ * - Caso o subgrafo não seja conexo, retorna um nullptr.
+ */
+Grafo *Grafo::arvoreGeradoraMinimaKruskal(std::vector<int> &subconjunto)
+{
+    if (!arestasPonderadas)
+    {
+        std::cout << "O grafo deve ser ponderado nas arestas" << std::endl;
+        return nullptr;
+    }
+    Grafo *subgrafo = subgrafoInduzidoVertices(subconjunto);
+    if (subgrafo == nullptr)
+    {
+        std::cout << "O subgrafo vértice-induzido não existe" << std::endl;
+        return nullptr;
+    }
+    if (subgrafo->getComponentesConexas().size() > 1)
+    {
+        std::cout << "O subgrafo vértice-induzido não é conexo" << std::endl;
+        return nullptr;
+    }
+    // Fazer tratamento de erro
+    int n = subconjunto.size();
+    std::vector<std::vector<int>> listaAresta;
+    std::vector<std::vector<int>> solucao;
+    std::vector<int> aux;
+    int u;
+    int v;
+    for (int i = 0; i < n; i++)
+    {
+        Vertice *a = getVertice(subconjunto[i]);
+        Aresta *e = a->arestas;
+        while (e != nullptr)
+        {
+            if (a->id < e->destino->id)
+            {
+                u = a->id;
+                v = e->destino->id;
+                aux = {u, v};
+                listaAresta.push_back(aux);
+            }
+            e = e->prox;
+        }
+    }
+    int temp1 = 0;
+    int temp2 = 0;
+    int numeroDeArestas = listaAresta.size();
+    for (int i = numeroDeArestas - 1; i > 1; i--) // receba o BubbleSort
+    {
+        for (int j = 0; j < i; j++)
+        {
+            temp1 = listaAresta[j][0];
+            temp2 = listaAresta[j][1];
+            if (custo(listaAresta[j][0], listaAresta[j][1]) > custo(listaAresta[j + 1][0], listaAresta[j + 1][1]))
+            {
+                listaAresta[j][0] = listaAresta[j + 1][0];
+                listaAresta[j][1] = listaAresta[j + 1][1];
+                listaAresta[j + 1][0] = temp1;
+                listaAresta[j + 1][1] = temp2;
+            }
+        }
+    }
+    Grafo *arvore = new Grafo(direcionado, arestasPonderadas, verticesPonderados);
+    int *subset = new int[n + 1];
+    memset(subset, -1, sizeof(int) * (n + 1));
+    for (int i = 0; i < numeroDeArestas; i++)
+    {
+        int v1 = buscar(subset, listaAresta[i][0]);
+        int v2 = buscar(subset, listaAresta[i][1]);
+        if (v1 != v2)
+        {
+            aux = {v1, v2};
+            solucao.push_back(aux);
+            unir(subset, v1, v2);
+            arvore->adicionaAresta(v1, v2);
+        }
+    }
+    delete[] subset;
+    return arvore;
 }
