@@ -16,8 +16,8 @@ class Grafo
 {
 
 public:
-    Grafo(std::ifstream &arquivoInstancia, bool direcionado, bool verticesPonderados, bool arestasPonderadas);
-    Grafo(bool direcionado, bool verticesPonderados, bool arestasPonderadas);
+    Grafo(std::ifstream &arquivoInstancia, bool direcionado, bool arestasPonderadas, bool verticesPonderados);
+    Grafo(bool direcionado, bool arestasPonderadas, bool verticesPonderados);
     ~Grafo();
     std::vector<Vertice *> vertices;
     void print();
@@ -32,10 +32,7 @@ public:
     void analiseExcentricidade();
     Grafo *verticesDeArticulacao();
     Grafo *caminhamentoProfundidade(int idVerticeInicio);
-    bool auxDijkstra();
-    std::list<int> listaAdjacentes(int idVertice);
-    int auxDijkstra1(int idVertice);
-    void Dijkstra(int idVertice);
+    void caminhoMinimoDijkstra(int idOrigem, int idDestino);
 
 private:
     bool direcionado;
@@ -60,6 +57,7 @@ private:
     std::set<int> encontraArticulacoesComponente(Vertice *v, std::set<Vertice*> componente);
     int getExcentricidade(const std::vector<int> &distanciasVertice);
     void caminhaProfundidade(Vertice *u, std::map<Vertice *, int> &cor, Grafo* arvoreProfundidade);
+    bool existeVerticeAberto(std::map<Vertice *, bool> &abertos);
   
 };
 

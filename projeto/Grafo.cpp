@@ -40,7 +40,7 @@ Grafo::Grafo(std::ifstream &arquivoInstancia, bool direcionado, bool arestasPond
 /**
  * Construtor mais básico, não define quaisquer elementos dos conjuntos de vértices e de arestas.
  */
-Grafo::Grafo(bool direcionado, bool verticesPonderados, bool arestasPonderadas)
+Grafo::Grafo(bool direcionado, bool arestasPonderadas, bool verticesPonderados)
 {
     this->direcionado = direcionado;
     this->arestasPonderadas = arestasPonderadas;
@@ -916,79 +916,110 @@ Grafo* Grafo::verticesDeArticulacao()
     }
     return grafoArticulacoes;
 }
-  
-bool Grafo::auxDijkstra() {
-    for (auto v : vertices) {
-        if (v->aberto && v->distancia != std::numeric_limits<int>::max()) {
+
+/**
+ * Método auxiliar para a obtenção do caminho mínimo entre dois vértices do grafo utilizando
+ * o algoritmo de Moore-Dijkstra.
+ */
+bool Grafo::existeVerticeAberto(std::map<Vertice *, bool> &abertos)
+{
+    for (std::map<Vertice *, bool>::iterator it = abertos.begin(); it != abertos.end(); it++)
+    {
+        if (it->second)
+        {
             return true;
         }
     }
     return false;
 }
 
-std::list<int> Grafo::listaAdjacentes(int idVertice) {
-    std::list<int> lista;
-    for (auto a : getVertice(idVertice)->arestas) {
-        lista.push_front(a->destino->id);
-    }
-    return lista;
-}
-
-void Grafo::Dijkstra(int idVertice) {
-    if (!direcionado)
-    {
-        std::cout << "O grafo deve ser direcionado\n";
-        return;
-    }
-    if(!arestasPonderadas)
+/**
+ * Calcula o caminho mínimo entre dois vértices do grafo utilizando o algoritmo
+ * de Moore-Dijkstra adaptado para arestas de custo negativo.
+ * - Caso o grafo não possua arestas ponderadas, retorna um nullptr
+ * - Caso um ou ambos os vértices não exista, retorna um nullptr
+ * - Caso não exista caminho entre os vértices, retorna um grafo vazio
+ * Obs.: comportamento indefinido para grafos com ciclos negativos.
+ */
+void Grafo::caminhoMinimoDijkstra(int idOrigem, int idDestino)
+{
+    if (!arestasPonderadas)
     {
         std::cout << "O grafo ter arestas ponderadas\n";
-        return;
+        return; // retornar nullptr
     }
-    Vertice *v = getVertice(idVertice);
+    Vertice *v = getVertice(idOrigem);
     if (v == nullptr)
     {
-        std::cout << "Nao existe no grafo vertice com o id especificado (" << idVertice << ")\n";
-        return;
+        std::cout << "Nao existe no grafo vertice com o id especificado (" << idOrigem << ")\n";
+        return; // retornar nullptr
     }
-    for(auto a: vertices){
-        for (auto ares : a->arestas) {
-            if(a->peso < 0){
-                std::cout << "O peso das sarestas não pode ser negativo\n";
-                return;
+    if (getVertice(idDestino) == nullptr)
+    {
+        std::cout << "Nao existe no grafo vertice com o id especificado (" << idDestino << ")\n";
+        return; // retornar nullptr
+    }
+    std::map<Vertice *, bool> abertos;
+    for (Vertice *vertice : vertices)
+    {
+        abertos[vertice] = true;
+    }
+    std::map<Vertice *, int> distancias;
+    std::map<Vertice *, Vertice *> predecessores;
+    for (Vertice *vertice : vertices)
+    {
+        distancias[vertice] = INF;
+        predecessores[vertice] = nullptr;
+    }
+    distancias[v] = 0;
+    predecessores[v] = nullptr;
+    Aresta *e = v->arestas;
+    while (e != nullptr)
+    {
+        distancias[e->destino] = e->peso;
+        predecessores[e->destino] = v;
+        e = e->prox;
+    }
+    while (existeVerticeAberto(abertos))
+    {
+        std::cout << "Checando vértices abertos\n";
+        Vertice *verticeAtual = nullptr;
+        int menorDistancia = INF;
+        for (Vertice *vertice : vertices)
+        {
+            if (!abertos[vertice])
+            {
+                continue;
             }
+            if (distancias[vertice] < menorDistancia)
+            {
+                menorDistancia = distancias[vertice];
+                verticeAtual = vertice;
+            }
+        }
+        if (verticeAtual == nullptr) // não deveria acontecer
+        {
+            return; // retornar nullptr
+        }
+        abertos[verticeAtual] = false;
+        Aresta *e = verticeAtual->arestas;
+        while (e != nullptr)
+        {
+            int distancia = distancias[verticeAtual] + e->peso;
+            if (distancia < distancias[e->destino])
+            {
+                distancias[e->destino] = distancia;
+                abertos[e->destino] = true;
+                predecessores[e->destino] = verticeAtual;
+            }
+            e = e->prox;
         }
     }
-    v->distancia = 0; // Distância do vértice de origem para ele mesmo é 0
 
-    while (auxDijkstra()) {
-        // Pegar o vértice com a menor distância
-        Vertice* verticeAtual = nullptr;
-        int menorDistancia = std::numeric_limits<int>::max();
-        for (auto vert : vertices) {
-            if (vert->aberto && vert->distancia < menorDistancia) {
-                menorDistancia = vert->distancia;
-                verticeAtual = vert;
-            }
-        }
-
-        // Verificar se encontrou um vértice válido
-        if (verticeAtual == nullptr) {
-            break;
-        }
-
-        verticeAtual->aberto = false; // Marcar o vértice atual como fechado
-        std::cout << verticeAtual->id << " distancia: " << verticeAtual->distancia << "\n";
-        
-        // Atualizar as distâncias dos vértices adjacentes
-        for(auto a: vertices){
-            for (auto ares : a->arestas) {
-            Vertice* destino = ares->destino;
-            if (destino->aberto && verticeAtual->distancia + ares->peso < destino->distancia) {
-                destino->distancia = a->distancia + ares->peso;
-            }
-        }
-        }
+    // TODO: imprimir caminho no terminal
+    // TODO: reconstruir e retornar grafo caminho
+    for (Vertice *v : vertices)
+    {
+        std::cout << "Vertice " << v->id << " tem distancia " << distancias[v] << '\n';
     }
 }
-    
