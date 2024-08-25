@@ -21,6 +21,10 @@ public:
     void adicionaVertice(int idVertice, int peso = 0);
     void adicionaAresta(int idVerticeU, int idVerticeV, int peso = 0);
     void removeVertice(int idVertice);
+    void prim(std::vector<int> &listavertice);
+    int buscar(int subset[], int i);
+    void unir(int subset[], int v1, int v2);
+    void kruskal(std::vector<int> &listavertice);
     void removeAresta(int idVerticeU, int idVerticeV);
     void fechoTransitivoDireto(int idVertice);
     void caminhoMinimoFloyd(int idVerticeU, int idVerticeV);

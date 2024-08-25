@@ -6,6 +6,7 @@
 #include "limits.h"
 #include "Grafo.hpp"
 #include "Printer.hpp"
+#include <string.h>
 
 /**
  * Construtor que instancia um grafo de acordo com as arestas definidas em um arquivo .dat lido como argumento para a execução.
@@ -342,4 +343,133 @@ void Grafo::removeVertice(int idVertice)
         removeAresta(aresta->destino->id, idVertice);
     }
     delete v;
+}
+
+int Grafo::buscar(int subset[], int i)
+{
+	if(subset[i] == -1)
+		return i;
+	return buscar(subset, subset[i]);
+}
+
+void Grafo::unir(int subset[], int v1, int v2)
+{
+	int v1_set = buscar(subset, v1);
+	int v2_set = buscar(subset, v2);
+	subset[v1_set] = v2_set;
+}
+
+void Grafo::prim(std::vector<int>& listavertice)
+{
+    //Fazer função para ver se grafo é fechado (conexo)
+    //Ver se vai dar problema qndo receber subárvore
+    //Tratamento de erro
+    int n=listavertice.size(); int prox[n];
+    std::vector<std::vector<int>> F;
+    int menorid; int menorpeso=INT_MAX;
+    int u; int v;
+    for(int i=0; i<n; i++)
+    {
+        Vertice* a = getVertice(listavertice[i]);
+        for (Aresta* e : a->arestas)
+        {
+            if(e->peso<=menorpeso)
+            {
+                menorpeso=e->peso; menorid=a->id;
+                u=a->id; v=e->destino->id;
+            }
+        }
+    }
+    std::vector<int> aux = {u,v}; 
+    F.push_back(aux);
+    for(int i=1; i<=n; i++)
+    {
+        if (custo(i,u)<custo(i,v))
+        {
+            prox[i-1]=u;
+        }
+        else
+        {
+            prox[i-1]=v;
+        }
+    }
+    prox[u-1]=0; prox[v-1]=0; int cont=0; int j=1;
+    while(cont<n-2)
+    {
+        int menor2=INT_MAX;
+        for(int i=1;i<=n;i++)
+        {
+            if(prox[i-1]!=0)
+            {
+                if(custo(i,prox[i-1])<menor2)
+                {
+                    menor2=custo(i,prox[i-1]);
+                    j=i;
+                }
+            }
+        }
+        aux={j,prox[j-1]};
+        F.push_back(aux);
+        prox[j-1]=0;
+        for (int i=0; i<n;i++)
+        {
+            if(prox[i]!=0 && custo(i+1,prox[i])>custo(i+1,j))
+            {
+                prox[i]=j;
+            }
+        }
+        cont=cont+1;
+    }
+}
+
+void Grafo::kruskal(std::vector<int>& listavertice)
+{
+    //Função para ver se grafo é conexo
+    //Ver se vai dar problema qndo receber subárvore
+    //Fazer tratamento de erro
+    int n=listavertice.size();
+    std::vector<std::vector<int>> listaaresta;
+    std::vector<std::vector<int>> F;
+    std::vector<int> aux;
+    int u; int v;
+    for(int i=0; i<n; i++)
+    {
+        Vertice* a = getVertice(listavertice[i]);
+        for (Aresta* e : a->arestas)
+        {
+            if(a->id<e->destino->id)
+            {
+                u=a->id; v=e->destino->id;
+                aux={u,v};
+                listaaresta.push_back(aux);
+            }
+        }
+    }
+    int temp1=0; int temp2=0; int size=listaaresta.size();
+    for(int i=size-1;i>1;i--) //receba o BubbleSort
+    {
+        for(int j=0;j<i;j++)
+        {
+            temp1=listaaresta[j][0]; temp2=listaaresta[j][1];
+            if(custo(listaaresta[j][0],listaaresta[j][1])>custo(listaaresta[j+1][0],listaaresta[j+1][1]))
+            {
+                listaaresta[j][0]=listaaresta[j+1][0]; listaaresta[j][1]=listaaresta[j+1][1];
+                listaaresta[j+1][0]=temp1; listaaresta[j+1][1]=temp2;
+            }
+        }
+    }
+    int na=listaaresta.size();
+    int * subset = new int[n+1];
+    memset(subset, -1, sizeof(int) * (n+1));
+    for(int i=0;i<na;i++)
+    {
+        int v1 = buscar(subset,listaaresta[i][0]);
+        int v2 = buscar(subset,listaaresta[i][1]);
+        if(v1!=v2)
+        {
+            aux={v1,v2};
+            F.push_back(aux);
+            unir(subset,v1,v2);
+        }
+    }
 }
