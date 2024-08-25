@@ -5,6 +5,8 @@
 #include <fstream>
 #include <list>
 #include <vector>
+#include <limits.h>
+#include <limits>
 #include <set>
 #include <map>
 #include "Vertice.hpp"
@@ -30,6 +32,10 @@ public:
     void analiseExcentricidade();
     Grafo *verticesDeArticulacao();
     Grafo *caminhamentoProfundidade(int idVerticeInicio);
+    bool auxDijkstra();
+    std::list<int> listaAdjacentes(int idVertice);
+    int auxDijkstra1(int idVertice);
+    void Dijkstra(int idVertice);
 
 private:
     bool direcionado;
