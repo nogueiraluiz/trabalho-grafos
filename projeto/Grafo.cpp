@@ -41,7 +41,7 @@ Grafo::Grafo(std::ifstream &arquivoInstancia, bool direcionado, bool arestasPond
 /**
  * Construtor mais básico, não define quaisquer elementos dos conjuntos de vértices e de arestas.
  */
-Grafo::Grafo(bool direcionado, bool verticesPonderados, bool arestasPonderadas)
+Grafo::Grafo(bool direcionado, bool arestasPonderadas, bool verticesPonderados)
 {
     this->direcionado = direcionado;
     this->arestasPonderadas = arestasPonderadas;
@@ -979,15 +979,20 @@ Grafo* Grafo::subgrafoInduzidoVertices(std::vector<int>& subconjunto)
 int Grafo::buscar(int subset[], int i)
 {
     if (subset[i] == -1)
-        return i;
-    return buscar(subset, subset[i]);
+       return i;
+    return subset[i]=buscar(subset, subset[i]);
+    //if(subset[i]!=-1)
+    //{
+    //    subset[i]=buscar(subset,subset[i]);
+    //}
+    //return subset[i];
 }
 
 void Grafo::unir(int subset[], int v1, int v2)
 {
     int v1_set = buscar(subset, v1);
     int v2_set = buscar(subset, v2);
-    subset[v1_set] = v2_set;
+    subset[v2_set] = v1_set;
 }
 
 /**
@@ -1040,7 +1045,9 @@ Grafo *Grafo::prim(std::vector<int> &listavertice)
         }
     }
     std::vector<int> aux = {u, v};
+    Grafo* s= new Grafo(direcionado,arestasPonderadas,verticesPonderados);
     F.push_back(aux);
+    s->adicionaAresta(u,v);
     for (int i = 1; i <= n; i++)
     {
         if (custo(i, u) < custo(i, v))
@@ -1072,6 +1079,7 @@ Grafo *Grafo::prim(std::vector<int> &listavertice)
         }
         aux = {j, prox[j - 1]};
         F.push_back(aux);
+        s->adicionaAresta(j,prox[j-1]);
         prox[j - 1] = 0;
         for (int i = 0; i < n; i++)
         {
@@ -1082,6 +1090,7 @@ Grafo *Grafo::prim(std::vector<int> &listavertice)
         }
         cont = cont + 1;
     }
+    return s;
 }
 
 /**
@@ -1114,8 +1123,7 @@ Grafo *Grafo::kruskal(std::vector<int> &listavertice)
     std::vector<std::vector<int>> listaaresta;
     std::vector<std::vector<int>> F;
     std::vector<int> aux;
-    int u;
-    int v;
+    int u; int v;
     for (int i = 0; i < n; i++)
     {
         Vertice *a = getVertice(listavertice[i]); // TODO: tratar possível dereferenciação de nullptr
@@ -1150,18 +1158,52 @@ Grafo *Grafo::kruskal(std::vector<int> &listavertice)
             }
         }
     }
+    Grafo* s= new Grafo(direcionado,arestasPonderadas,verticesPonderados);
     int na = listaaresta.size();
-    int *subset = new int[n + 1];
-    memset(subset, -1, sizeof(int) * (n + 1));
+    int *subset = new int[n+1];
+    memset(subset, -1, sizeof(int) * (n+1));
     for (int i = 0; i < na; i++)
     {
         int v1 = buscar(subset, listaaresta[i][0]);
         int v2 = buscar(subset, listaaresta[i][1]);
+        //std::cout<<buscar(subset,listaaresta[i][0])<<std::endl;
+        //std::cout<<buscar(subset,listaaresta[i][1])<<std::endl;
         if (v1 != v2)
         {
             aux = {v1, v2};
             F.push_back(aux);
             unir(subset, v1, v2);
+            s->adicionaAresta(v1,v2);
+            //for(int i=0;i<n+1;i++)
+            //{
+            //    std::cout<<subset[i]<<std::endl;
+            //}
+            //std::cout<<"--------------------------------------------"<<std::endl;
         }
     }
+    //for (int i = 0; i < n; i++)
+    //{
+    //    Vertice *a = getVertice(listavertice[i]);
+    //    Aresta *e = a->arestas; // TODO: tratar possível dereferenciação de nullptr
+    //    while (e != nullptr)
+    //    {
+    //        int x = buscar(subset,e->id_origem);
+    //        //int y = buscar(subset,e->prox->id_origem);
+    //        if(x!=y)
+    //        {
+    //            aux={x,y};
+    //            F.push_back(aux);
+    //            unir(subset, x, y);
+    //            s->adicionaAresta(x,y);
+    //        }
+    //    }
+    //}
+    //for(int i=0;i<listaaresta.size();i++)
+    //{
+    //    for(int j=0;j<2;j++)
+    //   {
+    //        std::cout<<listaaresta[i][j]<<std::endl;
+    //    }
+    //}
+    return s;
 }
