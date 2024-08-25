@@ -450,7 +450,8 @@ void Grafo::atualizaMatrizDistancias(std::vector<std::vector<int>>& distancias, 
 }
 
 /**
- * Retorna o peso de uma aresta. Se o vértice de origem não existir, retorna -1. Se não existir a aresta, retorna -1.
+ * Retorna o peso de uma aresta. Se o vértice de origem não existir, retorna -1. Se não existir a aresta,
+ * retorna INF (máximo inteiro).
  */
 int Grafo::custo(int idVerticeU, int idVerticeV)
 {
@@ -458,13 +459,16 @@ int Grafo::custo(int idVerticeU, int idVerticeV)
     if (u == nullptr) {
         return -1;
     }
-    for (Aresta* e : u->arestas)
-        if (e->destino->id == idVerticeV)
-            return e->peso;
-    return INT_MAX;
+    Aresta* aresta = u->arestas;
+    while (aresta != nullptr) {
+        if (aresta->destino->id == idVerticeV) {
+            return aresta->peso;
+        }
+        aresta = aresta->prox;
+    }
+    return INF;
 }
 
-void Grafo::caminhoMinimoFloyd(int idVerticeU, int idVerticeV)
 
  /**
  * Retorna a matriz representativa dos caminhos mínimos entre quaisquer vértices do grafo.
@@ -956,18 +960,20 @@ void Grafo::prim(std::vector<int>& listavertice)
     //Tratamento de erro
     int n=listavertice.size(); int prox[n];
     std::vector<std::vector<int>> F;
-    int menorid; int menorpeso=INT_MAX;
+    int menorid; int menorpeso=INF;
     int u; int v;
     for(int i=0; i<n; i++)
     {
         Vertice* a = getVertice(listavertice[i]);
-        for (Aresta* e : a->arestas)
+        Aresta* e = a->arestas; // TODO: tratar possível dereferenciação de nullptr
+        while (e != nullptr)
         {
             if(e->peso<=menorpeso)
             {
                 menorpeso=e->peso; menorid=a->id;
                 u=a->id; v=e->destino->id;
             }
+            e = e->prox;
         }
     }
     std::vector<int> aux = {u,v}; 
@@ -986,7 +992,7 @@ void Grafo::prim(std::vector<int>& listavertice)
     prox[u-1]=0; prox[v-1]=0; int cont=0; int j=1;
     while(cont<n-2)
     {
-        int menor2=INT_MAX;
+        int menor2=INF;
         for(int i=1;i<=n;i++)
         {
             if(prox[i-1]!=0)
@@ -1024,8 +1030,9 @@ void Grafo::kruskal(std::vector<int>& listavertice)
     int u; int v;
     for(int i=0; i<n; i++)
     {
-        Vertice* a = getVertice(listavertice[i]);
-        for (Aresta* e : a->arestas)
+        Vertice* a = getVertice(listavertice[i]); // TODO: tratar possível dereferenciação de nullptr
+        Aresta* e = a->arestas;
+        while (e != nullptr)
         {
             if(a->id<e->destino->id)
             {
@@ -1033,6 +1040,7 @@ void Grafo::kruskal(std::vector<int>& listavertice)
                 aux={u,v};
                 listaaresta.push_back(aux);
             }
+            e = e->prox;
         }
     }
     int temp1=0; int temp2=0; int size=listaaresta.size();
