@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include "Grafo.hpp"
+#include <string>
 
 
 int main(int argc, char *argv[])
@@ -18,7 +19,6 @@ int main(int argc, char *argv[])
     output.open(arquivoOutput);
     Grafo *g = new Grafo(input, direcionado, arestasPonderadas, verticesPonderados);
     std::vector<int> subconjunto =  {1, 2, 3, 4, 5, 6}; //subconjunto de vértices
-    g->kruskal(subconjunto)->print(output);
     g->print();
     g->print(output);
     input.close();

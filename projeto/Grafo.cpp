@@ -12,6 +12,9 @@
 const int INF = std::numeric_limits<int>::max();
 const int MIN = std::numeric_limits<int>::min();
 
+const int INF = std::numeric_limits<int>::max();
+const int MIN = std::numeric_limits<int>::min();
+
 /**
  * Construtor que instancia um grafo de acordo com as arestas definidas em um arquivo .dat lido como argumento para a execução.
  */
