@@ -996,7 +996,7 @@ Grafo* Grafo::caminhoMinimoDijkstra(int idOrigem, int idDestino)
                 verticeAtual = vertice;
             }
         }
-        if (verticeAtual == nullptr) // não deveria acontecer
+        if (verticeAtual == nullptr)
         {
             break;
         }
@@ -1015,10 +1015,9 @@ Grafo* Grafo::caminhoMinimoDijkstra(int idOrigem, int idDestino)
         }
     }
 
-    // TODO: imprimir caminho no terminal
-    // TODO: reconstruir e retornar grafo caminho
     Vertice *atual = getVertice(idDestino);
-    if(distancias[atual] == INF){
+    if (distancias[atual] == INF)
+    {
         std::cout << "Não existe qualquer caminho entre: " << idOrigem << " e " << idDestino;
         return new Grafo(direcionado, 0, 0);
     }
@@ -1032,9 +1031,11 @@ Grafo* Grafo::caminhoMinimoDijkstra(int idOrigem, int idDestino)
     for (int i = caminho.size() - 1; i > 0 ; i--) {
         grafoCaminho->adicionaAresta(caminho[i], caminho[i - 1]);
     }
-    for (Vertice *v : vertices)
+    std::cout << "Caminho mínimo entre " << idOrigem << " e " << idDestino << " com custo " << distancias[getVertice(idDestino)] << ":\n";
+    for (int i = caminho.size() - 1; i > 0; i--)
     {
-        std::cout << "Vertice " << v->id << " tem distancia " << (distancias[v] == INF ? "INF" : std::to_string(distancias[v])) << '\n';
+        std::cout << caminho[i] << " -> ";
     }
+    std::cout << caminho[0] << std::endl;
     return grafoCaminho;
 }
