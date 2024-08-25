@@ -982,7 +982,6 @@ void Grafo::caminhoMinimoDijkstra(int idOrigem, int idDestino)
     }
     while (existeVerticeAberto(abertos))
     {
-        std::cout << "Checando vértices abertos\n";
         Vertice *verticeAtual = nullptr;
         int menorDistancia = INF;
         for (Vertice *vertice : vertices)
@@ -999,7 +998,7 @@ void Grafo::caminhoMinimoDijkstra(int idOrigem, int idDestino)
         }
         if (verticeAtual == nullptr) // não deveria acontecer
         {
-            return; // retornar nullptr
+            break;
         }
         abertos[verticeAtual] = false;
         Aresta *e = verticeAtual->arestas;
@@ -1018,8 +1017,9 @@ void Grafo::caminhoMinimoDijkstra(int idOrigem, int idDestino)
 
     // TODO: imprimir caminho no terminal
     // TODO: reconstruir e retornar grafo caminho
+
     for (Vertice *v : vertices)
     {
-        std::cout << "Vertice " << v->id << " tem distancia " << distancias[v] << '\n';
+        std::cout << "Vertice " << v->id << " tem distancia " << (distancias[v] == INF ? "INF" : std::to_string(distancias[v])) << '\n';
     }
 }
