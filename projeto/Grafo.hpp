@@ -30,10 +30,10 @@ public:
     void analiseExcentricidade();
     Grafo *verticesDeArticulacao();
     Grafo *caminhamentoProfundidade(int idVerticeInicio);
-      void prim(std::vector<int> &listavertice);
+    Grafo* prim(std::vector<int> &listavertice);
     int buscar(int subset[], int i);
     void unir(int subset[], int v1, int v2);
-    void kruskal(std::vector<int> &listavertice);
+    Grafo* kruskal(std::vector<int> &listavertice);
 
 private:
     bool direcionado;
@@ -58,7 +58,8 @@ private:
     std::set<int> encontraArticulacoesComponente(Vertice *v, std::set<Vertice*> componente);
     int getExcentricidade(const std::vector<int> &distanciasVertice);
     void caminhaProfundidade(Vertice *u, std::map<Vertice *, int> &cor, Grafo* arvoreProfundidade);
-      int custo(int idVerticeU, int idVerticeV);
+    int custo(int idVerticeU, int idVerticeV);
+    Grafo *subgrafoInduzidoVertices(std::vector<int> &subconjunto);
 
 };
 
