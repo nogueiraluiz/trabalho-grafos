@@ -7,16 +7,16 @@ void opcoes(Grafo* g, std::ofstream& output)
 {
     int opcao = 0;
     while (opcao != 10) {
-        std::cout << "Escolha uma opção:\n";
+        std::cout << "Escolha uma opcao (Digite somente numeos):\n";
         std::cout << "1 - Fecho transitivo direto\n";
         std::cout << "2 - Fecho transitivo indireto\n";
-        std::cout << "3 - Caminho mínimo por Dijkstra\n";
-        std::cout << "4 - Caminho mínimo por Floyd\n";
+        std::cout << "3 - Caminho minimo por Dijkstra\n";
+        std::cout << "4 - Caminho minimo por Floyd\n";
         std::cout << "5 - AGM (Prim)\n";
         std::cout << "6 - AGM (Kruskal)\n";
-        std::cout << "7 - Árvore de caminhamento em profundidade\n";
-        std::cout << "8 - Análise de excentricidade\n";
-        std::cout << "9 - Conjunto dos vértices de articulação\n";
+        std::cout << "7 - Arvore de caminhamento em profundidade\n";
+        std::cout << "8 - Analise de excentricidade\n";
+        std::cout << "9 - Conjunto dos vértices de articulacao\n";
         std::cout << "10 - Sair" << std::endl;
         std::cin >> opcao;
         switch (opcao)
@@ -24,15 +24,15 @@ void opcoes(Grafo* g, std::ofstream& output)
         case 1:
         {
             int idVert;
-            std::cout << "Escolha id do vértice que deseja usar a funcionalidade Fecho transitivo direto:";
+            std::cout << "Escolha id do vertice que deseja usar a funcionalidade Fecho transitivo direto:";
             std::cin >> idVert;
             Grafo *fecho = g->fechoTransitivoDireto(idVert);
             if (fecho != nullptr)
             {
                 int r;
-                while (r != 1 || r != 2)
+                while (r != 1 && r != 2)
                 {
-                    std::cout << "Deseja salvar no arquivo? Sim-1 Não-2";
+                    std::cout << "Deseja salvar no arquivo? Sim-1 Nao-2 ";
                     std::cin >> r;
                     std::cout << std::endl;
                 }
@@ -40,10 +40,102 @@ void opcoes(Grafo* g, std::ofstream& output)
                 {
                     g->print(output);
                 }
+                r=0;
             }
             delete fecho;
             break;
         }
+        
+        case 2:
+        {
+            int idVert;
+            std::cout << "Escolha id do vertice que deseja usar a funcionalidade Fecho transitivo indireto:";
+            std::cin >> idVert;
+            Grafo* fecho = g->fechoTransitivoIndireto(idVert);
+            std::cout << std::endl;
+            if(fecho != nullptr){
+                int r;
+                while(r!=1 && r!=2){
+                    std::cout << "Deseja salvar no arquivo? Sim-1 Nao-2 ";
+                    std::cin >> r;
+                    std::cout << std::endl;
+                }
+                if(r==1){
+                    g->print(output);
+                }
+                r=0;
+            }
+            delete fecho;
+            break;
+        }
+
+        case 3:
+        {
+            int idInicio;
+            int idFinal;
+            std::cout << "Escolha id do vertice para ser o início do caminho minimo:";
+            std::cin >> idInicio;
+            std::cout << std::endl;
+            std::cout << "Escolha id do vertice para ser o destino do caminho minimo:";
+            std::cin >> idFinal;
+            std::cout << std::endl;
+            Grafo* fecho = g->caminhoMinimoDijkstra(idInicio, idFinal);
+            std::cout << std::endl;
+            if(fecho != nullptr){
+                int r;
+                while(r!=1 && r!=2){
+                    std::cout << "Deseja salvar no arquivo? Sim-1 Não-2 ";
+                    std::cin >> r;
+                    std::cout << std::endl;
+                }
+                if(r==1){
+                    g->print(output);
+                }
+                r=0;
+            }
+            delete fecho;
+            break;
+        }
+
+        case 4:
+        {
+            int idInicio;
+            int idFinal;
+            std::cout << "Escolha id do vértice para ser o início do caminho mínimo:";
+            std::cin >> idInicio;
+            std::cout << std::endl;
+            std::cout << "Escolha id do vértice para ser o destino do caminho mínimo:";
+            std::cin >> idFinal;
+            std::cout << std::endl;
+            Grafo* fecho = g->caminhoMinimoFloyd(idInicio, idFinal);
+            std::cout << std::endl;
+            if(fecho != nullptr){
+                int r;
+                while(r!=1 && r!=2){
+                    std::cout << "Deseja salvar no arquivo? Sim-1 Não-2 ";
+                    std::cin >> r;
+                    std::cout << std::endl;
+                }
+                if(r==1){
+                    g->print(output);
+                }
+                r=0;
+            }
+            delete fecho;
+            break;
+        }
+
+        case 5:
+        {
+            int idv;
+        }
+
+        case 10:
+        {
+            std::cout << "Saindo!\n";
+            break;
+        }
+
         default:
         {
             std::cout << "Opção inválida\n";
