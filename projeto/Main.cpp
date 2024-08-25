@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include "Grafo.hpp"
+#include <string>
 
 void opcoes(Grafo* g, std::ofstream& output)
 {
