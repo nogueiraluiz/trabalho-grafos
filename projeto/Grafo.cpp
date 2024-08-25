@@ -462,7 +462,6 @@ std::vector<std::vector<int>> Grafo::getMatrizDistancias()
 }
 
 void Grafo::inicializaMatrizesFloyd(std::vector<std::vector<int>>& distancias, std::vector<std::vector<int>>& proximos, int ordem)
-<<<<<<< HEAD
 {
     for (int i = 0; i < ordem; i++)
     {
@@ -504,90 +503,6 @@ void Grafo::atualizaMatrizesFloyd(std::vector<std::vector<int>>& distancias, std
     if (indice == ordem)
     {
         return;
-    }
-    for (int i = 0; i < ordem; i++)
-    {
-        if (i == indice) 
-        {
-            continue; // é necessário?
-        }
-        for (int j = 0; j < ordem; j++)
-        {
-            if (j == indice) 
-            {
-                continue; // é necessário?
-            }
-            int distanciaAtual = distancias[i][j];
-            if (distancias[i][indice] == INF || distancias[indice][j] == INF)
-            {
-                continue; // evitando cálculos imprevisíveis e irrelevantes
-            }
-            int novaDistancia = distancias[i][indice] + distancias[indice][j];
-            if (novaDistancia < distanciaAtual)
-            {
-                distancias[i][j] = novaDistancia;
-                proximos[i][j] = proximos[i][indice];
-            }
-        }
-    }
-    atualizaMatrizesFloyd(distancias, proximos, ordem, indice + 1);
-}
-
-/**
- * Calcula o caminho mínimo entre dois vértices do grafo.
- * - Caso o grafo não possua arestas ponderadas, retorna um nullptr
- * - Caso um ou ambos os vértices não exista, retorna um nullptr
- * - Caso não exista caminho entre os vértices, retorna um grafo vazio
- * - Caso exista caminho, retorna um grafo com as arestas que compõem o caminho mínimo
- */
-Grafo* Grafo::caminhoMinimoFloyd(int idVerticeU, int idVerticeV)
-{
-    if (!arestasPonderadas) {
-        std::cout << "As operacoes de caminho minimo nao sao permitidas para grafos sem ponderacao nas arestas" << std::endl;
-        return nullptr;
-=======
-{
-    for (int i = 0; i < ordem; i++)
-    {
-        std::vector<int> linhaDistancias;
-        std::vector<int> linhaProximos;
-        for (int j = 0; j < ordem; j++)
-        {
-            if (i == j)
-            {
-                linhaDistancias.push_back(0);
-                linhaProximos.push_back(j);
-            }
-            else
-            {
-                linhaDistancias.push_back(INF);
-                linhaProximos.push_back(-1);
-            } 
-        }
-        distancias.push_back(linhaDistancias);
-        proximos.push_back(linhaProximos);
-    }
-    for (int i = 0; i < ordem; i++)
-    {
-        Vertice* u = vertices[i];
-        Aresta *aresta = u->arestas;
-        while (aresta != nullptr)
-        {
-            Vertice* v = aresta->destino;
-            int j = encontraIndiceVertice(v->id);
-            distancias[i][j] = aresta->peso; // custo é o peso da aresta
-            proximos[i][j] = j; // o próximo é o vértice de destino da aresta
-            aresta = aresta->prox;
-        }
-    }
-}
-
-void Grafo::atualizaMatrizesFloyd(std::vector<std::vector<int>>& distancias, std::vector<std::vector<int>>& proximos, int ordem, int indice)
-{
-    if (indice == ordem)
-    {
-        return;
->>>>>>> 61b8265bfec10e0025c03a8b63ff27d549d3a9d7
     }
     for (int i = 0; i < ordem; i++)
     {
@@ -747,12 +662,6 @@ void Grafo::liberaMemoriaArestas(Aresta* inicio)
 {
     Aresta* aresta = inicio;
     while (aresta != nullptr)
-<<<<<<< HEAD
-    {
-        Aresta* prox = aresta->prox;
-        delete aresta;
-        aresta = prox;
-=======
     {
         Aresta* prox = aresta->prox;
         delete aresta;
@@ -784,14 +693,11 @@ void Grafo::caminhaProfundidade(Vertice *u, std::map<Vertice *, int> &cor, Grafo
             arvore->adicionaAresta(u->id, v->id, -1);
         }
         e = e->prox;
->>>>>>> 61b8265bfec10e0025c03a8b63ff27d549d3a9d7
     }
     cor[u] = 2;
 }
 
 /**
-<<<<<<< HEAD
-=======
  * Imprime no terminal e retorna como um grafo a árvore de caminhamento em
  * profundidade do grafo partindo do vértice especificado.
  * - Caso o grafo seja vazio, retorna um nullptr;
@@ -827,7 +733,6 @@ Grafo* Grafo::caminhamentoProfundidade(int idVerticeInicio)
 }
 
 /**
->>>>>>> 61b8265bfec10e0025c03a8b63ff27d549d3a9d7
  * Remove um vértice do grafo, caso exista, tratando de remover as adjacências por ele definidas.
  */
 void Grafo::removeVertice(int idVertice)
@@ -1011,8 +916,6 @@ Grafo* Grafo::verticesDeArticulacao()
     }
     return grafoArticulacoes;
 }
-<<<<<<< HEAD
-=======
 
 /**
  * Método auxiliar para a busca em profundidade de uma componente conexa.
@@ -1297,4 +1200,3 @@ Grafo* Grafo::caminhoMinimoDijkstra(int idOrigem, int idDestino)
     std::cout << caminho[0] << std::endl;
     return grafoCaminho;
 }
->>>>>>> 61b8265bfec10e0025c03a8b63ff27d549d3a9d7

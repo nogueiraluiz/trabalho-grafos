@@ -31,11 +31,8 @@ public:
     Grafo *caminhoMinimoFloyd(int idVerticeU, int idVerticeV);
     void analiseExcentricidade();
     Grafo *verticesDeArticulacao();
-<<<<<<< HEAD
-=======
     Grafo *caminhamentoProfundidade(int idVerticeInicio);
     Grafo *caminhoMinimoDijkstra(int idOrigem, int idDestino);
->>>>>>> 61b8265bfec10e0025c03a8b63ff27d549d3a9d7
 
 private:
     bool direcionado;
@@ -51,10 +48,6 @@ private:
     std::vector<std::vector<int>> getMatrizDistancias();
     void inicializaMatrizesFloyd(std::vector<std::vector<int>>& distancias, std::vector<std::vector<int>>& proximos, int ordem);
     void atualizaMatrizesFloyd(std::vector<std::vector<int>>& distancias, std::vector<std::vector<int>>& proximos, int ordem, int indice);
-<<<<<<< HEAD
-    int getExcentricidade(const std::vector<int>& distanciasVertice);
-=======
->>>>>>> 61b8265bfec10e0025c03a8b63ff27d549d3a9d7
     bool auxFechoIndireto(std::set<int>& fecho, std::vector<Vertice*>& naoUtilizados, Grafo *grafoFecho);
     void liberaMemoriaArestas(Aresta* arestas);
     void buscaProfundidadeComponente(Vertice *v, std::map<Vertice*, bool>& usados, std::set<Vertice*>& componente);
@@ -62,14 +55,10 @@ private:
     std::set<std::set<Vertice*>> getComponentesConexas();
     void buscaProfundidadeArticulacoes(std::set<int>& articulacoes, Vertice *v, Vertice* pai, std::map<int, int>& tempoEntrada, std::map<int, int>& minimo, std::map<int, bool> visitado, int& cronometro);
     std::set<int> encontraArticulacoesComponente(Vertice *v, std::set<Vertice*> componente);
-<<<<<<< HEAD
-
-=======
     int getExcentricidade(const std::vector<int> &distanciasVertice);
     void caminhaProfundidade(Vertice *u, std::map<Vertice *, int> &cor, Grafo* arvoreProfundidade);
     bool existeVerticeAberto(std::map<Vertice *, bool> &abertos);
   
->>>>>>> 61b8265bfec10e0025c03a8b63ff27d549d3a9d7
 };
 
 #endif
