@@ -32,7 +32,7 @@ public:
     void analiseExcentricidade();
     Grafo *verticesDeArticulacao();
     Grafo *caminhamentoProfundidade(int idVerticeInicio);
-    void caminhoMinimoDijkstra(int idOrigem, int idDestino);
+    Grafo *caminhoMinimoDijkstra(int idOrigem, int idDestino);
 
 private:
     bool direcionado;

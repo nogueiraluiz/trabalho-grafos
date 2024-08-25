@@ -941,23 +941,23 @@ bool Grafo::existeVerticeAberto(std::map<Vertice *, bool> &abertos)
  * - Caso não exista caminho entre os vértices, retorna um grafo vazio
  * Obs.: comportamento indefinido para grafos com ciclos negativos.
  */
-void Grafo::caminhoMinimoDijkstra(int idOrigem, int idDestino)
+Grafo* Grafo::caminhoMinimoDijkstra(int idOrigem, int idDestino)
 {
     if (!arestasPonderadas)
     {
         std::cout << "O grafo ter arestas ponderadas\n";
-        return; // retornar nullptr
+        return nullptr; 
     }
     Vertice *v = getVertice(idOrigem);
     if (v == nullptr)
     {
         std::cout << "Nao existe no grafo vertice com o id especificado (" << idOrigem << ")\n";
-        return; // retornar nullptr
+        return nullptr; 
     }
     if (getVertice(idDestino) == nullptr)
     {
         std::cout << "Nao existe no grafo vertice com o id especificado (" << idDestino << ")\n";
-        return; // retornar nullptr
+        return nullptr; 
     }
     std::map<Vertice *, bool> abertos;
     for (Vertice *vertice : vertices)
@@ -1017,9 +1017,24 @@ void Grafo::caminhoMinimoDijkstra(int idOrigem, int idDestino)
 
     // TODO: imprimir caminho no terminal
     // TODO: reconstruir e retornar grafo caminho
-
+    Vertice *atual = getVertice(idDestino);
+    if(distancias[atual] == INF){
+        std::cout << "Não existe qualquer caminho entre: " << idOrigem << " e " << idDestino;
+        return new Grafo(direcionado, 0, 0);
+    }
+    std::vector<int> caminho = {atual->id};
+    while (atual != v)
+    {
+        atual = predecessores[atual];
+        caminho.push_back(atual->id);
+    }
+    Grafo* grafoCaminho = new Grafo(direcionado, 0, 0);
+    for (int i = caminho.size() - 1; i > 0 ; i--) {
+        grafoCaminho->adicionaAresta(caminho[i], caminho[i - 1]);
+    }
     for (Vertice *v : vertices)
     {
         std::cout << "Vertice " << v->id << " tem distancia " << (distancias[v] == INF ? "INF" : std::to_string(distancias[v])) << '\n';
     }
+    return grafoCaminho;
 }
