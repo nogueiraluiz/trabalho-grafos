@@ -30,10 +30,10 @@ public:
     void analiseExcentricidade();
     Grafo *verticesDeArticulacao();
     Grafo *caminhamentoProfundidade(int idVerticeInicio);
-    Grafo* prim(std::vector<int> &listavertice);
+    Grafo* arvoreGeradoraMinimaPrim(std::vector<int> &subconjunto);
     int buscar(int subset[], int i);
     void unir(int subset[], int v1, int v2);
-    Grafo* kruskal(std::vector<int> &listavertice);
+    Grafo* arvoreGeradoraMinimaKruskal(std::vector<int> &subconjunto);
 
 private:
     bool direcionado;
