@@ -38,12 +38,6 @@ void opcoes(Grafo* g, std::ofstream& output)
                 delete fecho;
             }
 
-            case 2:
-            int idVert;
-            std::cout << "Escolha id do vértice que deseja usar a funcionalidade Fecho transitivo indireto:";
-            std::cin >> idVert;
-
-
             // TODO: implementar os tratamentos especiais de cada opção (obtenção do parâmetro que o usuário deseja)
             default:
                 std::cout << "Opção inválida\n";
