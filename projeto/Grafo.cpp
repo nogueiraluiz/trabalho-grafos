@@ -40,7 +40,7 @@ Grafo::Grafo(std::ifstream &arquivoInstancia, bool direcionado, bool arestasPond
 /**
  * Construtor mais básico, não define quaisquer elementos dos conjuntos de vértices e de arestas.
  */
-Grafo::Grafo(bool direcionado, bool verticesPonderados, bool arestasPonderadas)
+Grafo::Grafo(bool direcionado, bool arestasPonderadas, bool verticesPonderados)
 {
     this->direcionado = direcionado;
     this->arestasPonderadas = arestasPonderadas;
@@ -916,79 +916,287 @@ Grafo* Grafo::verticesDeArticulacao()
     }
     return grafoArticulacoes;
 }
-  
-bool Grafo::auxDijkstra() {
-    for (auto v : vertices) {
-        if (v->aberto && v->distancia != std::numeric_limits<int>::max()) {
+
+/**
+ * Método auxiliar para a busca em profundidade de uma componente conexa.
+ * O método é recursivo e, a cada chamada, adiciona um vértice ao conjunto que representa a componente conexa.
+ * Parâmetros:
+ * - v: vértice de início da busca;
+ * - usados: mapa que indica quais vértices já foram visitados;
+ * - componente: conjunto que armazena os vértices da componente conexa, inicialmente, contem apenas o vértice da primeira chamada.
+ */
+void Grafo::buscaProfundidadeComponente(Vertice *v, std::map<Vertice*, bool>& usados, std::set<Vertice*>& componente)
+{
+    Aresta *aresta = v->arestas;
+    while (aresta != nullptr)
+    {
+        Vertice *u = aresta->destino;
+        if (!usados[u])
+        {
+            usados[u] = true;
+            componente.insert(u);
+            buscaProfundidadeComponente(u, usados, componente);
+        }
+        aresta = aresta->prox;
+    }
+}
+
+/**
+ * Encontra e retorna a componente conexa do grafo que contém o vértice passado como argumento.
+ * Parâmetros:
+ * - v: vértice de início da busca;
+ * - usados: mapa que indica quais vértices já foram visitados.
+ */
+std::set<Vertice*> Grafo::buscaComponente(Vertice *v, std::map<Vertice*, bool>& usados)
+{
+    usados[v] = true;
+    std::set<Vertice*> componente;
+    componente.insert(v);
+    buscaProfundidadeComponente(v, usados, componente);
+    return componente;
+}
+
+/**
+ * Retorna um set de set de vértices, onde cada set interno representa uma componente conexa do grafo.
+ */
+std::set<std::set<Vertice*>> Grafo::getComponentesConexas()
+{
+    std::set<std::set<Vertice*>> componentes;
+    std::map<Vertice*, bool> usados;
+    for (Vertice* v : vertices)
+    {
+        usados[v] = false;
+    }
+    for (Vertice* v : vertices)
+    {
+        if (!usados[v])
+        {
+            std::set<Vertice*> componente = buscaComponente(v, usados);
+            componentes.insert(componente);
+        }
+    }
+    return componentes;
+}
+
+/**
+ * Através de uma busca em profundidade, encontra quais são os vértices de articulação
+ * da componente conexa que contém o vértice passado como argumento.
+ * Parâmetros:
+ * - articulacoes: conjunto que armazena os vértices de articulação;
+ * - v: vértice de início da busca;
+ * - pai: vértice pai do vértice de início da busca;
+ * - tempoEntrada: mapa que armazena o tempo de entrada de cada vértice na busca;
+ * - minimo: mapa que armazena o menor tempo de entrada dos vértices alcançáveis por cada vértice;
+ * - visitado: mapa que indica quais vértices já foram visitados;
+ * - cronometro: contador que armazena o tempo de entrada dos vértices.
+ */
+void Grafo::buscaProfundidadeArticulacoes(std::set<int> &articulacoes, Vertice *v, Vertice *pai,
+        std::map<int, int> &tempoEntrada, std::map<int, int> &minimo, std::map<int, bool> visitado, int &cronometro)
+{
+    visitado[v->id] = true;
+    cronometro++;
+    tempoEntrada[v->id] = cronometro;
+    minimo[v->id] = cronometro;
+    int filhos = 0;
+    Aresta *aresta = v->arestas;
+    while (aresta != nullptr)
+    {
+        Vertice *u = aresta->destino;
+        if (u == pai)
+        {
+            aresta = aresta->prox;
+            continue;
+        }
+        if (visitado[u->id])
+        {
+            minimo[v->id] = std::min(minimo[v->id], tempoEntrada[u->id]);
+        }
+        else
+        {
+            buscaProfundidadeArticulacoes(articulacoes, u, v, tempoEntrada, minimo, visitado, cronometro);
+            minimo[v->id] = std::min(minimo[v->id], minimo[u->id]);
+            if (minimo[u->id] >= tempoEntrada[v->id] && pai != nullptr)
+            {
+                articulacoes.insert(v->id);
+            }
+            filhos++;
+        }
+        aresta = aresta->prox;
+    }
+}
+
+/**
+ * Método auxiliar para a busca dos vértices de articulação de uma componente conexa.
+ * Parâmetros:
+ * - v: vértice de início da busca;
+ * - componente: conjunto que armazena os vértices da componente conexa.
+ * Retorna um set de inteiros, com os IDs dos vértices de articulação.
+ */
+std::set<int> Grafo::encontraArticulacoesComponente(Vertice *v, std::set<Vertice*> componente)
+{
+    int cronometro = 0;
+    std::set<int> articulacoes;
+    std::map<int, int> tempoEntrada, minimo;
+    std::map<int, bool> visitado;
+    for (Vertice* v : componente) // inicializações
+    {
+        tempoEntrada[v->id] = -1;
+        minimo[v->id] = -1;
+        visitado[v->id] = false;
+    }
+    buscaProfundidadeArticulacoes(articulacoes, v, nullptr, tempoEntrada, minimo, visitado, cronometro);
+    return articulacoes;
+}
+
+/**
+ * Retorna um grafo com os vértices de articulação do grafo original.
+ * - Caso o grafo não possua vértices, retorna um nullptr.
+ */
+Grafo* Grafo::verticesDeArticulacao()
+{
+    if (vertices.empty())
+    {
+        std::cout << "O grafo nao possui vertices" << std::endl;
+        return nullptr;
+    }
+    Grafo *grafoArticulacoes = new Grafo(direcionado, 0, 0);
+    std::set<std::set<Vertice*>> componentes = getComponentesConexas();
+    std::cout << "Componentes conexas do grafo: " << componentes.size() << std::endl;
+    for (std::set<std::set<Vertice*>>::iterator it = componentes.begin(); it != componentes.end(); it++)
+    {
+        std::set<Vertice*> componente = *it;
+        int cronometro = 0;
+
+        Vertice *v = *componente.begin();
+        std::cout << "Componente conexa comecando em " << v->id << std::endl;
+        std::set<int> articulacoes = encontraArticulacoesComponente(v, componente);
+        for (int id : articulacoes)
+        {
+            grafoArticulacoes->adicionaVertice(id);
+        }
+    }
+    return grafoArticulacoes;
+}
+
+/**
+ * Método auxiliar para a obtenção do caminho mínimo entre dois vértices do grafo utilizando
+ * o algoritmo de Moore-Dijkstra.
+ */
+bool Grafo::existeVerticeAberto(std::map<Vertice *, bool> &abertos)
+{
+    for (std::map<Vertice *, bool>::iterator it = abertos.begin(); it != abertos.end(); it++)
+    {
+        if (it->second)
+        {
             return true;
         }
     }
     return false;
 }
 
-std::list<int> Grafo::listaAdjacentes(int idVertice) {
-    std::list<int> lista;
-    for (auto a : getVertice(idVertice)->arestas) {
-        lista.push_front(a->destino->id);
-    }
-    return lista;
-}
-
-void Grafo::Dijkstra(int idVertice) {
-    if (!direcionado)
-    {
-        std::cout << "O grafo deve ser direcionado\n";
-        return;
-    }
-    if(!arestasPonderadas)
+/**
+ * Calcula o caminho mínimo entre dois vértices do grafo utilizando o algoritmo
+ * de Moore-Dijkstra adaptado para arestas de custo negativo.
+ * - Caso o grafo não possua arestas ponderadas, retorna um nullptr
+ * - Caso um ou ambos os vértices não exista, retorna um nullptr
+ * - Caso não exista caminho entre os vértices, retorna um grafo vazio
+ * Obs.: comportamento indefinido para grafos com ciclos negativos.
+ */
+Grafo* Grafo::caminhoMinimoDijkstra(int idOrigem, int idDestino)
+{
+    if (!arestasPonderadas)
     {
         std::cout << "O grafo ter arestas ponderadas\n";
-        return;
+        return nullptr; 
     }
-    Vertice *v = getVertice(idVertice);
+    Vertice *v = getVertice(idOrigem);
     if (v == nullptr)
     {
-        std::cout << "Nao existe no grafo vertice com o id especificado (" << idVertice << ")\n";
-        return;
+        std::cout << "Nao existe no grafo vertice com o id especificado (" << idOrigem << ")\n";
+        return nullptr; 
     }
-    for(auto a: vertices){
-        for (auto ares : a->arestas) {
-            if(a->peso < 0){
-                std::cout << "O peso das sarestas não pode ser negativo\n";
-                return;
+    if (getVertice(idDestino) == nullptr)
+    {
+        std::cout << "Nao existe no grafo vertice com o id especificado (" << idDestino << ")\n";
+        return nullptr; 
+    }
+    std::map<Vertice *, bool> abertos;
+    for (Vertice *vertice : vertices)
+    {
+        abertos[vertice] = true;
+    }
+    std::map<Vertice *, int> distancias;
+    std::map<Vertice *, Vertice *> predecessores;
+    for (Vertice *vertice : vertices)
+    {
+        distancias[vertice] = INF;
+        predecessores[vertice] = nullptr;
+    }
+    distancias[v] = 0;
+    predecessores[v] = nullptr;
+    Aresta *e = v->arestas;
+    while (e != nullptr)
+    {
+        distancias[e->destino] = e->peso;
+        predecessores[e->destino] = v;
+        e = e->prox;
+    }
+    while (existeVerticeAberto(abertos))
+    {
+        Vertice *verticeAtual = nullptr;
+        int menorDistancia = INF;
+        for (Vertice *vertice : vertices)
+        {
+            if (!abertos[vertice])
+            {
+                continue;
+            }
+            if (distancias[vertice] < menorDistancia)
+            {
+                menorDistancia = distancias[vertice];
+                verticeAtual = vertice;
             }
         }
-    }
-    v->distancia = 0; // Distância do vértice de origem para ele mesmo é 0
-
-    while (auxDijkstra()) {
-        // Pegar o vértice com a menor distância
-        Vertice* verticeAtual = nullptr;
-        int menorDistancia = std::numeric_limits<int>::max();
-        for (auto vert : vertices) {
-            if (vert->aberto && vert->distancia < menorDistancia) {
-                menorDistancia = vert->distancia;
-                verticeAtual = vert;
-            }
-        }
-
-        // Verificar se encontrou um vértice válido
-        if (verticeAtual == nullptr) {
+        if (verticeAtual == nullptr)
+        {
             break;
         }
-
-        verticeAtual->aberto = false; // Marcar o vértice atual como fechado
-        std::cout << verticeAtual->id << " distancia: " << verticeAtual->distancia << "\n";
-        
-        // Atualizar as distâncias dos vértices adjacentes
-        for(auto a: vertices){
-            for (auto ares : a->arestas) {
-            Vertice* destino = ares->destino;
-            if (destino->aberto && verticeAtual->distancia + ares->peso < destino->distancia) {
-                destino->distancia = a->distancia + ares->peso;
+        abertos[verticeAtual] = false;
+        Aresta *e = verticeAtual->arestas;
+        while (e != nullptr)
+        {
+            int distancia = distancias[verticeAtual] + e->peso;
+            if (distancia < distancias[e->destino])
+            {
+                distancias[e->destino] = distancia;
+                abertos[e->destino] = true;
+                predecessores[e->destino] = verticeAtual;
             }
-        }
+            e = e->prox;
         }
     }
+
+    Vertice *atual = getVertice(idDestino);
+    if (distancias[atual] == INF)
+    {
+        std::cout << "Não existe qualquer caminho entre: " << idOrigem << " e " << idDestino;
+        return new Grafo(direcionado, 0, 0);
+    }
+    std::vector<int> caminho = {atual->id};
+    while (atual != v)
+    {
+        atual = predecessores[atual];
+        caminho.push_back(atual->id);
+    }
+    Grafo* grafoCaminho = new Grafo(direcionado, 0, 0);
+    for (int i = caminho.size() - 1; i > 0 ; i--) {
+        grafoCaminho->adicionaAresta(caminho[i], caminho[i - 1]);
+    }
+    std::cout << "Caminho mínimo entre " << idOrigem << " e " << idDestino << " com custo " << distancias[getVertice(idDestino)] << ":\n";
+    for (int i = caminho.size() - 1; i > 0; i--)
+    {
+        std::cout << caminho[i] << " -> ";
+    }
+    std::cout << caminho[0] << std::endl;
+    return grafoCaminho;
 }
-    
