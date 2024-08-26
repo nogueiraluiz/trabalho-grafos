@@ -1062,36 +1062,6 @@ Grafo* Grafo::caminhoMinimoDijkstra(int idOrigem, int idDestino)
 }
 
 /**
- * Retorna um grafo com os vértices de articulação do grafo original.
- * - Caso o grafo não possua vértices, retorna um nullptr.
- */
-Grafo* Grafo::verticesDeArticulacao()
-{
-    if (vertices.empty())
-    {
-        std::cout << "O grafo nao possui vertices" << std::endl;
-        return nullptr;
-    }
-    Grafo *grafoArticulacoes = new Grafo(direcionado, 0, 0);
-    std::set<std::set<Vertice*>> componentes = getComponentesConexas();
-    std::cout << "Componentes conexas do grafo: " << componentes.size() << std::endl;
-    for (std::set<std::set<Vertice*>>::iterator it = componentes.begin(); it != componentes.end(); it++)
-    {
-        std::set<Vertice*> componente = *it;
-        int cronometro = 0;
-
-        Vertice *v = *componente.begin();
-        std::cout << "Componente conexa comecando em " << v->id << std::endl;
-        std::set<int> articulacoes = encontraArticulacoesComponente(v, componente);
-        for (int id : articulacoes)
-        {
-            grafoArticulacoes->adicionaVertice(id);
-        }
-    }
-    return grafoArticulacoes;
-}
-
-/**
  * Retorna o subgrafo vértice-induzido pelo 'subconjunto' de vértices.
  * - Caso algum dos vértices não exista no grafo, retorna nullptr.
  */
