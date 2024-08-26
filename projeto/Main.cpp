@@ -127,7 +127,12 @@ void opcoes(Grafo* g, std::ofstream& output)
 
         case 5:
         {
-            int idv;
+            std::vector<int> subconjunto;
+            int n;
+            while(n>0){
+                std::cout << "Digite os id dos vertices que voce deseja na arvore geradora:\n Digite -1 para parar\n";
+                std::cin >> n;
+            }
         }
 
         case 10:
