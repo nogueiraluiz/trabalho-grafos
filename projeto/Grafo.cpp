@@ -147,28 +147,54 @@ void Grafo::adicionaAdjacencias(int idVerticeU, int idVerticeV, int peso)
 /**
  * Adiciona um novo vértice ao grafo, caso não exista um com o id especificado.
  */
-void Grafo::adicionaVertice(int idVertice, int peso)
+bool Grafo::adicionaVertice(int idVertice, int peso)
 {
     if (getVertice(idVertice) != nullptr)
     {
-        return; // já existe o vértice com o id especificado
+        return false; // já existe o vértice com o id especificado
     }
     Vertice *u = new Vertice;
     u->id = idVertice;
     u->peso = peso;
     vertices.push_back(u);
     u->arestas = nullptr;
+    return true;
+}
+
+/**
+ * Remove um vértice do grafo, caso exista, tratando de remover as adjacências por ele definidas.
+ */
+bool Grafo::removeVertice(int idVertice)
+{
+    Vertice *u = getVertice(idVertice);
+    if (u == nullptr)
+    {
+        return false; // vértice buscado não existe
+    }
+    for (Vertice* vertice : vertices)
+    {
+        if (vertice->id != idVertice)
+        {
+            removeAresta(vertice->id, idVertice);
+        }
+    }
+    Aresta *aresta = u->arestas;
+    liberaMemoriaArestas(aresta);
+    std::vector<Vertice*>::iterator it = std::find(vertices.begin(), vertices.end(), u);
+    vertices.erase(it);
+    delete u;
+    return true;
 }
 
 /**
  * Adiciona uma nova aresta ao grafo, caso não exista uma com os vértices especificados.
  * Caso o grafo seja não-direcionado, adiciona a aresta no sentido contrário.
  */
-void Grafo::adicionaAresta(int idVerticeU, int idVerticeV, int peso)
+bool Grafo::adicionaAresta(int idVerticeU, int idVerticeV, int peso)
 {
     if (existeAresta(idVerticeU, idVerticeV))
     {
-        return; // já existe aresta definida pelo par
+        return false; // já existe aresta definida pelo par
     }
     adicionaVertice(idVerticeU);
     adicionaVertice(idVerticeV);
@@ -177,6 +203,7 @@ void Grafo::adicionaAresta(int idVerticeU, int idVerticeV, int peso)
     {
         adicionaAdjacencias(idVerticeV, idVerticeU, peso);
     }
+    return true;
 }
 
 /**
@@ -751,30 +778,6 @@ Grafo* Grafo::caminhamentoProfundidade(int idVerticeInicio)
     caminhaProfundidade(inicial, cor, arvore);
     Printer::printArvoreCaminhamento(vertices);
     return arvore;
-}
-
-/**
- * Remove um vértice do grafo, caso exista, tratando de remover as adjacências por ele definidas.
- */
-void Grafo::removeVertice(int idVertice)
-{
-    Vertice *u = getVertice(idVertice);
-    if (u == nullptr)
-    {
-        return; // vértice buscado não existe
-    }
-    for (Vertice* vertice : vertices)
-    {
-        if (vertice->id != idVertice)
-        {
-            removeAresta(vertice->id, idVertice);
-        }
-    }
-    Aresta *aresta = u->arestas;
-    liberaMemoriaArestas(aresta);
-    std::vector<Vertice*>::iterator it = std::find(vertices.begin(), vertices.end(), u);
-    vertices.erase(it);
-    delete u;
 }
 
 /**
