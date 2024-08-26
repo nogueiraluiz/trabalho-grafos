@@ -3,14 +3,17 @@
 
 #include <iostream>
 #include <fstream>
-#include <list>
 #include <vector>
-#include <limits.h>
-#include <limits>
 #include <set>
 #include <map>
-#include "Vertice.hpp"
+#include <string.h>
+#include <string>
+#include <sstream>
+#include <algorithm>
+#include <limits>
 #include "Aresta.hpp"
+#include "Vertice.hpp"
+#include "Printer.hpp"
 
 class Grafo
 {

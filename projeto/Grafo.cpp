@@ -1,13 +1,4 @@
-#include <iostream>
-#include <vector>
-#include <map>
-#include <string>
-#include <sstream>
-#include <algorithm>
-#include <limits>
 #include "Grafo.hpp"
-#include "Printer.hpp"
-#include <string.h>
 
 const int INF = std::numeric_limits<int>::max();
 const int MIN = std::numeric_limits<int>::min();
@@ -90,7 +81,8 @@ bool Grafo::existeAresta(int idVerticeU, int idVerticeV)
         return false;
     }
     Aresta *aresta = u->arestas;
-    while (aresta != nullptr) {
+    while (aresta != nullptr)
+    {
         if (aresta->destino->id == idVerticeV)
         {
             return true;
@@ -171,7 +163,7 @@ bool Grafo::removeVertice(int idVertice)
     {
         return false; // vértice buscado não existe
     }
-    for (Vertice* vertice : vertices)
+    for (Vertice *vertice : vertices)
     {
         if (vertice->id != idVertice)
         {
@@ -180,7 +172,7 @@ bool Grafo::removeVertice(int idVertice)
     }
     Aresta *aresta = u->arestas;
     liberaMemoriaArestas(aresta);
-    std::vector<Vertice*>::iterator it = std::find(vertices.begin(), vertices.end(), u);
+    std::vector<Vertice *>::iterator it = std::find(vertices.begin(), vertices.end(), u);
     vertices.erase(it);
     delete u;
     return true;
@@ -223,7 +215,8 @@ bool Grafo::removeAresta(int idVerticeU, int idVerticeV)
         return false;
     }
     Aresta *anterior = nullptr;
-    while (e != nullptr) {
+    while (e != nullptr)
+    {
         if (e->destino->id == idVerticeV)
         {
             removida = true;
@@ -236,9 +229,12 @@ bool Grafo::removeAresta(int idVerticeU, int idVerticeV)
     {
         return false;
     }
-    if (e == u->arestas) {
+    if (e == u->arestas)
+    {
         u->arestas = e->prox;
-    } else {
+    }
+    else
+    {
         anterior->prox = e->prox;
     }
     delete e;
@@ -246,10 +242,11 @@ bool Grafo::removeAresta(int idVerticeU, int idVerticeV)
     {
         return removida;
     }
-    Vertice *v = getVertice(idVerticeV); // v não pode ser nullptr nessa linha
+    Vertice *v = getVertice(idVerticeV);
     e = v->arestas;
     anterior = nullptr;
-    while (e != nullptr) {
+    while (e != nullptr)
+    {
         if (e->destino->id == idVerticeU)
         {
             break;
@@ -257,9 +254,12 @@ bool Grafo::removeAresta(int idVerticeU, int idVerticeV)
         anterior = e;
         e = e->prox;
     }
-    if (e == v->arestas) {
+    if (e == v->arestas)
+    {
         v->arestas = e->prox;
-    } else {
+    }
+    else
+    {
         anterior->prox = e->prox;
     }
     delete e;
@@ -273,7 +273,7 @@ bool Grafo::removeAresta(int idVerticeU, int idVerticeV)
 void Grafo::auxFechoDireto(Vertice *vertice, std::set<int> &fecho, Grafo *grafoFecho)
 {
     Aresta *aresta = vertice->arestas;
-    while (aresta != nullptr) 
+    while (aresta != nullptr)
     {
         Vertice *sucessor = aresta->destino;
         aresta = aresta->prox;
@@ -294,7 +294,7 @@ void Grafo::auxFechoDireto(Vertice *vertice, std::set<int> &fecho, Grafo *grafoF
  *      visto que a operação não pode ser feita;
  * - caso o vértice exista, mas seu fecho seja vazia, retorna um grafo também vazio, visto que o próprio vértice não faz parte de seu fecho.
  */
-Grafo* Grafo::fechoTransitivoDireto(int idVertice)
+Grafo *Grafo::fechoTransitivoDireto(int idVertice)
 {
     if (!direcionado)
     {
@@ -307,7 +307,7 @@ Grafo* Grafo::fechoTransitivoDireto(int idVertice)
         std::cout << "Nao existe no grafo vertice com o id especificado (" << idVertice << ")\n";
         return nullptr;
     }
-    Grafo* grafoFecho = new Grafo(direcionado, 0, 0);
+    Grafo *grafoFecho = new Grafo(direcionado, 0, 0);
     std::set<int> fecho;
     Aresta *aresta = v->arestas;
     while (aresta != nullptr)
@@ -335,9 +335,10 @@ Grafo* Grafo::fechoTransitivoDireto(int idVertice)
 /**
  * Retorna: true se foi adicionado ao menos novo vértice ao fecho.
  */
-bool Grafo::auxFechoIndireto(std::set<int>& fecho, std::vector<Vertice*>& naoUtilizados, Grafo *grafoFecho) {
+bool Grafo::auxFechoIndireto(std::set<int> &fecho, std::vector<Vertice *> &naoUtilizados, Grafo *grafoFecho)
+{
     bool adicionou = false;
-    for (std::vector<Vertice*>::iterator it = naoUtilizados.begin(); it != naoUtilizados.end(); it++)
+    for (std::vector<Vertice *>::iterator it = naoUtilizados.begin(); it != naoUtilizados.end(); it++)
     {
         for (int idVerticeFecho : fecho)
         {
@@ -361,7 +362,7 @@ bool Grafo::auxFechoIndireto(std::set<int>& fecho, std::vector<Vertice*>& naoUti
  *      visto que a operação não pode ser feita;
  * - caso o vértice exista, mas seu fecho seja vazia, retorna um grafo também vazio, visto que o próprio vértice não faz parte de seu fecho.
  */
-Grafo* Grafo::fechoTransitivoIndireto(int idVertice)
+Grafo *Grafo::fechoTransitivoIndireto(int idVertice)
 {
     if (!direcionado)
     {
@@ -375,18 +376,18 @@ Grafo* Grafo::fechoTransitivoIndireto(int idVertice)
         return nullptr;
     }
     Grafo *grafoFecho = new Grafo(direcionado, 0, 0);
-    std::vector<Vertice*> nao_utilizados;
-    for (Vertice* v : vertices) 
+    std::vector<Vertice *> nao_utilizados;
+    for (Vertice *v : vertices)
     {
         if (v->id != u->id)
-        { 
+        {
             nao_utilizados.push_back(v);
         }
     }
     std::set<int> fecho;
-    for (std::vector<Vertice*>::iterator it = nao_utilizados.begin(); it != nao_utilizados.end(); it++)
+    for (std::vector<Vertice *>::iterator it = nao_utilizados.begin(); it != nao_utilizados.end(); it++)
     {
-        Vertice* v = *it;
+        Vertice *v = *it;
         if (existeAresta(v->id, idVertice))
         {
             grafoFecho->adicionaAresta(v->id, u->id);
@@ -394,12 +395,13 @@ Grafo* Grafo::fechoTransitivoIndireto(int idVertice)
             nao_utilizados.erase(it);
         }
     }
-    if (fecho.empty()) // o vértice é isolado
+    if (fecho.empty())
     {
         std::cout << "O fecho do vértice " << idVertice << " é o conjunto vazio." << std::endl;
         return grafoFecho;
     }
-    while (auxFechoIndireto(fecho, nao_utilizados, grafoFecho));
+    while (auxFechoIndireto(fecho, nao_utilizados, grafoFecho))
+        ;
     std::cout << "O fecho transitivo indireto do vértice " << idVertice << " é o conjunto composto pelos vértices:\n{ ";
     for (int id : fecho)
     {
@@ -422,7 +424,7 @@ int Grafo::encontraIndiceVertice(int id)
     return -1;
 }
 
-void Grafo::inicializaMatrizDistancias(std::vector<std::vector<int>>& distancias, int ordem)
+void Grafo::inicializaMatrizDistancias(std::vector<std::vector<int>> &distancias, int ordem)
 {
     for (int i = 0; i < ordem; i++)
     {
@@ -436,17 +438,17 @@ void Grafo::inicializaMatrizDistancias(std::vector<std::vector<int>>& distancias
             else
             {
                 linhaInicial.push_back(INF);
-            } 
+            }
         }
         distancias.push_back(linhaInicial);
     }
     for (int i = 0; i < ordem; i++)
     {
-        Vertice* u = vertices[i];
+        Vertice *u = vertices[i];
         Aresta *aresta = u->arestas;
         while (aresta != nullptr)
         {
-            Vertice* v = aresta->destino;
+            Vertice *v = aresta->destino;
             int j = encontraIndiceVertice(v->id);
             distancias[i][j] = aresta->peso;
             aresta = aresta->prox;
@@ -454,20 +456,31 @@ void Grafo::inicializaMatrizDistancias(std::vector<std::vector<int>>& distancias
     }
 }
 
-void Grafo::atualizaMatrizDistancias(std::vector<std::vector<int>>& distancias, int ordem, int indice)
+void Grafo::atualizaMatrizDistancias(std::vector<std::vector<int>> &distancias, int ordem, int indice)
 {
     if (indice == ordem)
+    {
         return;
+    }
     for (int i = 0; i < ordem; i++)
     {
-        if (i == indice) continue; // é necessário?
+        if (i == indice)
+        {
+            continue;
+        }
         for (int j = 0; j < ordem; j++)
         {
-            if (j == indice) continue; // é necessário?
+            if (j == indice)
+            {
+                continue;
+            }
             int distanciaAtual = distancias[i][j];
             int distanciaIntermediariaA = distancias[i][indice];
             int distanciaIntermediariaB = distancias[indice][j];
-            if (distanciaIntermediariaA == INF || distanciaIntermediariaB == INF) continue; // evitando cálculos imprevisíveis
+            if (distanciaIntermediariaA == INF || distanciaIntermediariaB == INF)
+            {
+                continue; // evita cálculos com unsafe integers
+            }
             int novaDistancia = distanciaIntermediariaA + distanciaIntermediariaB;
             distanciaAtual = std::min(distanciaAtual, novaDistancia);
             distancias[i][j] = distanciaAtual;
@@ -482,13 +495,16 @@ void Grafo::atualizaMatrizDistancias(std::vector<std::vector<int>>& distancias, 
  */
 int Grafo::custo(int idVerticeU, int idVerticeV)
 {
-    Vertice* u = getVertice(idVerticeU);
-    if (u == nullptr) {
+    Vertice *u = getVertice(idVerticeU);
+    if (u == nullptr)
+    {
         return -1;
     }
-    Aresta* aresta = u->arestas;
-    while (aresta != nullptr) {
-        if (aresta->destino->id == idVerticeV) {
+    Aresta *aresta = u->arestas;
+    while (aresta != nullptr)
+    {
+        if (aresta->destino->id == idVerticeV)
+        {
             return aresta->peso;
         }
         aresta = aresta->prox;
@@ -509,7 +525,7 @@ std::vector<std::vector<int>> Grafo::getMatrizDistancias()
     return distancias;
 }
 
-void Grafo::inicializaMatrizesFloyd(std::vector<std::vector<int>>& distancias, std::vector<std::vector<int>>& proximos, int ordem)
+void Grafo::inicializaMatrizesFloyd(std::vector<std::vector<int>> &distancias, std::vector<std::vector<int>> &proximos, int ordem)
 {
     for (int i = 0; i < ordem; i++)
     {
@@ -526,27 +542,27 @@ void Grafo::inicializaMatrizesFloyd(std::vector<std::vector<int>>& distancias, s
             {
                 linhaDistancias.push_back(INF);
                 linhaProximos.push_back(-1);
-            } 
+            }
         }
         distancias.push_back(linhaDistancias);
         proximos.push_back(linhaProximos);
     }
     for (int i = 0; i < ordem; i++)
     {
-        Vertice* u = vertices[i];
+        Vertice *u = vertices[i];
         Aresta *aresta = u->arestas;
         while (aresta != nullptr)
         {
-            Vertice* v = aresta->destino;
+            Vertice *v = aresta->destino;
             int j = encontraIndiceVertice(v->id);
             distancias[i][j] = aresta->peso; // custo é o peso da aresta
-            proximos[i][j] = j; // o próximo é o vértice de destino da aresta
+            proximos[i][j] = j;              // o próximo é o vértice de destino da aresta
             aresta = aresta->prox;
         }
     }
 }
 
-void Grafo::atualizaMatrizesFloyd(std::vector<std::vector<int>>& distancias, std::vector<std::vector<int>>& proximos, int ordem, int indice)
+void Grafo::atualizaMatrizesFloyd(std::vector<std::vector<int>> &distancias, std::vector<std::vector<int>> &proximos, int ordem, int indice)
 {
     if (indice == ordem)
     {
@@ -554,20 +570,20 @@ void Grafo::atualizaMatrizesFloyd(std::vector<std::vector<int>>& distancias, std
     }
     for (int i = 0; i < ordem; i++)
     {
-        if (i == indice) 
+        if (i == indice)
         {
-            continue; // é necessário?
+            continue; // impossível provocar alguma melhora
         }
         for (int j = 0; j < ordem; j++)
         {
-            if (j == indice) 
+            if (j == indice)
             {
-                continue; // é necessário?
+                continue; // impossível provocar alguma melhora
             }
             int distanciaAtual = distancias[i][j];
             if (distancias[i][indice] == INF || distancias[indice][j] == INF)
             {
-                continue; // evitando cálculos imprevisíveis e irrelevantes
+                continue; // evita cálculos imprevisíveis e irrelevantes
             }
             int novaDistancia = distancias[i][indice] + distancias[indice][j];
             if (novaDistancia < distanciaAtual)
@@ -587,7 +603,7 @@ void Grafo::atualizaMatrizesFloyd(std::vector<std::vector<int>>& distancias, std
  * - Caso não exista caminho entre os vértices, retorna um grafo vazio
  * - Caso exista caminho, retorna um grafo com as arestas que compõem o caminho mínimo
  */
-Grafo* Grafo::caminhoMinimoFloyd(int idVerticeU, int idVerticeV)
+Grafo *Grafo::caminhoMinimoFloyd(int idVerticeU, int idVerticeV)
 {
     if (!arestasPonderadas)
     {
@@ -609,13 +625,13 @@ Grafo* Grafo::caminhoMinimoFloyd(int idVerticeU, int idVerticeV)
     std::cout << "Calculando caminho mínimo entre os vértices " << idVerticeU << ":" << u << " e " << idVerticeV << ":" << v << '\n';
     int ordem = vertices.size();
     std::vector<std::vector<int>> distancias; // controla o caminho mínimo entre i e j
-    std::vector<std::vector<int>> proximos; // controla qual é o próximo no caminho mínimo de i a j
+    std::vector<std::vector<int>> proximos;   // controla qual é o próximo no caminho mínimo de i a j
     inicializaMatrizesFloyd(distancias, proximos, vertices.size());
     atualizaMatrizesFloyd(distancias, proximos, vertices.size(), 0);
     int distanciaUV = distancias[u][v];
     if (distanciaUV == INF)
     {
-        std::cout << "Nao ha qualquer caminho entre " << idVerticeU << " e " << idVerticeV << '\n';
+        std::cout << "Nao há qualquer caminho entre " << idVerticeU << " e " << idVerticeV << '\n';
         return new Grafo(direcionado, 0, 0);
     }
     std::cout << "O custo do caminho minimo entre os vertices " << idVerticeU << " e " << idVerticeV << " é: " << distanciaUV << '\n';
@@ -625,10 +641,13 @@ Grafo* Grafo::caminhoMinimoFloyd(int idVerticeU, int idVerticeV)
         u = proximos[u][v];
         caminho.push_back(vertices[u]->id);
     }
-    Grafo* grafoCaminho = new Grafo(direcionado, 0, 0);
-    for (int i = 0; i < caminho.size() - 1; i++) {
+    Grafo *grafoCaminho = new Grafo(direcionado, 0, 0);
+    for (int i = 0; i < caminho.size() - 1; i++)
+    {
+        std::cout << caminho[i] << " -> " << caminho[i + 1] << " ";
         grafoCaminho->adicionaAresta(caminho[i], caminho[i + 1]);
     }
+    std::cout << std::endl;
     return grafoCaminho;
 }
 
@@ -706,12 +725,12 @@ void Grafo::analiseExcentricidade()
     std::cout << '}' << std::endl;
 }
 
-void Grafo::liberaMemoriaArestas(Aresta* inicio)
+void Grafo::liberaMemoriaArestas(Aresta *inicio)
 {
-    Aresta* aresta = inicio;
+    Aresta *aresta = inicio;
     while (aresta != nullptr)
     {
-        Aresta* prox = aresta->prox;
+        Aresta *prox = aresta->prox;
         delete aresta;
         aresta = prox;
     }
@@ -725,7 +744,7 @@ void Grafo::liberaMemoriaArestas(Aresta* inicio)
  * - cor: mapa que indica se o vértice foi visitado (2), se não (0) ou se está em processo de visita (1).
  * - arvore: grafo que representa a árvore de caminhamento em profundidade.
  */
-void Grafo::caminhaProfundidade(Vertice *u, std::map<Vertice *, int> &cor, Grafo* arvore)
+void Grafo::caminhaProfundidade(Vertice *u, std::map<Vertice *, int> &cor, Grafo *arvore)
 {
     cor[u] = 1;
     Aresta *e = u->arestas;
@@ -736,7 +755,8 @@ void Grafo::caminhaProfundidade(Vertice *u, std::map<Vertice *, int> &cor, Grafo
         {
             arvore->adicionaAresta(u->id, v->id);
             caminhaProfundidade(v, cor, arvore);
-        } else if (cor[v] == 1)
+        }
+        else if (cor[v] == 1)
         {
             arvore->adicionaAresta(u->id, v->id, -1);
         }
@@ -754,7 +774,7 @@ void Grafo::caminhaProfundidade(Vertice *u, std::map<Vertice *, int> &cor, Grafo
  * e usa arestas com peso -1 para indicar arestas de retorno.
  * - Aresta de retorno: aresta que liga um vértice a um ancestral na árvore de caminhamento em profundidade.
  */
-Grafo* Grafo::caminhamentoProfundidade(int idVerticeInicio)
+Grafo *Grafo::caminhamentoProfundidade(int idVerticeInicio)
 {
     if (vertices.empty())
     {
@@ -783,19 +803,19 @@ Grafo* Grafo::caminhamentoProfundidade(int idVerticeInicio)
 /**
  * Retorna um set de set de vértices, onde cada set interno representa uma componente conexa do grafo.
  */
-std::set<std::set<Vertice*>> Grafo::getComponentesConexas()
+std::set<std::set<Vertice *>> Grafo::getComponentesConexas()
 {
-    std::set<std::set<Vertice*>> componentes;
-    std::map<Vertice*, bool> usados;
-    for (Vertice* v : vertices)
+    std::set<std::set<Vertice *>> componentes;
+    std::map<Vertice *, bool> usados;
+    for (Vertice *v : vertices)
     {
         usados[v] = false;
     }
-    for (Vertice* v : vertices)
+    for (Vertice *v : vertices)
     {
         if (!usados[v])
         {
-            std::set<Vertice*> componente = buscaComponente(v, usados);
+            std::set<Vertice *> componente = buscaComponente(v, usados);
             componentes.insert(componente);
         }
     }
@@ -815,7 +835,7 @@ std::set<std::set<Vertice*>> Grafo::getComponentesConexas()
  * - cronometro: contador que armazena o tempo de entrada dos vértices.
  */
 void Grafo::buscaProfundidadeArticulacoes(std::set<int> &articulacoes, Vertice *v, Vertice *pai,
-        std::map<int, int> &tempoEntrada, std::map<int, int> &minimo, std::map<int, bool> visitado, int &cronometro)
+                                          std::map<int, int> &tempoEntrada, std::map<int, int> &minimo, std::map<int, bool> visitado, int &cronometro)
 {
     visitado[v->id] = true;
     cronometro++;
@@ -856,13 +876,13 @@ void Grafo::buscaProfundidadeArticulacoes(std::set<int> &articulacoes, Vertice *
  * - componente: conjunto que armazena os vértices da componente conexa.
  * Retorna um set de inteiros, com os IDs dos vértices de articulação.
  */
-std::set<int> Grafo::encontraArticulacoesComponente(Vertice *v, std::set<Vertice*> componente)
+std::set<int> Grafo::encontraArticulacoesComponente(Vertice *v, std::set<Vertice *> componente)
 {
     int cronometro = 0;
     std::set<int> articulacoes;
     std::map<int, int> tempoEntrada, minimo;
     std::map<int, bool> visitado;
-    for (Vertice* v : componente) // inicializações
+    for (Vertice *v : componente) // inicializações
     {
         tempoEntrada[v->id] = -1;
         minimo[v->id] = -1;
@@ -876,7 +896,7 @@ std::set<int> Grafo::encontraArticulacoesComponente(Vertice *v, std::set<Vertice
  * Retorna um grafo com os vértices de articulação do grafo original.
  * - Caso o grafo não possua vértices, retorna um nullptr.
  */
-Grafo* Grafo::verticesDeArticulacao()
+Grafo *Grafo::verticesDeArticulacao()
 {
     if (direcionado)
     {
@@ -889,11 +909,11 @@ Grafo* Grafo::verticesDeArticulacao()
         return nullptr;
     }
     Grafo *grafoArticulacoes = new Grafo(direcionado, 0, 0);
-    std::set<std::set<Vertice*>> componentes = getComponentesConexas();
+    std::set<std::set<Vertice *>> componentes = getComponentesConexas();
     std::cout << "Componentes conexas do grafo: " << componentes.size() << std::endl;
-    for (std::set<std::set<Vertice*>>::iterator it = componentes.begin(); it != componentes.end(); it++)
+    for (std::set<std::set<Vertice *>>::iterator it = componentes.begin(); it != componentes.end(); it++)
     {
-        std::set<Vertice*> componente = *it;
+        std::set<Vertice *> componente = *it;
         int cronometro = 0;
 
         Vertice *v = *componente.begin();
@@ -915,7 +935,7 @@ Grafo* Grafo::verticesDeArticulacao()
  * - usados: mapa que indica quais vértices já foram visitados;
  * - componente: conjunto que armazena os vértices da componente conexa, inicialmente, contem apenas o vértice da primeira chamada.
  */
-void Grafo::buscaProfundidadeComponente(Vertice *v, std::map<Vertice*, bool>& usados, std::set<Vertice*>& componente)
+void Grafo::buscaProfundidadeComponente(Vertice *v, std::map<Vertice *, bool> &usados, std::set<Vertice *> &componente)
 {
     Aresta *aresta = v->arestas;
     while (aresta != nullptr)
@@ -937,10 +957,10 @@ void Grafo::buscaProfundidadeComponente(Vertice *v, std::map<Vertice*, bool>& us
  * - v: vértice de início da busca;
  * - usados: mapa que indica quais vértices já foram visitados.
  */
-std::set<Vertice*> Grafo::buscaComponente(Vertice *v, std::map<Vertice*, bool>& usados)
+std::set<Vertice *> Grafo::buscaComponente(Vertice *v, std::map<Vertice *, bool> &usados)
 {
     usados[v] = true;
-    std::set<Vertice*> componente;
+    std::set<Vertice *> componente;
     componente.insert(v);
     buscaProfundidadeComponente(v, usados, componente);
     return componente;
@@ -970,23 +990,23 @@ bool Grafo::existeVerticeAberto(std::map<Vertice *, bool> &abertos)
  * - Caso não exista caminho entre os vértices, retorna um grafo vazio
  * Obs.: comportamento indefinido para grafos com ciclos negativos.
  */
-Grafo* Grafo::caminhoMinimoDijkstra(int idOrigem, int idDestino)
+Grafo *Grafo::caminhoMinimoDijkstra(int idOrigem, int idDestino)
 {
     if (!arestasPonderadas)
     {
         std::cout << "O grafo ter arestas ponderadas\n";
-        return nullptr; 
+        return nullptr;
     }
     Vertice *v = getVertice(idOrigem);
     if (v == nullptr)
     {
         std::cout << "Nao existe no grafo vertice com o id especificado (" << idOrigem << ")\n";
-        return nullptr; 
+        return nullptr;
     }
     if (getVertice(idDestino) == nullptr)
     {
         std::cout << "Nao existe no grafo vertice com o id especificado (" << idDestino << ")\n";
-        return nullptr; 
+        return nullptr;
     }
     std::map<Vertice *, bool> abertos;
     for (Vertice *vertice : vertices)
@@ -1056,8 +1076,9 @@ Grafo* Grafo::caminhoMinimoDijkstra(int idOrigem, int idDestino)
         atual = predecessores[atual];
         caminho.push_back(atual->id);
     }
-    Grafo* grafoCaminho = new Grafo(direcionado, 0, 0);
-    for (int i = caminho.size() - 1; i > 0 ; i--) {
+    Grafo *grafoCaminho = new Grafo(direcionado, 0, 0);
+    for (int i = caminho.size() - 1; i > 0; i--)
+    {
         grafoCaminho->adicionaAresta(caminho[i], caminho[i - 1]);
     }
     std::cout << "Caminho mínimo entre " << idOrigem << " e " << idDestino << " com custo " << distancias[getVertice(idDestino)] << ":\n";
@@ -1073,19 +1094,19 @@ Grafo* Grafo::caminhoMinimoDijkstra(int idOrigem, int idDestino)
  * Retorna o subgrafo vértice-induzido pelo 'subconjunto' de vértices.
  * - Caso algum dos vértices não exista no grafo, retorna nullptr.
  */
-Grafo* Grafo::subgrafoInduzidoVertices(std::vector<int>& subconjunto)
+Grafo *Grafo::subgrafoInduzidoVertices(std::vector<int> &subconjunto)
 {
-    Grafo* subgrafo = new Grafo(direcionado, arestasPonderadas, verticesPonderados);
+    Grafo *subgrafo = new Grafo(direcionado, arestasPonderadas, verticesPonderados);
     for (int id : subconjunto)
     {
-        Vertice* v = getVertice(id);
+        Vertice *v = getVertice(id);
         if (v == nullptr)
         {
             std::cout << "O vértice " << id << " não existe no grafo" << std::endl;
             return nullptr;
         }
-    } 
-    for (Vertice* v : vertices)
+    }
+    for (Vertice *v : vertices)
     {
         if (std::find(subconjunto.begin(), subconjunto.end(), v->id) == subconjunto.end())
         {
@@ -1093,7 +1114,7 @@ Grafo* Grafo::subgrafoInduzidoVertices(std::vector<int>& subconjunto)
             continue;
         }
         subgrafo->adicionaVertice(v->id, v->peso);
-        Aresta* e = v->arestas;
+        Aresta *e = v->arestas;
         while (e != nullptr)
         {
             if (std::find(subconjunto.begin(), subconjunto.end(), e->destino->id) != subconjunto.end())
@@ -1110,10 +1131,9 @@ int Grafo::buscar(int subset[], int i)
 {
     if (subset[i] == -1)
     {
-       return i;
+        return i;
     }
-    return subset[i]=buscar(subset, subset[i]);
-
+    return subset[i] = buscar(subset, subset[i]);
 }
 
 void Grafo::unir(int subset[], int v1, int v2)
@@ -1148,7 +1168,6 @@ Grafo *Grafo::arvoreGeradoraMinimaPrim(std::vector<int> &subconjunto)
         std::cout << "O subgrafo vértice-induzido não é conexo" << std::endl;
         return nullptr;
     }
-    // Tratamento de erro
     int n = subconjunto.size();
     int prox[n];
     std::vector<std::vector<int>> solucao;
@@ -1246,7 +1265,6 @@ Grafo *Grafo::arvoreGeradoraMinimaKruskal(std::vector<int> &subconjunto)
         std::cout << "O subgrafo vértice-induzido não é conexo" << std::endl;
         return nullptr;
     }
-    // Fazer tratamento de erro
     int n = subconjunto.size();
     std::vector<std::vector<int>> listaAresta;
     std::vector<std::vector<int>> solucao;
@@ -1272,7 +1290,7 @@ Grafo *Grafo::arvoreGeradoraMinimaKruskal(std::vector<int> &subconjunto)
     int temp1 = 0;
     int temp2 = 0;
     int numeroDeArestas = listaAresta.size();
-    for (int i = numeroDeArestas - 1; i > 1; i--) // receba o BubbleSort
+    for (int i = numeroDeArestas - 1; i > 1; i--)
     {
         for (int j = 0; j < i; j++)
         {
