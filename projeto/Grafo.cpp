@@ -875,6 +875,11 @@ std::set<int> Grafo::encontraArticulacoesComponente(Vertice *v, std::set<Vertice
  */
 Grafo* Grafo::verticesDeArticulacao()
 {
+    if (direcionado)
+    {
+        std::cout << "O grafo deve ser não direcionado" << std::endl;
+        return nullptr;
+    }
     if (vertices.empty())
     {
         std::cout << "O grafo nao possui vertices" << std::endl;
