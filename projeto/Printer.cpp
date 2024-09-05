@@ -47,7 +47,7 @@ void Printer::printVerticesPonderados(std::vector<Vertice *> &vertices, std::ofs
 {
     for (const Vertice *vertice : vertices)
     {
-        arquivo << '\t' << vertice->id << "[label=" << vertice->id << " (" << vertice->peso << ")];\n";
+        arquivo << '\t' << vertice->id << " [label=" << '"' << vertice->id << "(p=" << vertice->peso << ")" << '"' << "];\n";
     }
     arquivo << '\n';
 }

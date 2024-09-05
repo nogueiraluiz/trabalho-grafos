@@ -19,13 +19,14 @@ class Grafo
 {
 
 public:
-    Grafo(std::ifstream &arquivoInstancia, bool direcionado, bool arestasPonderadas, bool verticesPonderados);
+    // Grafo(std::ifstream &arquivoInstancia, bool direcionado, bool arestasPonderadas, bool verticesPonderados);
     Grafo(bool direcionado, bool arestasPonderadas, bool verticesPonderados);
     ~Grafo();
     std::vector<Vertice *> vertices;
     void print();
     void print(std::ofstream &output);
     bool adicionaVertice(int idVertice, int peso = 0);
+    Vertice *getVertice(int id);
     bool removeVertice(int idVertice);
     bool adicionaAresta(int idVerticeU, int idVerticeV, int peso = 0);
     bool removeAresta(int idVerticeU, int idVerticeV);
@@ -45,7 +46,6 @@ private:
     bool direcionado;
     bool verticesPonderados;
     bool arestasPonderadas;
-    Vertice *getVertice(int id);
     void adicionaAdjacencias(int idA, int idB, int peso = 0);
     bool existeAresta(int idVerticeU, int idVerticeV);
     void auxFechoDireto(Vertice *vertice, std::set<int> &fecho, Grafo *grafoFecho);
