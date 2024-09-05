@@ -8,7 +8,6 @@
 
 Grafo *Reader::readGrafo(std::ifstream &arquivoInstancia)
 {
-    std::cout << "Lendo grafo\n";
     Grafo *grafo = new Grafo(0, 0, 1);
     std::string cabecalhoVertices = "set V";
     std::string cabecalhoPesos = "param w";
@@ -34,7 +33,6 @@ Grafo *Reader::readGrafo(std::ifstream &arquivoInstancia)
 
 void Reader::readVertices(std::ifstream &arquivoInstancia, Grafo *grafo)
 {
-    std::cout << "Lendo vertices\n";
     std::string linha;
     while (getline(arquivoInstancia, linha))
     {
@@ -53,12 +51,10 @@ void Reader::readVertices(std::ifstream &arquivoInstancia, Grafo *grafo)
             }
         }
     }
-    std::cout << "Vertices lidos\n";
 }
 
 void Reader::readPesos(std::ifstream &arquivoInstancia, Grafo *grafo)
 {
-    std::cout << "Lendo pesos dos vértices\n";
     std::string linha;
     while (getline(arquivoInstancia, linha))
     {
@@ -78,12 +74,10 @@ void Reader::readPesos(std::ifstream &arquivoInstancia, Grafo *grafo)
         }
         grafo->getVertice(infoLinha[0])->peso = infoLinha[1];
     }
-    std::cout << "Pesos lidos\n";
 }
 
 void Reader::readArestas(std::ifstream &arquivoInstancia, Grafo *grafo)
-{
-    std::cout << "Lendo arestas\n";
+{   
     std::string linha;
     while (getline(arquivoInstancia, linha))
     {
@@ -93,7 +87,6 @@ void Reader::readArestas(std::ifstream &arquivoInstancia, Grafo *grafo)
         }
         if (linha.length() == 0)
         {
-            std::cout << "Pulando linha vazia\n";
             continue;
         }
         std::stringstream stream(linha);
@@ -102,7 +95,6 @@ void Reader::readArestas(std::ifstream &arquivoInstancia, Grafo *grafo)
         {
             if (aresta.size() > 0 && aresta.find(",") != std::string::npos)
             {
-                std::cout << "Aresta: " << aresta << "\n";
                 aresta.erase(0, 1);
                 aresta.erase(aresta.size() - 1, 1);
                 std::stringstream streamAresta(aresta);
@@ -116,5 +108,4 @@ void Reader::readArestas(std::ifstream &arquivoInstancia, Grafo *grafo)
             }
         }
     }
-    std::cout << "Arestas lidas\n";
 }
