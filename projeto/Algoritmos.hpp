@@ -28,7 +28,7 @@ namespace Algoritmos
     int calculaNovoGap(std::vector<std::vector<Aresta *>> &floresta, Aresta* candidata);
     void adicionaNovaAresta(std::vector<std::vector<Aresta *>> &floresta, 
             std::vector<Aresta *> &arestas, 
-            std::set<Vertice *> visitados);
+            std::set<Vertice *> &visitados);
     Grafo *construtivo(Grafo *grafo, int numeroParticoes);
 
 }

@@ -100,13 +100,15 @@ int Algoritmos::calculaNovoGap(std::vector<std::vector<Aresta *>> &floresta, Are
         {
             int pesoU = aresta->origem->peso;
             int pesoV = aresta->destino->peso;
-            if (pesoU < pesoMin)
+            int minAresta = std::min(pesoU, pesoV);
+            int maxAresta = std::max(pesoU, pesoV);
+            if (minAresta < pesoMin)
             {
-                pesoMin = pesoU;
+                pesoMin = minAresta;
             }
-            if (pesoV < pesoMin)
+            if (maxAresta > pesoMax)
             {
-                pesoMin = pesoV;
+                pesoMax = maxAresta;
             }
             candidataEntra = saoAdjacentes(candidata, aresta);
         }
@@ -114,21 +116,15 @@ int Algoritmos::calculaNovoGap(std::vector<std::vector<Aresta *>> &floresta, Are
         {
             int pesoU = candidata->origem->peso;
             int pesoV = candidata->destino->peso;
-            if (pesoU < pesoMin)
+            int minAresta = std::min(pesoU, pesoV);
+            int maxAresta = std::max(pesoU, pesoV);
+            if (minAresta < pesoMin)
             {
-                pesoMin = pesoU;
+                pesoMin = minAresta;
             }
-            if (pesoV < pesoMin)
+            if (maxAresta > pesoMax)
             {
-                pesoMin = pesoV;
-            }
-            if (pesoU > pesoMax)
-            {
-                pesoMax = pesoU;
-            }
-            if (pesoV > pesoMax)
-            {
-                pesoMax = pesoV;
+                pesoMax = maxAresta;
             }
         }
         gap += pesoMax - pesoMin;
@@ -147,13 +143,15 @@ int Algoritmos::calculaGap(std::vector<std::vector<Aresta *>> &floresta)
         {
             int pesoU = aresta->origem->peso;
             int pesoV = aresta->destino->peso;
-            if (pesoU < pesoMin)
+            int minAresta = std::min(pesoU, pesoV);
+            int maxAresta = std::max(pesoU, pesoV);
+            if (minAresta < pesoMin)
             {
-                pesoMin = pesoU;
+                pesoMin = minAresta;
             }
-            if (pesoV < pesoMin)
+            if (maxAresta > pesoMax)
             {
-                pesoMin = pesoV;
+                pesoMax = maxAresta;
             }
         }
         gap += pesoMax - pesoMin;
@@ -163,9 +161,8 @@ int Algoritmos::calculaGap(std::vector<std::vector<Aresta *>> &floresta)
 
 void Algoritmos::adicionaNovaAresta(std::vector<std::vector<Aresta *>> &floresta,
                                     std::vector<Aresta *> &arestas,
-                                    std::set<Vertice *> visitados)
+                                    std::set<Vertice *> &visitados)
 {
-    std::cout << "Adicionando nova aresta\n";
     int min = std::numeric_limits<int>::max();
     Aresta *arestaMin = nullptr;
     std::map<Aresta *, int> gapsAtualizados;
@@ -176,9 +173,12 @@ void Algoritmos::adicionaNovaAresta(std::vector<std::vector<Aresta *>> &floresta
         int adjacencias = numeroDeAdjacencias(aresta, floresta);
         if (adjacencias == 2)
         {
-            std::cout << "Aresta que não pode ser utilizada removida\n";
             iter = arestas.erase(iter); // remove da lista de candidatas a aresta que não pode ser utilizada
             ++iter;
+            if (arestas.size() == 1)
+            {
+                break;
+            }
             continue;
         }
         if (adjacencias == 0)
@@ -186,11 +186,9 @@ void Algoritmos::adicionaNovaAresta(std::vector<std::vector<Aresta *>> &floresta
             ++iter;
             continue;
         }
-        std::cout << "Aresta candidata: " << aresta->origem->id << " -> " << aresta->destino->id << std::endl;
         int novoGap = calculaNovoGap(floresta, aresta);
         if (novoGap < min)
         {
-            std::cout << "Nova melhor aresta encontrada\n";
             arestaMin = aresta;
             min = novoGap;
         }
