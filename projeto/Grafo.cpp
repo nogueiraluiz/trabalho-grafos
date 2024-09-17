@@ -118,7 +118,7 @@ void Grafo::adicionaAdjacencias(int idVerticeU, int idVerticeV, int peso)
     Vertice *v = getVertice(idVerticeV);
     Aresta *e = new Aresta;
     e->destino = v;
-    e->id_origem = idVerticeU;
+    e->origem = u;
     e->peso = peso;
     e->prox = nullptr;
     if (u->arestas == nullptr)

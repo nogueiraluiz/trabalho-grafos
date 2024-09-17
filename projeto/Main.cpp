@@ -2,6 +2,7 @@
 #include <fstream>
 #include "Reader.hpp"
 #include "Grafo.hpp"
+#include "Algoritmos.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -14,11 +15,19 @@ int main(int argc, char *argv[])
         std::cout << "Erro ao abrir o arquivo de instância\n";
         return 1;
     }
+    std::cout << "Lendo instância\n";
     Grafo* grafo = Reader::readGrafo(input);
+    std::cout << "Instância lida\n";
     input.close();
-    grafo->print();
+    std::cout << "Criando solução por algoritmo construtivo\n";
+    Grafo *solucao = Algoritmos::construtivo(grafo, 2);
+    if (solucao == nullptr)
+    {
+        std::cout << "Solução não encontrada\n";
+        return 1;
+    }
     std::ofstream output(arquivoSaida);
-    grafo->print(output);
+    solucao->print(output);
     output.close();
     delete grafo;
 }
