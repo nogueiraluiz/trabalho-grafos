@@ -14,9 +14,8 @@ std::vector<Aresta *> Algoritmos::coletaEOrdenaArestas(Grafo *grafo)
         Aresta *aresta = vertice->arestas;
         while (aresta != nullptr)
         {
-            if (aresta->origem->id > aresta->destino->id)
+            if (aresta->origem->id > aresta->destino->id) // evita repetir arco de ida e volta
             {
-                // evita repetições (arco de "ida" e de "volta")
                 arestas.push_back(aresta);
             }
             aresta = aresta->prox;
@@ -27,6 +26,9 @@ std::vector<Aresta *> Algoritmos::coletaEOrdenaArestas(Grafo *grafo)
     return arestas;
 }
 
+/**
+ * Verifica se uma aresta é adjacente a alguma aresta na floresta.
+ */
 bool Algoritmos::isAdjacenteAFloresta(Aresta *aresta, std::vector<std::vector<Aresta *>> &floresta)
 {
     for (std::vector<Aresta *> &componente : floresta)
@@ -42,6 +44,9 @@ bool Algoritmos::isAdjacenteAFloresta(Aresta *aresta, std::vector<std::vector<Ar
     return false;
 }
 
+/**
+ * Preenche a floresta com uma aresta em cada árvore.
+ */
 void Algoritmos::preencheFloresta(std::vector<std::vector<Aresta *>> &floresta, std::vector<Aresta *> &arestas,
                                   std::set<Vertice *> &visitados)
 {
@@ -67,6 +72,9 @@ void Algoritmos::preencheFloresta(std::vector<std::vector<Aresta *>> &floresta, 
     }
 }
 
+/**
+ * Calcula o número de adjacências de uma aresta em um conjunto de partições.
+ */
 int Algoritmos::numeroDeAdjacencias(Aresta *aresta, std::vector<std::vector<Aresta *>> &particoes)
 {
     int adjacencias = 0;
@@ -88,6 +96,9 @@ bool Algoritmos::saoAdjacentes(Aresta *e, Aresta *aresta)
     return e->origem == aresta->origem || e->origem == aresta->destino || e->destino == aresta->origem || e->destino == aresta->destino;
 }
 
+/**
+ * Calcula o novo gap para uma floresta de componentes após a adição de uma aresta candidata.
+ */
 int Algoritmos::calculaNovoGap(std::vector<std::vector<Aresta *>> &floresta, Aresta *candidata)
 {
     int gap = 0;
@@ -132,6 +143,9 @@ int Algoritmos::calculaNovoGap(std::vector<std::vector<Aresta *>> &floresta, Are
     return gap;
 };
 
+/**
+ * Calcula o somatório dos gaps das partições.
+*/
 int Algoritmos::calculaGap(std::vector<std::vector<Aresta *>> &floresta)
 {
     int gap = 0;
@@ -159,6 +173,15 @@ int Algoritmos::calculaGap(std::vector<std::vector<Aresta *>> &floresta)
     return gap;
 }
 
+/**
+ * Percorre a lista de arestas candidatas, removendo aquelas que não podem ser utilizadas
+ * (ou seja, aquelas que são adjacentes a dois vértices da solução que está sendo construída).
+ * Em seguida, calcula o novo gap para cada aresta e seleciona a aresta que, ao ser adicionada, resultaria no menor 
+ * somatório de gaps possível. A aresta selecionada é removida da lista de candidatas e adicionada
+ * à partição correspondente na floresta. Os vértices que definem a aresta adicionada são marcados como visitados
+ * (embora efetivamente apenas um seja marcado, pois a aresta adicionada é adjacente a um único vértice novo).
+ * são marcados como visitados.
+ */
 void Algoritmos::adicionaNovaAresta(std::vector<std::vector<Aresta *>> &floresta,
                                     std::vector<Aresta *> &arestas,
                                     std::set<Vertice *> &visitados)
@@ -216,6 +239,9 @@ void Algoritmos::adicionaNovaAresta(std::vector<std::vector<Aresta *>> &floresta
     }
 }
 
+/**
+ * Algoritmo construtivo guloso para o MGGPP.
+ */
 Grafo *Algoritmos::construtivo(Grafo *grafo, int numeroParticoes)
 {
     std::vector<Aresta *> arestas = coletaEOrdenaArestas(grafo);
