@@ -9,6 +9,7 @@ namespace Reader
     void readVertices(std::ifstream &arquivoInstancia, Grafo* grafo);
     void readPesos(std::ifstream &arquivoInstancia, Grafo* grafo);
     void readArestas(std::ifstream &arquivoInstancia, Grafo* grafo);
+    int getNumeroDeParticoes(std::ifstream &arquivoInstancia);
 }
 
 #endif

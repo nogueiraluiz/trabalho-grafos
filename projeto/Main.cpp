@@ -3,6 +3,7 @@
 #include "Reader.hpp"
 #include "Grafo.hpp"
 #include "Algoritmos.hpp"
+#include <chrono>
 
 int main(int argc, char *argv[])
 {
@@ -10,6 +11,7 @@ int main(int argc, char *argv[])
     std::cout << "Arquivo de instância: " << arquivoInstancia << std::endl;
     char* arquivoSaida = argv[2];
     std::ifstream input(arquivoInstancia);
+    int particoes = Reader::getNumeroDeParticoes(input);
     if (!input.is_open())
     {
         std::cout << "Erro ao abrir o arquivo de instância\n";
@@ -19,17 +21,11 @@ int main(int argc, char *argv[])
     Grafo* grafo = Reader::readGrafo(input);
     std::cout << "Instância lida\n";
     input.close();
-    for (Vertice* vertice : grafo->vertices)
-    {
-        std::cout << "Vertice: " << vertice->id << " Peso: " << vertice->peso << std::endl;
-        for (Aresta* aresta = vertice->arestas; aresta != nullptr; aresta = aresta->prox)
-        {
-            if (aresta->origem->id < aresta->destino->id)
-            std::cout << "Aresta: " << aresta->origem->id << " " << aresta->destino->id << std::endl;
-        }
-    }
     std::cout << "Criando solução por algoritmo construtivo\n";
-    Grafo *solucao = Algoritmos::construtivo(grafo, std::stoi(argv[3]));
+    auto start = std::chrono::high_resolution_clock::now();
+    Grafo *solucao = Algoritmos::construtivo(grafo, particoes);
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << "Tempo de execução: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms\n";
     if (solucao == nullptr)
     {
         std::cout << "Solução não encontrada\n";
