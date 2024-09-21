@@ -23,12 +23,12 @@ namespace Algoritmos
     bool isAdjacenteAFloresta(Aresta *aresta, std::vector<std::vector<Aresta *>> &floresta);
     void preencheFloresta(std::vector<std::vector<Aresta *>> &floresta,
                           std::vector<Aresta *> &arestas,
-                          std::set<Vertice *> &visitados);
+                          std::set<int> &visitados);
     int calculaGap(std::vector<std::vector<Aresta *>> &floresta);
     int calculaNovoGap(std::vector<std::vector<Aresta *>> &floresta, Aresta* candidata);
     void adicionaNovaAresta(std::vector<std::vector<Aresta *>> &floresta, 
             std::vector<Aresta *> &arestas, 
-            std::set<Vertice *> &visitados);
+            std::set<int> &visitados);
     Grafo *construtivo(Grafo *grafo, int numeroParticoes);
 
 }

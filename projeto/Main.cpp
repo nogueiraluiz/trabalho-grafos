@@ -19,8 +19,17 @@ int main(int argc, char *argv[])
     Grafo* grafo = Reader::readGrafo(input);
     std::cout << "Instância lida\n";
     input.close();
+    for (Vertice* vertice : grafo->vertices)
+    {
+        std::cout << "Vertice: " << vertice->id << " Peso: " << vertice->peso << std::endl;
+        for (Aresta* aresta = vertice->arestas; aresta != nullptr; aresta = aresta->prox)
+        {
+            if (aresta->origem->id < aresta->destino->id)
+            std::cout << "Aresta: " << aresta->origem->id << " " << aresta->destino->id << std::endl;
+        }
+    }
     std::cout << "Criando solução por algoritmo construtivo\n";
-    Grafo *solucao = Algoritmos::construtivo(grafo, 2);
+    Grafo *solucao = Algoritmos::construtivo(grafo, std::stoi(argv[3]));
     if (solucao == nullptr)
     {
         std::cout << "Solução não encontrada\n";
@@ -29,5 +38,6 @@ int main(int argc, char *argv[])
     std::ofstream output(arquivoSaida);
     solucao->print(output);
     output.close();
+    delete solucao;
     delete grafo;
 }
