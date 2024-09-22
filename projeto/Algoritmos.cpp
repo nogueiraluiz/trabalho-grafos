@@ -98,6 +98,29 @@ void Algoritmos::preencheFloresta(std::vector<std::vector<Aresta *>> &floresta, 
     }
 }
 
+void Algoritmos::preencheFlorestaRandomizado(std::vector<std::vector<Aresta *>> &floresta,
+                std::vector<Aresta *> &arestas,
+                std::set<int> &visitados,
+                float alfa)
+{
+    int componente = 0;
+    while (componente != floresta.size())
+    {
+        int maxIndex = (int) (arestas.size() * alfa);
+        int indexSelecionado = geraAleatorioEntreZeroE(maxIndex) - 1;
+        Aresta *selecionada = arestas[indexSelecionado];
+        bool adjacente = isAdjacenteAFloresta(selecionada, floresta);
+        if (!adjacente)
+        {
+            floresta[componente].push_back(selecionada);
+            visitados.insert(selecionada->origem->id);
+            visitados.insert(selecionada->destino->id);
+            arestas.erase(arestas.begin() + indexSelecionado);
+            componente++;
+        }
+    }
+}
+
 /**
  * @brief Calcula o número de adjacências de uma aresta em um conjunto de partições.
  *
@@ -282,15 +305,25 @@ void Algoritmos::adicionaNovaAresta(std::vector<std::vector<Aresta *>> &floresta
         }
     }
 }
+int Algoritmos::geraAleatorioEntreZeroE(int max)
+{
+    if (max == 1)
+    {
+        return 1;
+    }
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(1, max);
+    return dis(gen);
+}
 
 void Algoritmos::adicionaNovaArestaRandomico(std::vector<std::vector<Aresta *>> &floresta,
                                     std::vector<Aresta *> &arestas,
-                                    std::set<int> &visitados, int alfa)
+                                    std::set<int> &visitados, float alfa)
 {
-    int min = std::numeric_limits<int>::max();
-    Aresta *arestaMin = nullptr;
-    //std::vector<Aresta *>;
+    std::vector<Aresta *> candidatas;
     std::vector<Aresta *>::iterator iter = arestas.begin();
+    std::map<Aresta * , int> gapsResultantes;
     while (iter != arestas.end() && arestas.size() > 0)
     {
         Aresta *aresta = *iter;
@@ -298,30 +331,34 @@ void Algoritmos::adicionaNovaArestaRandomico(std::vector<std::vector<Aresta *>> 
         if (adjacencias == 1)
         {
             int novoGap = calculaNovoGap(floresta, aresta);
-            if (novoGap < min)
-            {
-                arestaMin = aresta;
-                // Aqui tem que de algum jeito criar uma lista de arestas min
-                min = novoGap;
-            }
+            gapsResultantes[aresta] = novoGap;
+            candidatas.push_back(aresta);
         }
         iter++;
     }
-    if (arestaMin == nullptr)
+    if (candidatas.size() == 0)
     {
         return;
     }
-    std::vector<Aresta *>::iterator it = std::find(arestas.begin(), arestas.end(), arestaMin);
-    arestas.erase(it); // remove aresta utilizada da lista de candidatas
+    std::sort(arestas.begin(), arestas.end(), [&gapsResultantes](Aresta *a, Aresta *b)
+            { return gapsResultantes[a] < gapsResultantes[b]; });
+    int maxIndex = (int) (candidatas.size() * alfa);
+    std::cout << "Max index: " << maxIndex << std::endl;
+    std::cout << "Tamanho de candidatas: " << candidatas.size() << std::endl;
+    int indexSelecionado = geraAleatorioEntreZeroE(maxIndex) - 1;
+    std::cout << "Index selecionado: " << indexSelecionado << " entre 0 e " << maxIndex << std::endl;
+    Aresta *selecionada = candidatas[maxIndex];
+    std::vector<Aresta *>::iterator it = std::find(arestas.begin(), arestas.end(), selecionada);
+    arestas.erase(it);
     for (std::vector<Aresta *> &componente : floresta)
     {
         for (Aresta *aresta : componente)
         {
-            if (saoAdjacentes(aresta, arestaMin))
+            if (saoAdjacentes(aresta, selecionada))
             {
-                componente.push_back(arestaMin); // nesse ponto, qualquer aresta a ser adicionada só é adjacente a um único vértice
-                visitados.insert(arestaMin->origem->id);
-                visitados.insert(arestaMin->destino->id);
+                componente.push_back(selecionada);
+                visitados.insert(selecionada->origem->id);
+                visitados.insert(selecionada->destino->id);
                 return;
             }
         }
@@ -343,7 +380,7 @@ void Algoritmos::adicionaNovaArestaRandomico(std::vector<std::vector<Aresta *>> 
  * 5. Calcula o gap da solução encontrada e exibe o resultado.
  * 6. Cria um novo grafo representando a solução e retorna um ponteiro para ele.
  */
-Grafo *Algoritmos::construtivoGuloso(Grafo *grafo, int numeroParticoes)
+Grafo *Algoritmos::gulosoComum(Grafo *grafo, int numeroParticoes)
 {
     std::vector<Aresta *> arestas = coletaEOrdenaArestas(grafo);
     std::vector<std::vector<Aresta *>> floresta(numeroParticoes);
@@ -373,11 +410,11 @@ Grafo *Algoritmos::construtivoGuloso(Grafo *grafo, int numeroParticoes)
 }
 
 /**
- * @brief Executa o algoritmo guloso randomico para particionar o grafo em um número especificado de partições.
+ * @brief Executa o algoritmo guloso gulosoRandomizado para particionar o grafo em um número especificado de partições.
  *
  * @param grafo Ponteiro para o grafo a ser particionado.
  * @param numeroParticoes Número de partições desejadas.
- * @param alfa Porcentagem que torna o algoritmo randomico. 0 <= alfa <= 1.
+ * @param alfa Porcentagem que torna o algoritmo gulosoRandomizado. 0 <= alfa <= 1.
  * @return Grafo* Ponteiro para o grafo resultante após a aplicação do algoritmo.
  *
  * O algoritmo segue os seguintes passos:
@@ -388,32 +425,48 @@ Grafo *Algoritmos::construtivoGuloso(Grafo *grafo, int numeroParticoes)
  * 5. Calcula o gap da solução encontrada e exibe o resultado.
  * 6. Cria um novo grafo representando a solução e retorna um ponteiro para ele.
  */
-
-Grafo *Algoritmos::randomico(Grafo *grafo, int numeroParticoes, int alfa)
+Grafo *Algoritmos::gulosoRandomizado(Grafo *grafo, int numeroParticoes, float alfa)
 {
-   std::vector<Aresta *> arestas = coletaEOrdenaArestas(grafo);
-    std::vector<std::vector<Aresta *>> floresta(numeroParticoes);
-    for (int i = 0; i < numeroParticoes; i++)
+    int i = 0;
+    int melhorGap = std::numeric_limits<int>::max();
+    std::vector<std::vector<Aresta *>> solucao(numeroParticoes);
+    for (int i = 0; i < 25; i++)
     {
-        floresta[i] = std::vector<Aresta *>();
-    }
-    std::set<int> visitados = std::set<int>();
-    preencheFloresta(floresta, arestas, visitados);
-    while (visitados.size() != grafo->vertices.size())
-    {
-        adicionaNovaAresta(floresta, arestas, visitados);
-    }
-    int gap = calculaGap(floresta);
-    std::cout << "Somatório dos gaps da solução encontrada = " << gap << std::endl;
-    Grafo *solucao = new Grafo(0, 0, 1);
-    for (int i = 0; i < floresta.size(); i++)
-    {
-        for (Aresta *aresta : floresta[i])
+        std::vector<Aresta *> arestas = coletaEOrdenaArestas(grafo);
+        std::vector<std::vector<Aresta *>> floresta(numeroParticoes);
+        for (int j = 0; j < numeroParticoes; j++)
         {
-            solucao->adicionaVertice(aresta->origem->id, aresta->origem->peso);
-            solucao->adicionaVertice(aresta->destino->id, aresta->destino->peso);
-            solucao->adicionaAresta(aresta->origem->id, aresta->destino->id);
+            floresta[j] = std::vector<Aresta *>();
+        }
+        std::set<int> visitados = std::set<int>();
+        preencheFlorestaRandomizado(floresta, arestas, visitados, alfa);
+        for (int visitado : visitados)
+        {
+            std::cout << "Visitado: " << visitado << std::endl;
+        }
+        std::cout << "-------------\n";
+        while (visitados.size() != grafo->vertices.size())
+        {
+            adicionaNovaArestaRandomico(floresta, arestas, visitados, alfa);
+        }
+        int gap = calculaGap(floresta);
+        if (gap < melhorGap)
+        {
+            melhorGap = gap;
+            solucao = floresta;
+        }
+        std::cout << "Somatório dos gaps da solução encontrada = " << gap << std::endl;
+    }
+    std::cout << "Somatório dos gaps da melhor solução encontrada = " << melhorGap << std::endl;
+    Grafo *grafoSolucao = new Grafo(0, 0, 1);
+    for (int i = 0; i < solucao.size(); i++)
+    {
+        for (Aresta *aresta : solucao[i])
+        {
+            grafoSolucao->adicionaVertice(aresta->origem->id, aresta->origem->peso);
+            grafoSolucao->adicionaVertice(aresta->destino->id, aresta->destino->peso);
+            grafoSolucao->adicionaAresta(aresta->origem->id, aresta->destino->id);
         }
     }
-    return solucao;
+    return grafoSolucao;
 }

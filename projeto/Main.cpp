@@ -1,9 +1,9 @@
 #include <iostream>
 #include <fstream>
+#include <chrono>
 #include "Reader.hpp"
 #include "Grafo.hpp"
 #include "Algoritmos.hpp"
-#include <chrono>
 
 int main(int argc, char *argv[])
 {
@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     input.close();
     std::cout << "Criando solução por algoritmo construtivo\n";
     auto start = std::chrono::high_resolution_clock::now();
-    Grafo *solucao = Algoritmos::construtivoGuloso(grafo, particoes);
+    Grafo *solucao = Algoritmos::gulosoRandomizado(grafo, particoes, 0.5f);
     auto end = std::chrono::high_resolution_clock::now();
     std::cout << "Tempo de execução: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms\n";
     if (solucao == nullptr)
