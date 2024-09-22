@@ -8,7 +8,7 @@ struct Vertice;
 struct Aresta
 {
     int peso;
-    int id_origem;
+    Vertice *origem;
     Aresta *prox;
     Vertice *destino;
 };

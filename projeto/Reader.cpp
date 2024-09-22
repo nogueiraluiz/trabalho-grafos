@@ -13,16 +13,16 @@ Grafo *Reader::readGrafo(std::ifstream &arquivoInstancia)
     std::string cabecalhoPesos = "param w";
     std::string cabecalhoArestas = "set E";
     std::string linha;
-    while(getline(arquivoInstancia, linha))
+    while (getline(arquivoInstancia, linha))
     {
         if (linha.find(cabecalhoVertices) != std::string::npos)
         {
             readVertices(arquivoInstancia, grafo);
-        } 
+        }
         else if (linha.find(cabecalhoPesos) != std::string::npos)
         {
             readPesos(arquivoInstancia, grafo);
-        } 
+        }
         else if (linha.find(cabecalhoArestas) != std::string::npos)
         {
             readArestas(arquivoInstancia, grafo);
@@ -67,7 +67,7 @@ void Reader::readPesos(std::ifstream &arquivoInstancia, Grafo *grafo)
         std::vector<int> infoLinha;
         while (getline(stream, item, ' '))
         {
-            if (item.size() > 0) 
+            if (item.size() > 0)
             {
                 infoLinha.push_back(std::stoi(item));
             }
@@ -77,7 +77,7 @@ void Reader::readPesos(std::ifstream &arquivoInstancia, Grafo *grafo)
 }
 
 void Reader::readArestas(std::ifstream &arquivoInstancia, Grafo *grafo)
-{   
+{
     std::string linha;
     while (getline(arquivoInstancia, linha))
     {
@@ -108,4 +108,28 @@ void Reader::readArestas(std::ifstream &arquivoInstancia, Grafo *grafo)
             }
         }
     }
+}
+
+int Reader::getNumeroDeParticoes(std::ifstream &arquivoInstancia)
+{
+    std::string linha;
+    while (getline(arquivoInstancia, linha))
+    {
+        if (linha.find("param p :=") != std::string::npos)
+        {
+            std::stringstream stream(linha);
+            std::string item;
+            std::vector<std::string> infoLinha;
+            while (getline(stream, item, ' '))
+            {
+                if (item.size() > 0)
+                {
+                    infoLinha.push_back(item);
+                }
+            }
+            int particoes = std::stoi(infoLinha[infoLinha.size() - 2]);
+            return particoes;
+        }
+    }
+    return -1; // não encontrou o número de partições no arquivo
 }
