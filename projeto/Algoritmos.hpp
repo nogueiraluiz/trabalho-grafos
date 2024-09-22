@@ -29,7 +29,11 @@ namespace Algoritmos
     void adicionaNovaAresta(std::vector<std::vector<Aresta *>> &floresta, 
             std::vector<Aresta *> &arestas, 
             std::set<int> &visitados);
+    void adicionaNovaArestaRandomico(std::vector<std::vector<Aresta *>> &floresta, 
+            std::vector<Aresta *> &arestas, 
+            std::set<int> &visitados, int alfa);
     Grafo *construtivoGuloso(Grafo *grafo, int numeroParticoes);
+    Grafo *randomico(Grafo *grafo, int numeroParticoes, int alfa);
 
 }
 

@@ -283,6 +283,51 @@ void Algoritmos::adicionaNovaAresta(std::vector<std::vector<Aresta *>> &floresta
     }
 }
 
+void Algoritmos::adicionaNovaArestaRandomico(std::vector<std::vector<Aresta *>> &floresta,
+                                    std::vector<Aresta *> &arestas,
+                                    std::set<int> &visitados, int alfa)
+{
+    int min = std::numeric_limits<int>::max();
+    Aresta *arestaMin = nullptr;
+    //std::vector<Aresta *>;
+    std::vector<Aresta *>::iterator iter = arestas.begin();
+    while (iter != arestas.end() && arestas.size() > 0)
+    {
+        Aresta *aresta = *iter;
+        int adjacencias = numeroDeAdjacencias(aresta, floresta);
+        if (adjacencias == 1)
+        {
+            int novoGap = calculaNovoGap(floresta, aresta);
+            if (novoGap < min)
+            {
+                arestaMin = aresta;
+                // Aqui tem que de algum jeito criar uma lista de arestas min
+                min = novoGap;
+            }
+        }
+        iter++;
+    }
+    if (arestaMin == nullptr)
+    {
+        return;
+    }
+    std::vector<Aresta *>::iterator it = std::find(arestas.begin(), arestas.end(), arestaMin);
+    arestas.erase(it); // remove aresta utilizada da lista de candidatas
+    for (std::vector<Aresta *> &componente : floresta)
+    {
+        for (Aresta *aresta : componente)
+        {
+            if (saoAdjacentes(aresta, arestaMin))
+            {
+                componente.push_back(arestaMin); // nesse ponto, qualquer aresta a ser adicionada só é adjacente a um único vértice
+                visitados.insert(arestaMin->origem->id);
+                visitados.insert(arestaMin->destino->id);
+                return;
+            }
+        }
+    }
+}
+
 /**
  * @brief Executa o algoritmo construtivo guloso para particionar o grafo em um número especificado de partições.
  *
@@ -301,6 +346,52 @@ void Algoritmos::adicionaNovaAresta(std::vector<std::vector<Aresta *>> &floresta
 Grafo *Algoritmos::construtivoGuloso(Grafo *grafo, int numeroParticoes)
 {
     std::vector<Aresta *> arestas = coletaEOrdenaArestas(grafo);
+    std::vector<std::vector<Aresta *>> floresta(numeroParticoes);
+    for (int i = 0; i < numeroParticoes; i++)
+    {
+        floresta[i] = std::vector<Aresta *>();
+    }
+    std::set<int> visitados = std::set<int>();
+    preencheFloresta(floresta, arestas, visitados);
+    while (visitados.size() != grafo->vertices.size())
+    {
+        adicionaNovaAresta(floresta, arestas, visitados);
+    }
+    int gap = calculaGap(floresta);
+    std::cout << "Somatório dos gaps da solução encontrada = " << gap << std::endl;
+    Grafo *solucao = new Grafo(0, 0, 1);
+    for (int i = 0; i < floresta.size(); i++)
+    {
+        for (Aresta *aresta : floresta[i])
+        {
+            solucao->adicionaVertice(aresta->origem->id, aresta->origem->peso);
+            solucao->adicionaVertice(aresta->destino->id, aresta->destino->peso);
+            solucao->adicionaAresta(aresta->origem->id, aresta->destino->id);
+        }
+    }
+    return solucao;
+}
+
+/**
+ * @brief Executa o algoritmo guloso randomico para particionar o grafo em um número especificado de partições.
+ *
+ * @param grafo Ponteiro para o grafo a ser particionado.
+ * @param numeroParticoes Número de partições desejadas.
+ * @param alfa Porcentagem que torna o algoritmo randomico. 0 <= alfa <= 1.
+ * @return Grafo* Ponteiro para o grafo resultante após a aplicação do algoritmo.
+ *
+ * O algoritmo segue os seguintes passos:
+ * 1. Coleta e ordena as arestas do grafo.
+ * 2. Inicializa uma floresta com o número de partições especificado.
+ * 3. Preenche a floresta adicionando sempre a melhor aresta possível (que minimiza o gap resultante ao ser adicionada).
+ * 4. Adiciona novas arestas escolhidas aleatoriamente entre as alfa arestas da lista de possíveis arestas à floresta até que todos os vértices do grafo original sejam visitados.
+ * 5. Calcula o gap da solução encontrada e exibe o resultado.
+ * 6. Cria um novo grafo representando a solução e retorna um ponteiro para ele.
+ */
+
+Grafo *Algoritmos::randomico(Grafo *grafo, int numeroParticoes, int alfa)
+{
+   std::vector<Aresta *> arestas = coletaEOrdenaArestas(grafo);
     std::vector<std::vector<Aresta *>> floresta(numeroParticoes);
     for (int i = 0; i < numeroParticoes; i++)
     {
