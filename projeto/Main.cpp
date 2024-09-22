@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     input.close();
     std::cout << "Criando solução por algoritmo construtivo\n";
     auto start = std::chrono::high_resolution_clock::now();
-    Grafo *solucao = Algoritmos::construtivo(grafo, particoes);
+    Grafo *solucao = Algoritmos::construtivoGuloso(grafo, particoes);
     auto end = std::chrono::high_resolution_clock::now();
     std::cout << "Tempo de execução: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms\n";
     if (solucao == nullptr)
