@@ -106,8 +106,8 @@ void Algoritmos::preencheFlorestaRandomizado(std::vector<std::vector<Aresta *>> 
     int componente = 0;
     while (componente != floresta.size())
     {
-        int maxIndex = (int) (arestas.size() * alfa);
-        int indexSelecionado = geraAleatorioEntreZeroE(maxIndex) - 1;
+        int maxIndex = (int) ((arestas.size() - 1) * alfa);
+        int indexSelecionado = geraIndiceAleatorioEntreZeroE(maxIndex);
         Aresta *selecionada = arestas[indexSelecionado];
         bool adjacente = isAdjacenteAFloresta(selecionada, floresta);
         if (!adjacente)
@@ -124,8 +124,8 @@ void Algoritmos::preencheFlorestaRandomizado(std::vector<std::vector<Aresta *>> 
 /**
  * @brief Calcula o número de adjacências de uma aresta em um conjunto de partições.
  *
- * Esta função percorre todas as partições fornecidas e verifica quantas vezes
- * a aresta fornecida é adjacente a outras arestas nas partições. O cálculo é
+ * Esta função percorre todas as partições fornecidas e verifica a quantas partições
+ * uma aresta é adjacente. O cálculo é
  * interrompido e retorna 2 se duas adjacências forem encontradas.
  *
  * @param aresta Ponteiro para a aresta cuja adjacência será verificada.
@@ -138,16 +138,17 @@ int Algoritmos::numeroDeAdjacencias(Aresta *aresta, std::vector<std::vector<Ares
     int adjacencias = 0;
     for (int i = 0; i < particoes.size(); i++)
     {
+        if (adjacencias == 2)
+        {
+            return adjacencias;
+        }
         for (Aresta *e : particoes[i])
         {
-            if (adjacencias == 2)
-            {
-                return adjacencias;
-            }
+            
             if (saoAdjacentes(e, aresta))
             {
                 adjacencias++;
-                continue;
+                break;
             }
         }
     }
@@ -305,26 +306,26 @@ void Algoritmos::adicionaNovaAresta(std::vector<std::vector<Aresta *>> &floresta
         }
     }
 }
-int Algoritmos::geraAleatorioEntreZeroE(int max)
+int Algoritmos::geraIndiceAleatorioEntreZeroE(int max)
 {
-    if (max == 1)
+    if (max == 0)
     {
-        return 1;
+        return 0;
     }
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(1, max);
+    std::uniform_int_distribution<> dis(0, max);
     return dis(gen);
 }
 
-void Algoritmos::adicionaNovaArestaRandomico(std::vector<std::vector<Aresta *>> &floresta,
+void Algoritmos::adicionaNovaArestaRandomizado(std::vector<std::vector<Aresta *>> &floresta,
                                     std::vector<Aresta *> &arestas,
                                     std::set<int> &visitados, float alfa)
 {
     std::vector<Aresta *> candidatas;
     std::vector<Aresta *>::iterator iter = arestas.begin();
     std::map<Aresta * , int> gapsResultantes;
-    while (iter != arestas.end() && arestas.size() > 0)
+    while (iter != arestas.end())
     {
         Aresta *aresta = *iter;
         int adjacencias = numeroDeAdjacencias(aresta, floresta);
@@ -336,18 +337,11 @@ void Algoritmos::adicionaNovaArestaRandomico(std::vector<std::vector<Aresta *>> 
         }
         iter++;
     }
-    if (candidatas.size() == 0)
-    {
-        return;
-    }
     std::sort(arestas.begin(), arestas.end(), [&gapsResultantes](Aresta *a, Aresta *b)
             { return gapsResultantes[a] < gapsResultantes[b]; });
-    int maxIndex = (int) (candidatas.size() * alfa);
-    std::cout << "Max index: " << maxIndex << std::endl;
-    std::cout << "Tamanho de candidatas: " << candidatas.size() << std::endl;
-    int indexSelecionado = geraAleatorioEntreZeroE(maxIndex) - 1;
-    std::cout << "Index selecionado: " << indexSelecionado << " entre 0 e " << maxIndex << std::endl;
-    Aresta *selecionada = candidatas[maxIndex];
+    int maxIndex = (int) ((candidatas.size() - 1) * alfa);
+    int indexSelecionado = geraIndiceAleatorioEntreZeroE(maxIndex);
+    Aresta *selecionada = candidatas[indexSelecionado];
     std::vector<Aresta *>::iterator it = std::find(arestas.begin(), arestas.end(), selecionada);
     arestas.erase(it);
     for (std::vector<Aresta *> &componente : floresta)
@@ -427,11 +421,11 @@ Grafo *Algoritmos::gulosoComum(Grafo *grafo, int numeroParticoes)
  */
 Grafo *Algoritmos::gulosoRandomizado(Grafo *grafo, int numeroParticoes, float alfa)
 {
-    int i = 0;
     int melhorGap = std::numeric_limits<int>::max();
     std::vector<std::vector<Aresta *>> solucao(numeroParticoes);
-    for (int i = 0; i < 25; i++)
+    for (int i = 0; i < 30; i++)
     {
+        std::cout << "Iteração: " << i + 1 << std::endl;
         std::vector<Aresta *> arestas = coletaEOrdenaArestas(grafo);
         std::vector<std::vector<Aresta *>> floresta(numeroParticoes);
         for (int j = 0; j < numeroParticoes; j++)
@@ -440,14 +434,9 @@ Grafo *Algoritmos::gulosoRandomizado(Grafo *grafo, int numeroParticoes, float al
         }
         std::set<int> visitados = std::set<int>();
         preencheFlorestaRandomizado(floresta, arestas, visitados, alfa);
-        for (int visitado : visitados)
-        {
-            std::cout << "Visitado: " << visitado << std::endl;
-        }
-        std::cout << "-------------\n";
         while (visitados.size() != grafo->vertices.size())
         {
-            adicionaNovaArestaRandomico(floresta, arestas, visitados, alfa);
+            adicionaNovaArestaRandomizado(floresta, arestas, visitados, alfa);
         }
         int gap = calculaGap(floresta);
         if (gap < melhorGap)

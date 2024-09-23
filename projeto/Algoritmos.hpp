@@ -34,8 +34,8 @@ namespace Algoritmos
         void adicionaNovaAresta(std::vector<std::vector<Aresta *>> &floresta,
                 std::vector<Aresta *> &arestas,
                 std::set<int> &visitados);
-        int geraAleatorioEntreZeroE(int max);
-        void adicionaNovaArestaRandomico(std::vector<std::vector<Aresta *>> &floresta,
+        int geraIndiceAleatorioEntreZeroE(int max);
+        void adicionaNovaArestaRandomizado(std::vector<std::vector<Aresta *>> &floresta,
                 std::vector<Aresta *> &arestas,
                 std::set<int> &visitados,
                 float alfa);
