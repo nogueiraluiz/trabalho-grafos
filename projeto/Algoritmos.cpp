@@ -267,6 +267,8 @@ int Algoritmos::calculaGap(std::vector<std::vector<Aresta *>> &floresta)
  * Esta função percorre a lista de arestas candidatas e seleciona a aresta que,
  * ao ser adicionada à floresta, minimiza o gap calculado. A aresta selecionada
  * é então removida da lista de candidatas e adicionada à floresta.
+ * 
+ * Ao longo da iteração, a lista de arestas candidatas é filtrada para remover aquelas que não podem ser adicionadas.
  *
  * @param floresta Referência para o vetor de componentes da floresta, onde cada componente é um vetor de ponteiros para arestas.
  * @param arestas Referência para a lista de arestas candidatas existentes no grafo original que ainda não foram utilizadas.
@@ -282,6 +284,11 @@ void Algoritmos::adicionaNovaAresta(std::vector<std::vector<Aresta *>> &floresta
     while (iter != arestas.end() && arestas.size() > 0)
     {
         Aresta *aresta = *iter;
+        if (numeroDeVerticesAdjacentes(aresta, visitados) == 2)
+        {
+            iter = arestas.erase(iter);
+            continue;
+        }
         if (numeroDeVerticesAdjacentes(aresta, visitados) == 1)
         {
             int novoGap = calculaNovoGap(floresta, aresta);
@@ -341,6 +348,8 @@ int Algoritmos::geraIndiceAleatorioEntreZeroE(int max)
  * Este método seleciona uma nova aresta a ser adicionada à floresta com base em um critério de aleatoriedade
  * controlado pelo parâmetro alfa. A aresta é escolhida dentre as candidatas que conectam um vértice visitado
  * a um não visitado, minimizando o gap resultante.
+ * 
+ * Ao longo da iteração, a lista de arestas candidatas é filtrada para remover aquelas que não podem ser adicionadas.
  *
  * @param floresta Referência para a floresta representada como um vetor de vetores de ponteiros para Aresta.
  * @param arestas Referência para a lista de arestas disponíveis para seleção.
@@ -357,7 +366,13 @@ void Algoritmos::adicionaNovaArestaRandomizado(std::vector<std::vector<Aresta *>
     while (iter != arestas.end())
     {
         Aresta *aresta = *iter;
-        if (numeroDeVerticesAdjacentes(aresta, visitados) == 1)
+        int adjacencias = numeroDeVerticesAdjacentes(aresta, visitados);
+        if (adjacencias == 2)
+        {
+            iter = arestas.erase(iter);
+            continue;
+        }
+        if (adjacencias == 1)
         {
             int novoGap = calculaNovoGap(floresta, aresta);
             gapsResultantes[aresta] = novoGap;
