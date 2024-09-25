@@ -1,15 +1,16 @@
 #include <iostream>
 #include <fstream>
+#include <chrono>
 #include "Reader.hpp"
 #include "Grafo.hpp"
 #include "Algoritmos.hpp"
-#include <chrono>
 
 int main(int argc, char *argv[])
 {
     char* arquivoInstancia = argv[1];
     std::cout << "Arquivo de instância: " << arquivoInstancia << std::endl;
     char* arquivoSaida = argv[2];
+    int opcao = std::stoi(argv[3]);
     std::ifstream input(arquivoInstancia);
     int particoes = Reader::getNumeroDeParticoes(input);
     if (!input.is_open())
@@ -23,7 +24,18 @@ int main(int argc, char *argv[])
     input.close();
     std::cout << "Criando solução por algoritmo construtivo\n";
     auto start = std::chrono::high_resolution_clock::now();
-    Grafo *solucao = Algoritmos::construtivoGuloso(grafo, particoes);
+    Grafo *solucao = nullptr;
+    switch (opcao)
+    {
+        case 1:
+            solucao = Algoritmos::gulosoComum(grafo, particoes);
+            break;
+        case 2:
+            solucao = Algoritmos::gulosoRandomizado(grafo, particoes, 0.2f);
+            break;
+        default:
+            break;
+    }
     auto end = std::chrono::high_resolution_clock::now();
     std::cout << "Tempo de execução: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms\n";
     if (solucao == nullptr)
