@@ -516,3 +516,100 @@ Grafo *Algoritmos::gulosoRandomizado(Grafo *grafo, int numeroParticoes, float al
     }
     return grafoSolucao;
 }
+
+void Algoritmos::atualizaProbabilidades(float probabilidades[],float mediaQualidades[],float alfas[], int melhorGap)
+{
+    float qi[5]; 
+    float qj=0;
+    for(int i=0;i<5;i++)
+    {
+        qi[i]=(melhorGap)/(mediaQualidades[i]);
+    }
+    for(int k=0;k<5;k++)
+    {
+        qj=qj+qi[k];
+    }
+    for(int j=0;j<5;j++)
+    {   
+        probabilidades[j]=(qi[j])/(qj);
+    }
+}
+
+int Algoritmos::escolheAlfa(float probabilidades[])
+{
+    int numProbabilidades = sizeof(probabilidades) / sizeof(probabilidades[0]);
+
+    // Criando o motor de números aleatórios e a distribuição
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::discrete_distribution<> dis(probabilidades, probabilidades + numProbabilidades);
+
+    // Sorteando 5 índices
+    int indiceSorteado;
+    indiceSorteado=dis(gen);
+    return indiceSorteado;
+}
+
+Grafo *Algoritmos::gulosoRandomizadoReativo(Grafo *grafo, int numeroParticoes)
+{
+    
+    float alfas[]={0.05, 0.1, 0.15, 0.3, 0.5};
+    float probabilidades[]={0.2, 0.2, 0.2, 0.2, 0.2};
+    float mediaQualidades[]={0, 0, 0, 0, 0};
+    int numeroDeUtilizacoes[]={0, 0, 0, 0, 0};
+    int somatorioQualidades[]={0, 0, 0, 0, 0};
+
+    int melhorGap = std::numeric_limits<int>::max();
+    std::vector<std::vector<Aresta *>> solucao(numeroParticoes);
+
+    for (int i = 0; i < 150; i++)
+    {
+        std::cout << "Iteração: " << i + 1 << '\n';
+        std::list<Aresta *> arestas = coletaArestasOrdenadas(grafo);
+        std::vector<std::vector<Aresta *>> floresta(numeroParticoes);
+
+        if(i%25==0)
+        {
+            atualizaProbabilidades(probabilidades, mediaQualidades, alfas, melhorGap);
+        }
+
+        for (int j = 0; j < numeroParticoes; j++)
+        {
+            floresta[j] = std::vector<Aresta *>();
+        }
+        std::set<int> visitados = std::set<int>();
+
+        int indice = escolheAlfa(probabilidades);
+
+        preencheFlorestaRandomizado(floresta, arestas, visitados, alfas[indice]);
+        
+        while (visitados.size() != grafo->vertices.size())
+        {
+            adicionaNovaArestaRandomizado(floresta, arestas, visitados, alfas[indice]);
+        }
+
+        int gap = calculaGap(floresta);
+        numeroDeUtilizacoes[indice]+=1;
+        somatorioQualidades[indice]+=gap;
+
+        if (gap < melhorGap)
+        {
+            melhorGap = gap;
+            solucao = floresta;  
+        } 
+        std::cout << "Somatório dos gaps da solução encontrada = " << gap << '\n';
+    }
+
+    std::cout << "Somatório dos gaps da melhor solução encontrada = " << melhorGap << '\n';
+    Grafo *grafoSolucao = new Grafo(0, 0, 1);
+    for (int i = 0; i < solucao.size(); i++)
+    {
+        for (Aresta *aresta : solucao[i])
+        {
+            grafoSolucao->adicionaVertice(aresta->origem->id, aresta->origem->peso);
+            grafoSolucao->adicionaVertice(aresta->destino->id, aresta->destino->peso);
+            grafoSolucao->adicionaAresta(aresta->origem->id, aresta->destino->id);
+        }
+    }
+    return grafoSolucao;
+}
