@@ -56,11 +56,11 @@ namespace Algoritmos
         Grafo *gulosoComum(Grafo *grafo, int numeroParticoes);
         Grafo *gulosoRandomizado(Grafo *grafo, int numeroParticoes, float alfa);
 
-        void atualizaProbabilidades(float probabilidades[], float mediaQualidades[], float alfas[], int melhorGap);
+        void atualizaProbabilidades(std::vector<float> &probabilidades, float mediaQualidades[], std::vector<float> &alfas, int melhorGap);
 
-        int escolheAlfa(float probabilidades[]);
+        int escolheAlfa(std::vector<float> &probabilidades);
 
-        Grafo *gulosoRandomizadoReativo(Grafo *grafo, int numeroParticoes);
+        int gulosoRandomizadoReativo(Grafo *grafo, int numeroParticoes);
 }
 
 #endif
