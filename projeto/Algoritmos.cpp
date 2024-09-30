@@ -54,10 +54,10 @@ std::list<Aresta *> Algoritmos::coletaArestasOrdenadas(Grafo *grafo)
  * @param maximos Referência para um vetor de inteiros, representando os pesos máximos de cada componente da floresta.
  */
 void Algoritmos::preencheFloresta(std::vector<std::vector<Aresta *>> &floresta,
-                                  std::list<Aresta *> &arestas,
-                                  std::set<int> &visitados,
-                                  std::vector<int> &minimos,
-                                  std::vector<int> &maximos)
+        std::list<Aresta *> &arestas,
+        std::set<int> &visitados,
+        std::vector<int> &minimos,
+        std::vector<int> &maximos)
 {
     for (int componente = 0; componente < floresta.size(); componente++)
     {
@@ -97,19 +97,18 @@ void Algoritmos::preencheFloresta(std::vector<std::vector<Aresta *>> &floresta,
  * @param alfa Porcentagem que torna o algoritmo gulosoRandomizado. 0 < alfa <= 1.
  */
 void Algoritmos::preencheFlorestaRandomizado(std::vector<std::vector<Aresta *>> &floresta,
-                                             std::list<Aresta *> &arestas,
-                                             std::set<int> &visitados,
-                                             float alfa,
-                                             std::vector<int> &minimos,
-                                             std::vector<int> &maximos)
+                std::list<Aresta *> &arestas,
+                std::set<int> &visitados,
+                float alfa,
+                std::vector<int> &minimos,
+                std::vector<int> &maximos)
 {
     for (int componente = 0; componente < floresta.size(); componente++)
     {
         int maxIndex = (int)((arestas.size() - 1) * alfa);
         int indexSelecionado = geraIndiceAleatorioEntreZeroE(maxIndex);
         std::list<Aresta *>::iterator iter = arestas.begin();
-        for (int i = 0; i <= indexSelecionado; i++, ++iter)
-            ;
+        for (int i = 0; i <= indexSelecionado; i++, ++iter);
         Aresta *selecionada = *iter;
         if (numeroDeVerticesAdjacentes(selecionada, visitados) == 0)
         {
@@ -148,9 +147,46 @@ bool Algoritmos::saoAdjacentes(Aresta *e, Aresta *aresta)
 }
 
 int Algoritmos::calculaImpacto(Aresta *candidata,
-                               std::vector<std::vector<Aresta *>> &floresta,
-                               std::vector<int> &minimos,
-                               std::vector<int> &maximos)
+        std::vector<std::vector<Aresta *>> &floresta,
+        std::vector<int> &minimos,
+        std::vector<int> &maximos)
+{
+    int componente = -1;
+    for (int i = 0; i < floresta.size(); i++)
+    {
+        for (Aresta *aresta : floresta[i])
+        {
+            if (saoAdjacentes(aresta, candidata))
+            {
+                componente = i;
+                break;
+            }
+        }
+    }
+    int pesoU = candidata->origem->peso;
+    int pesoV = candidata->destino->peso;
+    int minAresta = std::min(pesoU, pesoV);
+    int maxAresta = std::max(pesoU, pesoV);
+    int gapAtual = maximos[componente] - minimos[componente];
+    int novoMin = std::min(minimos[componente], minAresta);
+    int novoMax = std::max(maximos[componente], maxAresta);
+    int novoGap = novoMax - novoMin;
+    int impacto = novoGap - gapAtual;
+    return impacto;
+}
+
+/**
+ * @brief Calcula o novo gap (diferença entre o maior e o menor peso) em uma floresta de componentes.
+ *
+ * Esta função percorre cada componente da floresta e determina o menor e o maior peso das arestas.
+ * Se a aresta candidata for adjacente a alguma aresta do componente, seus pesos também são considerados.
+ * O gap é a soma das diferenças entre os pesos máximos e mínimos de cada componente.
+ *
+ * @param floresta Vetor de vetores de ponteiros para Aresta, representando a floresta de componentes.
+ * @param candidata Ponteiro para a aresta candidata a ser considerada na atualização do gap.
+ * @return O novo gap calculado.
+ */
+int Algoritmos::calculaNovoGap(std::vector<std::vector<Aresta *>> &floresta, Aresta *candidata)
 {
     int componente = -1;
     for (int i = 0; i < floresta.size(); i++)
@@ -201,14 +237,14 @@ int Algoritmos::calculaGap(std::vector<int> &minimos, std::vector<int> &maximos)
  * @param visitados Referência para o conjunto de vértices já visitados.
  */
 void Algoritmos::adicionaNovaAresta(std::vector<std::vector<Aresta *>> &floresta,
-                                    std::list<Aresta *> &arestas,
-                                    std::set<int> &visitados,
-                                    std::vector<int> &minimos,
-                                    std::vector<int> &maximos)
+        std::list<Aresta *> &arestas,
+        std::set<int> &visitados,
+        std::vector<int> &minimos,
+        std::vector<int> &maximos)
 {
     int impactoMinimo = std::numeric_limits<int>::max();
-    std::list<Aresta *>::iterator melhor = arestas.end();
-    std::list<Aresta *>::iterator iter = arestas.begin();
+    std::list<Aresta*>::iterator melhor = arestas.end();
+    std::list<Aresta*>::iterator iter = arestas.begin();
     while (iter != arestas.end())
     {
         Aresta *aresta = *iter;
@@ -375,7 +411,7 @@ void Algoritmos::adicionaNovaArestaRandomizado(std::vector<std::vector<Aresta *>
  * 5. Calcula o gap da solução encontrada e exibe o resultado.
  * 6. Cria um novo grafo representando a solução e retorna um ponteiro para ele.
  */
-Grafo *Algoritmos::gulosoComum(Grafo *grafo, int numeroParticoes)
+Grafo* Algoritmos::gulosoComum(Grafo *grafo, int numeroParticoes)
 {
     std::list<Aresta *> arestas = coletaArestasOrdenadas(grafo);
     std::vector<std::vector<Aresta *>> floresta(numeroParticoes);

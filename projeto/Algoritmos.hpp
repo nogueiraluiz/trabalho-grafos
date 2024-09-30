@@ -34,6 +34,7 @@ namespace Algoritmos
                 std::vector<int> &minimos,
                 std::vector<int> &maximos);
         int calculaGap(std::vector<int> &minimos, std::vector<int> &maximos);
+
         int calculaImpacto(Aresta *candidata,
                 std::vector<std::vector<Aresta *>> &floresta,
                 std::vector<int> &minimos,
