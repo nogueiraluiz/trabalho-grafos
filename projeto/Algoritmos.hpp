@@ -25,21 +25,34 @@ namespace Algoritmos
         bool isAdjacenteAFloresta(Aresta *aresta, std::vector<std::vector<Aresta *>> &floresta);
         void preencheFloresta(std::vector<std::vector<Aresta *>> &floresta,
                 std::list<Aresta *> &arestas,
-                std::set<int> &visitados);
+                std::set<int> &visitados,
+                std::vector<int> &minimos,
+                std::vector<int> &maximos);
         void preencheFlorestaRandomizado(std::vector<std::vector<Aresta *>> &floresta,
                 std::list<Aresta *> &arestas,
                 std::set<int> &visitados,
-                float alfa);
+                float alfa,
+                std::vector<int> &minimos,
+                std::vector<int> &maximos);
+        int novoCalculaGap(std::vector<int> &minimos, std::vector<int> &maximos);
         int calculaGap(std::vector<std::vector<Aresta *>> &floresta);
         int calculaNovoGap(std::vector<std::vector<Aresta *>> &floresta, Aresta *candidata);
+        int calculaImpacto(Aresta *candidata,
+                std::vector<std::vector<Aresta *>> &floresta,
+                std::vector<int> &minimos,
+                std::vector<int> &maximos);
         void adicionaNovaAresta(std::vector<std::vector<Aresta *>> &floresta,
                 std::list<Aresta *> &arestas,
-                std::set<int> &visitados);
+                std::set<int> &visitados,
+                std::vector<int> &minimos,
+                std::vector<int> &maximos);
         int geraIndiceAleatorioEntreZeroE(int max);
         void adicionaNovaArestaRandomizado(std::vector<std::vector<Aresta *>> &floresta,
                 std::list<Aresta *> &arestas,
                 std::set<int> &visitados,
-                float alfa);
+                float alfa,
+                std::vector<int> &minimos,
+                std::vector<int> &maximos);
         Grafo *gulosoComum(Grafo *grafo, int numeroParticoes);
         Grafo *gulosoRandomizado(Grafo *grafo, int numeroParticoes, float alfa);
 
