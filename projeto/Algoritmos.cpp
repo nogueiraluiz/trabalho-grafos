@@ -41,32 +41,6 @@ std::list<Aresta *> Algoritmos::coletaArestasOrdenadas(Grafo *grafo)
 }
 
 /**
- * @brief Verifica se uma aresta é adjacente a alguma outra na floresta.
- *
- * Esta função percorre todos os componentes da floresta e verifica se a aresta fornecida
- * é adjacente a alguma das arestas presentes em qualquer componente da floresta.
- *
- * @param aresta Ponteiro para a aresta que será verificada.
- * @param floresta Referência para uma matriz de ponteiros de arestas, representando a floresta.
- * @return true Se a aresta fornecida for adjacente a alguma aresta na floresta.
- * @return false Se a aresta fornecida não for adjacente a nenhuma aresta na floresta.
- */
-bool Algoritmos::isAdjacenteAFloresta(Aresta *aresta, std::vector<std::vector<Aresta *>> &floresta)
-{
-    for (std::vector<Aresta *> &componente : floresta)
-    {
-        for (Aresta *e : componente)
-        {
-            if (saoAdjacentes(e, aresta))
-            {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-/**
  * @brief Preenche a floresta com arestas não adjacentes.
  *
  * Esta função itera sobre as arestas fornecidas e adiciona aquelas que não são adjacentes
@@ -202,106 +176,13 @@ int Algoritmos::calculaImpacto(Aresta *candidata,
     return impacto;
 }
 
-/**
- * @brief Calcula o novo gap (diferença entre o maior e o menor peso) em uma floresta de componentes.
- *
- * Esta função percorre cada componente da floresta e determina o menor e o maior peso das arestas.
- * Se a aresta candidata for adjacente a alguma aresta do componente, seus pesos também são considerados.
- * O gap é a soma das diferenças entre os pesos máximos e mínimos de cada componente.
- *
- * @param floresta Vetor de vetores de ponteiros para Aresta, representando a floresta de componentes.
- * @param candidata Ponteiro para a aresta candidata a ser considerada na atualização do gap.
- * @return O novo gap calculado.
- */
-int Algoritmos::calculaNovoGap(std::vector<std::vector<Aresta *>> &floresta, Aresta *candidata)
-{
-    int gap = 0;
-    for (std::vector<Aresta *> &componente : floresta)
-    {
-        int pesoMin = std::numeric_limits<int>::max();
-        int pesoMax = std::numeric_limits<int>::min();
-        bool candidataEntra = false;
-        for (Aresta *aresta : componente)
-        {
-            int pesoU = aresta->origem->peso;
-            int pesoV = aresta->destino->peso;
-            int minAresta = std::min(pesoU, pesoV);
-            int maxAresta = std::max(pesoU, pesoV);
-            if (minAresta < pesoMin)
-            {
-                pesoMin = minAresta;
-            }
-            if (maxAresta > pesoMax)
-            {
-                pesoMax = maxAresta;
-            }
-            candidataEntra = saoAdjacentes(candidata, aresta);
-        }
-        if (candidataEntra)
-        {
-            int pesoU = candidata->origem->peso;
-            int pesoV = candidata->destino->peso;
-            int minAresta = std::min(pesoU, pesoV);
-            int maxAresta = std::max(pesoU, pesoV);
-            if (minAresta < pesoMin)
-            {
-                pesoMin = minAresta;
-            }
-            if (maxAresta > pesoMax)
-            {
-                pesoMax = maxAresta;
-            }
-        }
-        gap += pesoMax - pesoMin;
-    }
-    return gap;
-};
-
-int Algoritmos::novoCalculaGap(std::vector<int> &minimos, std::vector<int> &maximos)
+int Algoritmos::calculaGap(std::vector<int> &minimos, std::vector<int> &maximos)
 {
     int gap = 0;
     for (int componente = 0; componente < minimos.size(); componente++)
     {
         int gapComponente = maximos[componente] - minimos[componente];
         gap += gapComponente;
-    }
-    return gap;
-}
-
-/**
- * @brief Calcula o gap total de uma floresta.
- *
- * Esta função percorre uma floresta, onde cada componente da floresta
- * é um vetor de ponteiros para objetos do tipo Aresta. Para cada componente,
- * a função encontra o peso mínimo e o peso máximo das arestas e calcula a diferença
- * entre esses pesos (gap). O gap total é a soma das diferenças de todos os componentes.
- *
- * @param floresta Referência para um vetor de vetores de ponteiros para objetos do tipo Aresta.
- * @return O somatório dos gaps de cada partição.
- */
-int Algoritmos::calculaGap(std::vector<std::vector<Aresta *>> &floresta)
-{
-    int gap = 0;
-    for (int i = 0; i < floresta.size(); i++)
-    {
-        int pesoMin = std::numeric_limits<int>::max();
-        int pesoMax = std::numeric_limits<int>::min();
-        for (Aresta *aresta : floresta[i])
-        {
-            int pesoU = aresta->origem->peso;
-            int pesoV = aresta->destino->peso;
-            int minAresta = std::min(pesoU, pesoV);
-            int maxAresta = std::max(pesoU, pesoV);
-            if (minAresta < pesoMin)
-            {
-                pesoMin = minAresta;
-            }
-            if (maxAresta > pesoMax)
-            {
-                pesoMax = maxAresta;
-            }
-        }
-        gap += pesoMax - pesoMin;
     }
     return gap;
 }
@@ -510,7 +391,7 @@ Grafo *Algoritmos::gulosoComum(Grafo *grafo, int numeroParticoes)
     {
         adicionaNovaAresta(floresta, arestas, visitados, minimos, maximos);
     }
-    int gap = novoCalculaGap(minimos, maximos);
+    int gap = calculaGap(minimos, maximos);
     std::cout << "Somatório dos gaps da solução encontrada = " << gap << '\n';
     Grafo *solucao = new Grafo(0, 0, 1);
     for (int i = 0; i < floresta.size(); i++)
@@ -546,7 +427,7 @@ Grafo *Algoritmos::gulosoRandomizado(Grafo *grafo, int numeroParticoes, float al
 {
     int melhorGap = std::numeric_limits<int>::max();
     std::vector<std::vector<Aresta *>> solucao(numeroParticoes);
-    for (int i = 0; i < 10; i++) // LEMBRAR DE MULTIPLICAR RESULTADOS DE TEMPO DOS EXPERIMENTOS POR 3
+    for (int i = 0; i < 30; i++)
     {
         std::list<Aresta *> arestas = coletaArestasOrdenadas(grafo);
         std::vector<std::vector<Aresta *>> floresta(numeroParticoes);
@@ -562,7 +443,7 @@ Grafo *Algoritmos::gulosoRandomizado(Grafo *grafo, int numeroParticoes, float al
         {
             adicionaNovaArestaRandomizado(floresta, arestas, visitados, alfa, minimos, maximos);
         }
-        int gap = calculaGap(floresta);
+        int gap = calculaGap(minimos, maximos);
         if (gap < melhorGap)
         {
             melhorGap = gap;
@@ -607,19 +488,19 @@ int Algoritmos::escolheAlfa(std::vector<float> &probabilidades)
     return dis(gen);
 }
 
-int Algoritmos::gulosoRandomizadoReativo(Grafo *grafo, int numeroParticoes)
+Grafo *Algoritmos::gulosoRandomizadoReativo(Grafo *grafo, int numeroParticoes)
 {
 
-    std::vector<float> alfas = {0.1, 0.3, 0.5};
-    std::vector<float> probabilidades = {0.2, 0.2, 0.2};
-    float mediaQualidades[] = {0, 0, 0};
-    int numeroDeUtilizacoes[] = {0, 0, 0};
-    int somatorioQualidades[] = {0, 0, 0};
+    std::vector<float> alfas = {0.01, 0.1, 0.15, 0.3, 0.5};
+    std::vector<float> probabilidades = {0.2, 0.2, 0.2, 0.2, 0.2};
+    float mediaQualidades[] = {0, 0, 0, 0, 0};
+    int numeroDeUtilizacoes[] = {0, 0, 0, 0, 0};
+    int somatorioQualidades[] = {0, 0, 0, 0, 0};
 
     int melhorGap = std::numeric_limits<int>::max();
     std::vector<std::vector<Aresta *>> solucao(numeroParticoes);
 
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 150; i++)
     {
         std::list<Aresta *> arestas = coletaArestasOrdenadas(grafo);
         std::vector<std::vector<Aresta *>> floresta(numeroParticoes);
@@ -646,7 +527,7 @@ int Algoritmos::gulosoRandomizadoReativo(Grafo *grafo, int numeroParticoes)
             adicionaNovaArestaRandomizado(floresta, arestas, visitados, alfas[indice], minimos, maximos);
         }
 
-        int gap = calculaGap(floresta);
+        int gap = calculaGap(minimos, maximos);
         numeroDeUtilizacoes[indice] += 1;
         somatorioQualidades[indice] += gap;
 
@@ -655,19 +536,17 @@ int Algoritmos::gulosoRandomizadoReativo(Grafo *grafo, int numeroParticoes)
             melhorGap = gap;
             solucao = floresta;
         }
-        // std::cout << "Somatório dos gaps da solução encontrada = " << gap << '\n';
     }
-    return melhorGap;
-    // std::cout << "Somatório dos gaps da melhor solução encontrada = " << melhorGap << '\n';
-    // Grafo *grafoSolucao = new Grafo(0, 0, 1);
-    // for (int i = 0; i < solucao.size(); i++)
-    // {
-    //     for (Aresta *aresta : solucao[i])
-    //     {
-    //         grafoSolucao->adicionaVertice(aresta->origem->id, aresta->origem->peso);
-    //         grafoSolucao->adicionaVertice(aresta->destino->id, aresta->destino->peso);
-    //         grafoSolucao->adicionaAresta(aresta->origem->id, aresta->destino->id);
-    //     }
-    // }
-    // return grafoSolucao;
+    std::cout << "Somatório dos gaps da melhor solução encontrada = " << melhorGap << '\n';
+    Grafo *grafoSolucao = new Grafo(0, 0, 1);
+    for (int i = 0; i < solucao.size(); i++)
+    {
+        for (Aresta *aresta : solucao[i])
+        {
+            grafoSolucao->adicionaVertice(aresta->origem->id, aresta->origem->peso);
+            grafoSolucao->adicionaVertice(aresta->destino->id, aresta->destino->peso);
+            grafoSolucao->adicionaAresta(aresta->origem->id, aresta->destino->id);
+        }
+    }
+    return grafoSolucao;
 }

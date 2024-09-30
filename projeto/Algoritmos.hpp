@@ -22,7 +22,6 @@ namespace Algoritmos
         std::list<Aresta *> coletaArestasOrdenadas(Grafo *grafo);
         int numeroDeVerticesAdjacentes(Aresta *aresta, std::set<int> &visitados);
         bool saoAdjacentes(Aresta *e, Aresta *aresta);
-        bool isAdjacenteAFloresta(Aresta *aresta, std::vector<std::vector<Aresta *>> &floresta);
         void preencheFloresta(std::vector<std::vector<Aresta *>> &floresta,
                 std::list<Aresta *> &arestas,
                 std::set<int> &visitados,
@@ -34,9 +33,7 @@ namespace Algoritmos
                 float alfa,
                 std::vector<int> &minimos,
                 std::vector<int> &maximos);
-        int novoCalculaGap(std::vector<int> &minimos, std::vector<int> &maximos);
-        int calculaGap(std::vector<std::vector<Aresta *>> &floresta);
-        int calculaNovoGap(std::vector<std::vector<Aresta *>> &floresta, Aresta *candidata);
+        int calculaGap(std::vector<int> &minimos, std::vector<int> &maximos);
         int calculaImpacto(Aresta *candidata,
                 std::vector<std::vector<Aresta *>> &floresta,
                 std::vector<int> &minimos,
@@ -60,7 +57,7 @@ namespace Algoritmos
 
         int escolheAlfa(std::vector<float> &probabilidades);
 
-        int gulosoRandomizadoReativo(Grafo *grafo, int numeroParticoes);
+        Grafo *gulosoRandomizadoReativo(Grafo *grafo, int numeroParticoes);
 }
 
 #endif
