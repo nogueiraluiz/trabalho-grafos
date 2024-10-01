@@ -175,43 +175,6 @@ int Algoritmos::calculaImpacto(Aresta *candidata,
     return impacto;
 }
 
-/**
- * @brief Calcula o novo gap (diferença entre o maior e o menor peso) em uma floresta de componentes.
- *
- * Esta função percorre cada componente da floresta e determina o menor e o maior peso das arestas.
- * Se a aresta candidata for adjacente a alguma aresta do componente, seus pesos também são considerados.
- * O gap é a soma das diferenças entre os pesos máximos e mínimos de cada componente.
- *
- * @param floresta Vetor de vetores de ponteiros para Aresta, representando a floresta de componentes.
- * @param candidata Ponteiro para a aresta candidata a ser considerada na atualização do gap.
- * @return O novo gap calculado.
- */
-int Algoritmos::calculaNovoGap(std::vector<std::vector<Aresta *>> &floresta, Aresta *candidata)
-{
-    int componente = -1;
-    for (int i = 0; i < floresta.size(); i++)
-    {
-        for (Aresta *aresta : floresta[i])
-        {
-            if (saoAdjacentes(aresta, candidata))
-            {
-                componente = i;
-                break;
-            }
-        }
-    }
-    int pesoU = candidata->origem->peso;
-    int pesoV = candidata->destino->peso;
-    int minAresta = std::min(pesoU, pesoV);
-    int maxAresta = std::max(pesoU, pesoV);
-    int gapAtual = maximos[componente] - minimos[componente];
-    int novoMin = std::min(minimos[componente], minAresta);
-    int novoMax = std::max(maximos[componente], maxAresta);
-    int novoGap = novoMax - novoMin;
-    int impacto = novoGap - gapAtual;
-    return impacto;
-}
-
 int Algoritmos::calculaGap(std::vector<int> &minimos, std::vector<int> &maximos)
 {
     int gap = 0;
