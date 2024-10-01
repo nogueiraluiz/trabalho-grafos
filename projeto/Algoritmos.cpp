@@ -146,6 +146,18 @@ bool Algoritmos::saoAdjacentes(Aresta *e, Aresta *aresta)
     return e->origem == aresta->origem || e->origem == aresta->destino || e->destino == aresta->origem || e->destino == aresta->destino;
 }
 
+/**
+ * @brief Calcula o impacto de adicionar uma aresta candidata em uma floresta de arestas.
+ *
+ * Esta função determina o impacto de adicionar uma aresta candidata em uma floresta de arestas,
+ * atualizando os valores mínimos e máximos dos pesos das arestas na componente conectada.
+ *
+ * @param candidata Ponteiro para a aresta candidata a ser adicionada.
+ * @param floresta Referência para um vetor de vetores de ponteiros de arestas, representando a floresta.
+ * @param minimos Referência para um vetor de inteiros contendo os valores mínimos dos pesos das arestas em cada componente.
+ * @param maximos Referência para um vetor de inteiros contendo os valores máximos dos pesos das arestas em cada componente.
+ * @return O impacto de adicionar a aresta candidata, calculado como a diferença entre o novo gap (diferença entre o peso máximo e mínimo) e o gap atual.
+ */
 int Algoritmos::calculaImpacto(Aresta *candidata,
         std::vector<std::vector<Aresta *>> &floresta,
         std::vector<int> &minimos,
@@ -175,6 +187,18 @@ int Algoritmos::calculaImpacto(Aresta *candidata,
     return impacto;
 }
 
+/**
+ * @brief Calcula o gap total entre os valores mínimos e máximos de componentes.
+ *
+ * Esta função recebe dois vetores de inteiros, `minimos` e `maximos`, que representam
+ * os valores mínimos e máximos de diferentes componentes, respectivamente. A função
+ * calcula a diferença (gap) entre os valores máximos e mínimos para cada componente
+ * e retorna a soma total desses gaps.
+ *
+ * @param minimos Vetor de inteiros contendo os valores mínimos dos componentes.
+ * @param maximos Vetor de inteiros contendo os valores máximos dos componentes.
+ * @return int O gap total calculado a partir das diferenças entre os valores máximos e mínimos.
+ */
 int Algoritmos::calculaGap(std::vector<int> &minimos, std::vector<int> &maximos)
 {
     int gap = 0;
@@ -463,6 +487,17 @@ Grafo *Algoritmos::gulosoRandomizado(Grafo *grafo, int numeroParticoes, float al
     return grafoSolucao;
 }
 
+/**
+ * @brief Atualiza as probabilidades com base nas qualidades médias e no melhor gap.
+ * 
+ * Esta função calcula os coeficientes dividindo o melhor gap pelas qualidades médias
+ * e, em seguida, normaliza esses coeficientes para obter as probabilidades.
+ * 
+ * @param probabilidades Vetor de probabilidades a ser atualizado.
+ * @param mediaQualidades Array contendo as qualidades médias.
+ * @param alfas Vetor de alfas utilizado para determinar o número de coeficientes.
+ * @param melhorGap Valor do melhor gap utilizado no cálculo dos coeficientes.
+ */
 void Algoritmos::atualizaProbabilidades(std::vector<float> &probabilidades, float mediaQualidades[], std::vector<float> &alfas, int melhorGap)
 {
     int numAlfas = alfas.size();
@@ -487,6 +522,21 @@ int Algoritmos::escolheAlfa(std::vector<float> &probabilidades)
     return dis(gen);
 }
 
+/**
+ * @brief Executa o algoritmo guloso randomizado reativo para encontrar uma solução de partição de um grafo.
+ *
+ * @param grafo Ponteiro para o grafo a ser particionado.
+ * @param numeroParticoes Número de partições desejadas.
+ * @return Grafo* Ponteiro para o grafo resultante com a melhor solução encontrada.
+ *
+ * O algoritmo utiliza uma abordagem gulosa randomizada reativa para particionar o grafo em um número especificado de partições.
+ * Ele itera 150 vezes, ajustando probabilidades e escolhendo alfas para construir soluções. A cada 10 iterações, as probabilidades
+ * são atualizadas com base nas qualidades médias das soluções encontradas. Em cada iteração, uma nova floresta é construída e 
+ * preenchida com arestas, e o gap (diferença entre o maior e o menor peso das partições) é calculado. A melhor solução encontrada 
+ * é armazenada e retornada ao final.
+ *
+ * @note O grafo resultante é alocado dinamicamente e deve ser liberado pelo chamador para evitar vazamento de memória.
+ */
 Grafo *Algoritmos::gulosoRandomizadoReativo(Grafo *grafo, int numeroParticoes)
 {
 
