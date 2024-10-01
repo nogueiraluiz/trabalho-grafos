@@ -6,32 +6,29 @@ const int MIN = std::numeric_limits<int>::min();
 /**
  * Construtor que instancia um grafo de acordo com as arestas definidas em um arquivo .dat lido como argumento para a execução.
  */
-// Grafo::Grafo(std::ifstream &arquivoInstancia, bool direcionado, bool arestasPonderadas, bool verticesPonderados)
-// {
-//     this->direcionado = direcionado;
-//     this->arestasPonderadas = arestasPonderadas;
-//     this->verticesPonderados = verticesPonderados;
-//     std::string linha;
-//     getline(arquivoInstancia, linha);
-//     while (getline(arquivoInstancia, linha))
-//     {
-//         std::stringstream stream(linha);
-//         std::string item;
-//         std::vector<int> itens;
-//         while (getline(stream, item, ' '))
-//         {
-//             itens.push_back(std::stoi(item));
-//         }
-//         int idVerticeU = itens[0];
-//         int idVerticeV = itens[1];
-//         int pesoAresta = itens[2];
-//         adicionaAresta(idVerticeU, idVerticeV, pesoAresta);
-//     }
-// }
+Grafo::Grafo(std::ifstream &arquivoInstancia, bool direcionado, bool arestasPonderadas, bool verticesPonderados)
+{
+    this->direcionado = direcionado;
+    this->arestasPonderadas = arestasPonderadas;
+    this->verticesPonderados = verticesPonderados;
+    std::string linha;
+    getline(arquivoInstancia, linha);
+    while (getline(arquivoInstancia, linha))
+    {
+        std::stringstream stream(linha);
+        std::string item;
+        std::vector<int> itens;
+        while (getline(stream, item, ' '))
+        {
+            itens.push_back(std::stoi(item));
+        }
+        int idVerticeU = itens[0];
+        int idVerticeV = itens[1];
+        int pesoAresta = itens[2];
+        adicionaAresta(idVerticeU, idVerticeV, pesoAresta);
+    }
+}
 
-/**
- * Construtor mais básico, não define quaisquer elementos dos conjuntos de vértices e de arestas.
- */
 Grafo::Grafo(bool direcionado, bool arestasPonderadas, bool verticesPonderados)
 {
     this->direcionado = direcionado;

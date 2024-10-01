@@ -19,7 +19,7 @@ class Grafo
 {
 
 public:
-    // Grafo(std::ifstream &arquivoInstancia, bool direcionado, bool arestasPonderadas, bool verticesPonderados);
+    Grafo(std::ifstream &arquivoInstancia, bool direcionado, bool arestasPonderadas, bool verticesPonderados);
     Grafo(bool direcionado, bool arestasPonderadas, bool verticesPonderados);
     ~Grafo();
     std::vector<Vertice *> vertices;
